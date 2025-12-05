@@ -1,0 +1,98 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  line-height: 1.5;
+  --background: 240 10% 3.9%; /* Deep Cosmos Black */
+  --logo-final-left: 1rem;
+}
+
+html { scroll-behavior: smooth; }
+body { 
+  margin: 0; 
+  min-width: 320px; 
+  min-height: 100vh; 
+  background-color: #050505; /* Hardcoded Deep Black */
+  overflow-x: hidden;
+}
+
+@layer base {
+  * { @apply border-border; }
+  body { @apply bg-[#050505] text-slate-100; }
+}
+
+/* --- Cosmos Hero Animations --- */
+
+/* Floating Animation (Up/Down) */
+@keyframes float-y {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-20px); }
+}
+.animate-float-slow { animation: float-y 6s ease-in-out infinite; }
+.animate-float-medium { animation: float-y 5s ease-in-out infinite; }
+.animate-float-fast { animation: float-y 4s ease-in-out infinite; }
+
+/* Orbit Animation (Circular Drifting) */
+@keyframes orbit-drift {
+  0% { transform: rotate(0deg) translateX(10px) rotate(0deg); }
+  100% { transform: rotate(360deg) translateX(10px) rotate(-360deg); }
+}
+.animate-orbit { animation: orbit-drift 20s linear infinite; }
+
+/* Star Twinkle */
+@keyframes twinkle {
+  0%, 100% { opacity: 0.2; transform: scale(0.8); }
+  50% { opacity: 0.8; transform: scale(1.2); }
+}
+.star {
+  position: absolute;
+  background: white;
+  border-radius: 50%;
+  animation: twinkle 3s infinite ease-in-out;
+}
+
+/* --- Existing Styles (Kept for compatibility) --- */
+@media (min-width: 640px) { :root { --logo-final-left: 1.5rem; } }
+@media (min-width: 1024px) { :root { --logo-final-left: 2rem; } }
+
+@keyframes logo-sequence {
+  0% { transform: scale(0.8); opacity: 0; }
+  20% { transform: scale(2.5); opacity: 1; }
+  40% { transform: scale(2.5); }
+  50% { transform: scale(2.2); }
+  100% { transform: translate(calc(-50vw + var(--logo-final-left) + 30px), calc(-50vh + 40px)) scale(1); }
+}
+@keyframes bg-fade-out {
+  0% { background-color: #050505; }
+  80% { background-color: #050505; }
+  100% { background-color: transparent; }
+}
+.animated-logo-container {
+  position: fixed; inset: 0; z-index: 60; display: flex; justify-content: center; align-items: center;
+  animation: bg-fade-out 2.5s cubic-bezier(0.4, 0, 0.2, 1) forwards; pointer-events: none;
+}
+.animated-logo-container > div {
+  animation: logo-sequence 2.5s cubic-bezier(0.22, 1, 0.36, 1) forwards; will-change: transform;
+}
+
+.status-badge { font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; border: 1px solid transparent; backdrop-filter: blur(8px); }
+.status-active { background-color: rgba(16, 185, 129, 0.1) !important; color: #34d399 !important; border-color: rgba(16, 185, 129, 0.2) !important; }
+.status-pending { background-color: rgba(251, 191, 36, 0.1) !important; color: #fbbf24 !important; border-color: rgba(251, 191, 36, 0.2) !important; }
+.status-retired { background-color: rgba(148, 163, 184, 0.1) !important; color: #94a3b8 !important; border-color: rgba(148, 163, 184, 0.2) !important; }
+.status-default { background-color: rgba(99, 102, 241, 0.1) !important; color: #818cf8 !important; border-color: rgba(99, 102, 241, 0.2) !important; }
+
+@keyframes slow-pan-zoom { 0% { transform: scale(1.0) translate(0, 0); } 100% { transform: scale(1.15) translate(-1%, -1%); } }
+.live-photo-img { transition: transform 0.5s ease-out; }
+.group:hover .live-photo-img { animation: slow-pan-zoom 8s alternate infinite linear; }
+
+.main-site-wrapper { opacity: 0; transition: opacity 0.8s ease-in; }
+.main-site-wrapper.fade-in { opacity: 1; }
+
+.sort-dropdown { position: absolute; top: 110%; right: 0; background-color: #0f172a; border-radius: 0.5rem; border: 1px solid #1e293b; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5); width: 180px; z-index: 50; padding: 0.5rem 0; list-style: none; margin: 0; }
+.sort-dropdown-item { padding: 0.5rem 1rem; font-size: 0.875rem; color: #cbd5e1; cursor: pointer; transition: all 0.2s; }
+.sort-dropdown-item:hover { background-color: #1e293b; color: #34d399; }
+
+.dummy-select-content { @apply bg-slate-900 border-slate-800 text-slate-300; }
+.dummy-select-item:hover { @apply bg-slate-800 text-emerald-400; }
