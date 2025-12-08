@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, CreditCard, CheckCircle2, Lock, Loader2, Leaf, ArrowRight, ShieldCheck } from 'lucide-react';
+import { X, ShieldCheck, Loader2, ArrowRight, CheckCircle2, CreditCard, Leaf } from 'lucide-react';
 import { CarbonCredit } from '../../lib/types';
 
 interface PaymentModalProps {
@@ -10,206 +10,187 @@ interface PaymentModalProps {
 }
 
 export default function PaymentModal({ isOpen, onClose, project, quantity }: PaymentModalProps) {
-  const [step, setStep] = useState<'review' | 'payment' | 'processing' | 'success'>('review');
-  const totalCost = (quantity * project.pricePerCredit).toFixed(2);
+  const [step, setStep] = useState<'review' | 'processing' | 'success'>('review');
 
-  // Reset state when opening
   useEffect(() => {
     if (isOpen) setStep('review');
   }, [isOpen]);
 
-  const handlePayment = () => {
-    setStep('processing');
-    // Simulate API call
-    setTimeout(() => {
-      setStep('success');
-    }, 3000);
-  };
-
   if (!isOpen) return null;
+
+  const totalCost = project.pricePerCredit * quantity;
+  const fees = totalCost * 0.01; 
+  const finalTotal = totalCost + fees;
+
+  const handlePurchase = async () => {
+    setStep('processing');
+    // Simulate transaction time
+    await new Promise(resolve => setTimeout(resolve, 2500));
+    setStep('success');
+  };
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-      {/* Backdrop with blur */}
+      
+      {/* 1. Cinematic Backdrop */}
       <div 
-        className="absolute inset-0 bg-[#020617]/90 backdrop-blur-md transition-opacity duration-500" 
+        className="absolute inset-0 bg-[#050505]/90 backdrop-blur-xl transition-opacity animate-in fade-in duration-300" 
         onClick={onClose}
       />
-      
-      <div className="relative w-full max-w-lg overflow-hidden rounded-3xl border border-white/10 bg-[#0B0C15] shadow-2xl shadow-emerald-900/20 animate-in fade-in zoom-in-95 duration-300">
+
+      {/* 2. The "Transaction Window" */}
+      <div className="relative w-full max-w-lg bg-[#0A0A0A] border border-white/10 rounded-3xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300 flex flex-col max-h-[90vh]">
         
-        {/* Header */}
-        <div className="flex items-center justify-between border-b border-white/5 p-6">
-          <div className="flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-              <Leaf className="h-4 w-4" />
-            </div>
-            <span className="font-bold text-white">Offset Checkout</span>
+        {/* Header Bar */}
+        <div className="flex items-center justify-between p-6 border-b border-white/5 bg-white/[0.02]">
+          <div className="flex items-center gap-3">
+            <div className={`w-2.5 h-2.5 rounded-full ${step === 'processing' ? 'bg-yellow-400 animate-pulse' : step === 'success' ? 'bg-emerald-400' : 'bg-slate-400'}`} />
+            <span className="text-xs font-mono font-bold text-slate-300 uppercase tracking-widest">
+              {step === 'review' && 'Confirm Allocation'}
+              {step === 'processing' && 'Processing Chain'}
+              {step === 'success' && 'Asset Retired'}
+            </span>
           </div>
-          <button onClick={onClose} className="text-slate-400 hover:text-white transition-colors">
-            <X className="h-5 w-5" />
+          <button onClick={onClose} className="text-slate-500 hover:text-white transition-colors">
+            <X className="w-5 h-5" />
           </button>
         </div>
 
-        {/* Content Area */}
-        <div className="p-6">
+        {/* Content Body */}
+        <div className="p-8 overflow-y-auto custom-scrollbar">
           
-          {/* STEP 1: REVIEW ORDER */}
+          {/* STEP 1: REVIEW */}
           {step === 'review' && (
-            <div className="space-y-6 animate-in slide-in-from-right-4 duration-300">
-              <div className="rounded-2xl bg-slate-900/50 border border-white/5 p-4 flex gap-4 items-start">
-                <img src={project.image} alt="Project" className="w-20 h-20 rounded-lg object-cover opacity-80" />
-                <div>
-                  <h3 className="font-bold text-white text-lg">{project.projectName}</h3>
-                  <p className="text-xs text-slate-400 font-mono mt-1">{project.unicId}</p>
-                  <div className="flex items-center gap-2 mt-2">
-                    <span className="text-xs bg-emerald-500/10 text-emerald-400 px-2 py-0.5 rounded border border-emerald-500/20">
-                      Vintage {project.vintage}
-                    </span>
-                  </div>
+            <div className="space-y-8 animate-in slide-in-from-right-4 duration-300">
+              
+              {/* Asset Ticket */}
+              <div className="bg-white/5 rounded-2xl p-5 border border-white/5 relative overflow-hidden group">
+                <div className="absolute top-0 left-0 w-1 h-full bg-emerald-500" />
+                <div className="flex justify-between items-start mb-4">
+                   <div>
+                      <p className="text-[10px] text-slate-500 uppercase tracking-widest font-bold mb-1">Asset ID</p>
+                      <p className="text-xs font-mono text-emerald-400">{project.unicId}</p>
+                   </div>
+                   <div className="text-right">
+                      <p className="text-[10px] text-slate-500 uppercase tracking-widest font-bold mb-1">Vintage</p>
+                      <p className="text-xs font-mono text-white">{project.vintage}</p>
+                   </div>
+                </div>
+                <h3 className="text-lg font-bold text-white mb-4">{project.projectName}</h3>
+                <div className="flex justify-between items-end border-t border-white/10 pt-4">
+                   <div>
+                      <p className="text-[10px] text-slate-500 uppercase tracking-widest font-bold mb-1">Quantity</p>
+                      <p className="text-xl font-mono text-white">{quantity} t</p>
+                   </div>
+                   <div className="text-right">
+                      <p className="text-[10px] text-slate-500 uppercase tracking-widest font-bold mb-1">Unit Price</p>
+                      <p className="text-sm font-mono text-slate-300">${project.pricePerCredit.toFixed(2)}</p>
+                   </div>
                 </div>
               </div>
 
+              {/* Financials */}
               <div className="space-y-3">
-                <div className="flex justify-between text-sm text-slate-400">
-                  <span>Quantity</span>
-                  <span className="text-white font-mono">{quantity} tonnes</span>
+                <div className="flex justify-between text-sm">
+                  <span className="text-slate-500 font-medium">Subtotal</span>
+                  <span className="text-slate-300 font-mono">${totalCost.toFixed(2)}</span>
                 </div>
-                <div className="flex justify-between text-sm text-slate-400">
-                  <span>Price per credit</span>
-                  <span className="text-white font-mono">${project.pricePerCredit}</span>
+                <div className="flex justify-between text-sm">
+                  <span className="text-slate-500 font-medium">Network Fee (1%)</span>
+                  <span className="text-slate-300 font-mono">${fees.toFixed(2)}</span>
                 </div>
-                <div className="h-px w-full bg-white/10" />
-                <div className="flex justify-between items-end">
-                  <span className="text-sm font-medium text-white">Total Due</span>
-                  <span className="text-2xl font-bold text-emerald-400">${totalCost}</span>
+                <div className="h-px bg-white/10 my-2" />
+                <div className="flex justify-between text-lg">
+                  <span className="text-white font-bold">Total</span>
+                  <span className="text-emerald-400 font-mono font-bold">${finalTotal.toFixed(2)}</span>
                 </div>
+              </div>
+
+              {/* Payment Method Stub */}
+              <div className="flex items-center gap-4 p-4 rounded-xl border border-white/10 bg-black/40">
+                <div className="w-10 h-6 bg-slate-200 rounded flex items-center justify-center">
+                   <div className="w-6 h-6 rounded-full bg-red-500 opacity-80 -mr-3" />
+                   <div className="w-6 h-6 rounded-full bg-yellow-500 opacity-80" />
+                </div>
+                <div>
+                   <p className="text-xs text-white font-bold">Mastercard •••• 4242</p>
+                   <p className="text-[10px] text-slate-500">Expires 12/28</p>
+                </div>
+                <div className="ml-auto">
+                   <ShieldCheck className="w-4 h-4 text-emerald-500" />
+                </div>
+              </div>
+
+              <button
+                onClick={handlePurchase}
+                className="w-full py-4 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-sm uppercase tracking-widest rounded-xl shadow-lg shadow-emerald-900/20 flex items-center justify-center gap-2 transition-all hover:scale-[1.01]"
+              >
+                Confirm Allocation <ArrowRight className="w-4 h-4" />
+              </button>
+            </div>
+          )}
+
+          {/* STEP 2: PROCESSING */}
+          {step === 'processing' && (
+            <div className="py-12 flex flex-col items-center justify-center text-center animate-in fade-in zoom-in-95">
+              <div className="relative mb-8">
+                {/* Rings */}
+                <div className="absolute inset-0 rounded-full border-2 border-emerald-500/20 animate-ping duration-1000" />
+                <div className="absolute inset-[-10px] rounded-full border border-emerald-500/10 animate-pulse duration-2000" />
+                
+                {/* Spinner */}
+                <div className="w-20 h-20 rounded-full border-2 border-t-emerald-400 border-r-emerald-500/50 border-b-transparent border-l-transparent animate-spin flex items-center justify-center bg-black/50 backdrop-blur-md">
+                   <Loader2 className="w-8 h-8 text-emerald-400 animate-pulse" />
+                </div>
+              </div>
+              <h3 className="text-xl font-bold text-white mb-2 tracking-tight">Securing Assets</h3>
+              <div className="space-y-1">
+                 <p className="text-[10px] font-mono text-emerald-500/80 uppercase tracking-widest animate-pulse">Writing to Ledger...</p>
+                 <p className="text-[10px] font-mono text-slate-600 uppercase tracking-widest">Block #1928374</p>
+              </div>
+            </div>
+          )}
+
+          {/* STEP 3: SUCCESS */}
+          {step === 'success' && (
+            <div className="py-4 flex flex-col items-center text-center animate-in zoom-in-95 duration-500">
+              <div className="w-24 h-24 bg-emerald-500/10 rounded-full flex items-center justify-center mb-6 border border-emerald-500/20 shadow-[0_0_40px_-10px_rgba(16,185,129,0.3)]">
+                <CheckCircle2 className="w-12 h-12 text-emerald-400" />
+              </div>
+              <h3 className="text-3xl font-bold text-white mb-2">Retired.</h3>
+              <p className="text-slate-400 max-w-xs mx-auto mb-8 text-sm leading-relaxed">
+                <span className="text-white font-bold">{quantity} tonnes</span> have been permanently removed from circulation.
+              </p>
+              
+              {/* Receipt Preview */}
+              <div className="w-full bg-white/5 border border-white/5 rounded-xl p-4 mb-8 flex items-center gap-4 text-left">
+                 <div className="w-10 h-10 bg-slate-800 rounded flex items-center justify-center text-emerald-500">
+                    <Leaf className="w-5 h-5" />
+                 </div>
+                 <div>
+                    <p className="text-xs font-bold text-white">Retirement Certificate</p>
+                    <p className="text-[10px] font-mono text-slate-500">ID: CERT-{Math.floor(Math.random() * 999999)}</p>
+                 </div>
+                 <button className="ml-auto text-xs font-bold text-emerald-400 hover:text-emerald-300">
+                    Download PDF
+                 </button>
               </div>
 
               <button 
-                onClick={() => setStep('payment')}
-                className="w-full py-4 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl shadow-[0_0_20px_-5px_rgba(16,185,129,0.4)] transition-all flex items-center justify-center gap-2 group"
+                onClick={onClose}
+                className="w-full py-4 bg-white text-black font-bold text-sm uppercase tracking-widest rounded-xl hover:bg-slate-200 transition-colors"
               >
-                Proceed to Payment
-                <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                Return to Dashboard
               </button>
             </div>
           )}
-
-          {/* STEP 2: PAYMENT FORM (Mock Stripe) */}
-          {step === 'payment' && (
-            <div className="space-y-6 animate-in slide-in-from-right-4 duration-300">
-               <div className="text-center">
-                 <h3 className="text-xl font-bold text-white mb-1">Payment Method</h3>
-                 <p className="text-xs text-slate-400">Secured by Stripe Encryption</p>
-               </div>
-
-               <div className="space-y-4">
-                 <div className="space-y-1.5">
-                   <label className="text-xs font-medium text-slate-400 uppercase">Card Number</label>
-                   <div className="relative">
-                     <CreditCard className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
-                     <input type="text" placeholder="0000 0000 0000 0000" className="w-full bg-slate-950 border border-slate-800 rounded-lg pl-10 pr-4 py-3 text-white focus:outline-none focus:border-emerald-500 transition-colors font-mono" />
-                   </div>
-                 </div>
-                 
-                 <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-1.5">
-                      <label className="text-xs font-medium text-slate-400 uppercase">Expiry</label>
-                      <input type="text" placeholder="MM/YY" className="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-emerald-500 transition-colors font-mono" />
-                    </div>
-                    <div className="space-y-1.5">
-                      <label className="text-xs font-medium text-slate-400 uppercase">CVC</label>
-                      <div className="relative">
-                        <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-3 w-3 text-slate-500" />
-                        <input type="text" placeholder="123" className="w-full bg-slate-950 border border-slate-800 rounded-lg pl-9 pr-4 py-3 text-white focus:outline-none focus:border-emerald-500 transition-colors font-mono" />
-                      </div>
-                    </div>
-                 </div>
-               </div>
-
-               <button 
-                onClick={handlePayment}
-                className="w-full py-4 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl shadow-lg transition-all"
-              >
-                Pay ${totalCost}
-              </button>
-            </div>
-          )}
-
-          {/* STEP 3: PROCESSING (Animation) */}
-          {step === 'processing' && (
-            <div className="py-12 flex flex-col items-center justify-center text-center animate-in fade-in duration-500">
-               <div className="relative mb-6">
-                 <div className="absolute inset-0 rounded-full border-2 border-emerald-500/20 animate-ping" />
-                 <div className="relative h-16 w-16 rounded-full border-2 border-t-emerald-500 border-r-emerald-500 border-b-transparent border-l-transparent animate-spin flex items-center justify-center">
-                 </div>
-                 <div className="absolute inset-0 flex items-center justify-center">
-                    <ShieldCheck className="h-6 w-6 text-emerald-400" />
-                 </div>
-               </div>
-               <h3 className="text-xl font-bold text-white mb-2">Processing Transaction</h3>
-               <p className="text-slate-400 text-sm animate-pulse">Verifying on the Blockchain...</p>
-            </div>
-          )}
-
-          {/* STEP 4: SUCCESS (Certificate) */}
-          {step === 'success' && (
-            <div className="text-center animate-in zoom-in-95 duration-500">
-               <div className="inline-flex h-16 w-16 items-center justify-center rounded-full bg-emerald-500/20 text-emerald-400 mb-6 shadow-[0_0_30px_rgba(16,185,129,0.4)]">
-                 <CheckCircle2 className="h-8 w-8" />
-               </div>
-               
-               <h2 className="text-2xl font-bold text-white mb-2">Retirement Confirmed!</h2>
-               <p className="text-slate-400 text-sm mb-8">You have successfully offset {quantity} tonnes of Carbon.</p>
-
-               {/* Digital Certificate Card */}
-               <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-slate-800 to-slate-950 border border-emerald-500/30 p-6 text-left shadow-2xl">
-                 <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/10 blur-[50px] pointer-events-none" />
-                 <div className="flex justify-between items-start mb-8">
-                   <div className="flex items-center gap-2">
-                      <Leaf className="h-5 w-5 text-emerald-400" />
-                      <span className="font-bold text-white tracking-tight">Offset Certificate</span>
-                   </div>
-                   <span className="text-[10px] font-mono text-slate-500 border border-slate-700 px-2 py-1 rounded">#{Math.floor(Math.random() * 1000000)}</span>
-                 </div>
-                 
-                 <div className="space-y-4 mb-8">
-                    <div>
-                      <p className="text-[10px] uppercase text-slate-500 tracking-wider">Issued To</p>
-                      <p className="text-white font-medium">Guest User</p>
-                    </div>
-                    <div>
-                      <p className="text-[10px] uppercase text-slate-500 tracking-wider">Project</p>
-                      <p className="text-white font-medium">{project.projectName}</p>
-                    </div>
-                    <div className="flex gap-8">
-                      <div>
-                        <p className="text-[10px] uppercase text-slate-500 tracking-wider">Amount</p>
-                        <p className="text-emerald-400 font-bold text-lg">{quantity} tCO2e</p>
-                      </div>
-                      <div>
-                        <p className="text-[10px] uppercase text-slate-500 tracking-wider">Date</p>
-                        <p className="text-white font-medium">{new Date().toLocaleDateString()}</p>
-                      </div>
-                    </div>
-                 </div>
-                 
-                 <div className="pt-4 border-t border-white/10 flex justify-between items-center">
-                   <span className="text-[10px] text-slate-600">Verified by {project.registry}</span>
-                   <ShieldCheck className="h-4 w-4 text-emerald-500/50" />
-                 </div>
-               </div>
-
-               <button 
-                 onClick={onClose}
-                 className="mt-8 text-sm text-slate-400 hover:text-white underline underline-offset-4 transition-colors"
-               >
-                 Close & Return to Explorer
-               </button>
-            </div>
-          )}
-
+        </div>
+        
+        {/* Footer Security Badge */}
+        <div className="bg-black/40 p-4 text-center border-t border-white/5 backdrop-blur-md">
+          <p className="text-[9px] text-slate-600 flex items-center justify-center gap-1.5 uppercase tracking-widest font-bold">
+            <ShieldCheck className="w-3 h-3" /> End-to-End Encryption
+          </p>
         </div>
       </div>
     </div>

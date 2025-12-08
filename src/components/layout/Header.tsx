@@ -1,239 +1,214 @@
-import React, { ButtonHTMLAttributes } from 'react';
-import { Leaf, Menu, User } from 'lucide-react';
+import React, { useState, useEffect, ButtonHTMLAttributes } from 'react';
+import { Leaf, Menu, X, User, LogOut, Command, ChevronRight } from 'lucide-react';
 
 type ViewState = 'landing' | 'home' | 'marketplace' | 'portfolio' | 'about';
 
-type ButtonVariant = 'default' | 'ghost' | 'outline' | 'glow' | 'glass';
-
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: ButtonVariant;
+  variant?: 'primary' | 'ghost' | 'icon';
+  active?: boolean;
 }
 
-const Button = ({
-  variant = 'default',
-  className = '',
-  children,
-  onClick,
-  ...props
-}: ButtonProps) => {
-  const variants: Record<ButtonVariant, string> = {
-    default:
-      'bg-emerald-600 text-white hover:bg-emerald-500 shadow-lg shadow-emerald-900/20',
-    ghost: 'hover:bg-white/10 text-slate-300 hover:text-white',
-    outline:
-      'border border-slate-700 bg-transparent hover:bg-slate-800 text-slate-300',
-    glow:
-      'bg-emerald-500/10 text-emerald-400 border border-emerald-500/50 hover:bg-emerald-500/20 hover:shadow-[0_0_15px_rgba(16,185,129,0.3)]',
-    glass:
-      'bg-white/5 text-slate-100 border border-emerald-500/40 shadow-[0_0_18px_rgba(16,185,129,0.35)]',
+const NavButton = ({ variant = 'ghost', active, className = '', children, onClick, ...props }: ButtonProps) => {
+  const base = "relative px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 flex items-center gap-2 group";
+  
+  const variants = {
+    primary: "bg-primary text-primary-foreground hover:shadow-[0_0_20px_rgba(16,185,129,0.4)] hover:scale-105",
+    ghost: `hover:bg-muted/50 ${active ? 'text-foreground bg-muted/30' : 'text-muted-foreground hover:text-foreground'}`,
+    icon: "p-2 hover:bg-muted/50 text-muted-foreground hover:text-foreground rounded-full aspect-square justify-center",
   };
 
   return (
-    <button
-      className={`inline-flex items-center justify-center rounded-lg text-sm font-medium transition-all h-10 px-4 py-2 ${variants[variant]} ${className}`}
-      onClick={onClick}
-      {...props}
-    >
+    <button className={`${base} ${variants[variant]} ${className}`} onClick={onClick} {...props}>
       {children}
+      {/* Active Dot for Navigation Items */}
+      {active && variant === 'ghost' && (
+        <span className="absolute bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-primary shadow-[0_0_8px_currentColor]" />
+      )}
     </button>
   );
 };
 
 interface HeaderProps {
-  showContent: boolean;
-  isLoggedIn: boolean;
-  currentView?: ViewState;
-  onNavigate: (view: ViewState) => void;
   onOpenAuth: (mode: 'login' | 'signup') => void;
-  onLogout: () => void;
+  isLoggedIn: boolean;
+  showContent?: boolean;
+  currentView?: ViewState;
+  onNavigate?: (view: ViewState) => void;
+  onLogout?: () => void;
+  theme: 'dark' | 'light';
+  onToggleTheme: () => void;
 }
 
 export default function Header({
-  showContent,
+  showContent = true,
   isLoggedIn,
-  currentView,
-  onNavigate,
+  currentView = 'home',
+  onNavigate = () => {},
   onOpenAuth,
   onLogout,
 }: HeaderProps) {
-  const handleHomeClick = () => {
-    if (isLoggedIn) {
-      onNavigate('home');
-    } else {
-      // For logged-out users, Home = scroll to top of landing
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-  };
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
 
-  const scrollToSection = (id: string) => {
-    if (!isLoggedIn || currentView === 'landing') {
-      const element = document.getElementById(id);
-      if (element) {
-        element.scrollIntoView({ behavior: 'smooth' });
-      }
-    } else {
-      // If user is logged in but currently not on landing,
-      // navigate to landing first, then scroll.
-      onNavigate('landing');
-      setTimeout(() => {
-        const element = document.getElementById(id);
-        if (element) element.scrollIntoView({ behavior: 'smooth' });
-      }, 100);
-    }
+  // Scroll Detection for minimizing/styling
+  useEffect(() => {
+    const handleScroll = () => setScrolled(window.scrollY > 50);
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  const handleNav = (view: ViewState) => {
+    onNavigate(view);
+    setIsMenuOpen(false);
   };
 
   return (
     <>
-      {/* Floating animated logo on landing */}
-      <div className="animated-logo-container">
-        <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-700 shadow-lg shadow-emerald-900/50 ml-7">
-            <Leaf className="h-6 w-6 text-white" />
-          </div>
-          <span className="text-2xl font-bold tracking-tight text-white">
-            Offset
-          </span>
-        </div>
-      </div>
-
-      {/* Main header */}
-      <header
-        className={`fixed top-0 w-full z-40 border-b border-white/5 bg-slate-950/80 backdrop-blur-xl transition-opacity duration-1000 ${
-          showContent ? 'opacity-100' : 'opacity-0 pointer-events-none'
-        }`}
+      {/* --- THE FLOATING COMMAND BAR --- */}
+      <div 
+        className={`fixed top-0 left-0 right-0 z-50 flex justify-center transition-all duration-500 ${
+          showContent ? 'translate-y-0 opacity-100' : '-translate-y-full opacity-0'
+        } ${scrolled ? 'pt-4' : 'pt-6 md:pt-8'}`}
       >
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="flex h-20 items-center justify-between">
-            <div className="flex items-center gap-12">
-              {/* Invisible logo so layout aligns with floating one */}
-              <div
-                className="flex items-center gap-3 opacity-0 cursor-pointer"
-                aria-hidden="true"
-                onClick={handleHomeClick}
-              >
-                <div className="h-10 w-10" />
-                <span className="text-2xl font-bold">Offset</span>
+        <header 
+          className={`
+            relative flex items-center justify-between 
+            bg-background/60 backdrop-blur-xl border border-border/50 
+            shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)]
+            transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)]
+            ${scrolled 
+              ? 'w-[95%] md:w-[600px] rounded-2xl py-2 px-3' 
+              : 'w-[95%] md:w-[1200px] rounded-full py-3 px-6'
+            }
+          `}
+        >
+          {/* 1. Left: Identity */}
+          <div className="flex items-center gap-4">
+            <div 
+              className="flex items-center gap-2 cursor-pointer group" 
+              onClick={() => handleNav('landing')}
+            >
+              <div className="relative flex items-center justify-center w-8 h-8 rounded-full bg-primary/10 text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-colors duration-300">
+                <Leaf className="w-4 h-4 transition-transform group-hover:rotate-45" />
+                {/* Online Indicator */}
+                <span className="absolute -top-0.5 -right-0.5 flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
+                </span>
               </div>
+              <span className={`font-bold tracking-tight transition-all duration-300 ${scrolled ? 'w-0 opacity-0 overflow-hidden' : 'w-auto opacity-100'}`}>
+                Offset
+              </span>
+            </div>
 
-              <nav className="hidden md:flex items-center gap-2">
-                {/* Home */}
-                <Button
-                  variant={
-                    currentView === 'home' || (!isLoggedIn && currentView === 'landing')
-                      ? 'outline'
-                      : 'ghost'
-                  }
-                  onClick={handleHomeClick}
-                  className={
-                    currentView === 'home'
-                      ? 'text-emerald-400 border-emerald-500/30'
-                      : ''
-                  }
-                >
-                  Home
-                </Button>
+            {/* Separator (Desktop Only) */}
+            <div className={`h-4 w-px bg-border hidden md:block transition-opacity ${scrolled ? 'opacity-0' : 'opacity-100'}`} />
 
-                {isLoggedIn ? (
-                  <>
-                    <Button
-                      variant={currentView === 'marketplace' ? 'outline' : 'ghost'}
-                      onClick={() => onNavigate('marketplace')}
-                      className={
-                        currentView === 'marketplace'
-                          ? 'text-emerald-400 border-emerald-500/30'
-                          : ''
-                      }
-                    >
-                      Marketplace
-                    </Button>
+            {/* Desktop Navigation */}
+            {isLoggedIn && (
+              <nav className={`hidden md:flex items-center gap-1 transition-all duration-300 ${scrolled ? 'opacity-0 pointer-events-none absolute' : 'opacity-100'}`}>
+                {['home', 'marketplace', 'portfolio', 'about'].map((view) => (
+                  <NavButton 
+                    key={view} 
+                    active={currentView === view} 
+                    onClick={() => handleNav(view as ViewState)}
+                  >
+                    {view.charAt(0).toUpperCase() + view.slice(1)}
+                  </NavButton>
+                ))}
+              </nav>
+            )}
+          </div>
 
-                    <Button
-                      variant={currentView === 'portfolio' ? 'outline' : 'ghost'}
-                      onClick={() => onNavigate('portfolio')}
-                      className={
-                        currentView === 'portfolio'
-                          ? 'text-emerald-400 border-emerald-500/30'
-                          : ''
-                      }
-                    >
-                      Portfolio
-                    </Button>
-                  </>
-                ) : (
-                  <Button variant="ghost" onClick={() => scrollToSection('mission')}>
-                    Mission
-                  </Button>
+          {/* 2. Middle: Dynamic Island Content (Visible ONLY when Scrolled) */}
+          <div className={`absolute left-1/2 -translate-x-1/2 flex items-center gap-4 transition-all duration-500 ${scrolled ? 'opacity-100 scale-100' : 'opacity-0 scale-90 pointer-events-none'}`}>
+             {isLoggedIn ? (
+               <div className="flex items-center gap-2 text-xs font-mono text-muted-foreground">
+                 <Command className="w-3 h-3" />
+                 <span>CMD+K</span>
+               </div>
+             ) : (
+                <span className="text-sm font-semibold text-foreground">Offset Platform</span>
+             )}
+          </div>
+
+
+          {/* 3. Right: Actions */}
+          <div className="flex items-center gap-2">
+            
+            {isLoggedIn ? (
+              <>
+                <div className={`hidden md:flex flex-col items-end mr-2 transition-all duration-300 ${scrolled ? 'opacity-0 w-0 overflow-hidden' : 'opacity-100 w-auto'}`}>
+                  <span className="text-[9px] uppercase tracking-widest text-muted-foreground font-bold">Balance</span>
+                  <span className="text-xs font-mono text-primary">2,450 CO2e</span>
+                </div>
+
+                <div className="h-8 w-8 rounded-full bg-gradient-to-tr from-primary to-blue-500 p-[1px] cursor-pointer" onClick={() => handleNav('portfolio')}>
+                   <div className="h-full w-full rounded-full bg-background flex items-center justify-center hover:bg-transparent transition-colors group">
+                      <User className="w-4 h-4 text-primary group-hover:text-white" />
+                   </div>
+                </div>
+
+                {onLogout && (
+                  <NavButton variant="icon" onClick={onLogout} className="hidden md:flex" title="Sign Out">
+                    <LogOut className="w-4 h-4" />
+                  </NavButton>
                 )}
 
-                {/* About page navigation */}
-                <Button
-                  variant={currentView === 'about' ? 'glass' : 'ghost'}
-                  onClick={() => onNavigate('about')}
-                  className={
-                    currentView === 'about'
-                      ? 'text-emerald-400 border-emerald-500/30'
-                      : ''
-                  }
-                >
-                  About
-                </Button>
-              </nav>
-            </div>
-
-            <div className="flex items-center gap-4">
-              {isLoggedIn ? (
-                <>
-                  <div className="hidden md:flex flex-col items-end mr-2">
-                    <span className="text-xs text-slate-400">Balance</span>
-                    <span className="text-sm font-mono text-emerald-400">
-                      2,450 CO2e
-                    </span>
-                  </div>
-
-                  {/* User icon -> Portfolio */}
-                  <Button
-                    variant="ghost"
-                    onClick={() => onNavigate('portfolio')}
-                    className={`rounded-full border border-white/15 w-15 p-0 flex items-center justify-center hover:bg-emerald-500/10 hover:border-emerald-500/50 ${
-                      currentView === 'portfolio'
-                        ? 'bg-emerald-500/10 border-emerald-500/50 text-emerald-400'
-                        : ''
-                    }`}
-                  >
-                    <User className="h-5 w-6" />
-                  </Button>
-
-                  <Button
-                    variant="outline"
-                    onClick={onLogout}
-                    className="hidden sm:flex"
-                  >
-                    Disconnect
-                  </Button>
-                </>
-              ) : (
-                <>
-                  <Button
-                    variant="ghost"
-                    className="hidden sm:flex"
-                    onClick={() => onOpenAuth('login')}
-                  >
-                    Sign In
-                  </Button>
-                </>
-              )}
-
-              {/* Mobile menu */}
-              <Button
-                variant="ghost"
-                className="md:hidden w-10 p-0 flex items-center justify-center"
-              >
-                <Menu className="h-5 w-5" />
-              </Button>
-            </div>
+                {/* Mobile Menu Trigger */}
+                <button onClick={() => setIsMenuOpen(!isMenuOpen)} className="md:hidden p-2 text-muted-foreground hover:text-foreground">
+                  {isMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+                </button>
+              </>
+            ) : (
+              <div className="flex items-center gap-2">
+                <NavButton variant="ghost" onClick={() => onOpenAuth('login')} className={scrolled ? 'hidden sm:flex' : ''}>
+                  Log in
+                </NavButton>
+                <NavButton variant="primary" onClick={() => onOpenAuth('signup')}>
+                  <span>Get Started</span>
+                  <ChevronRight className="w-3 h-3" />
+                </NavButton>
+              </div>
+            )}
           </div>
+        </header>
+      </div>
+
+      {/* --- MOBILE MENU OVERLAY (Fullscreen Blur) --- */}
+      <div 
+        className={`fixed inset-0 z-40 bg-background/95 backdrop-blur-2xl transition-all duration-500 flex flex-col justify-center items-center gap-8 ${
+          isMenuOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
+        }`}
+      >
+        <div className="flex flex-col gap-6 w-full max-w-xs text-center">
+          {isLoggedIn ? (
+             <>
+                <button onClick={() => handleNav('home')} className="text-2xl font-bold text-foreground hover:text-primary transition-colors">Home</button>
+                <button onClick={() => handleNav('marketplace')} className="text-2xl font-bold text-foreground hover:text-primary transition-colors">Marketplace</button>
+                <button onClick={() => handleNav('portfolio')} className="text-2xl font-bold text-foreground hover:text-primary transition-colors">Portfolio</button>
+                <button onClick={() => handleNav('about')} className="text-2xl font-bold text-foreground hover:text-primary transition-colors">About</button>
+                <div className="h-px w-full bg-border my-4" />
+                <button onClick={onLogout} className="text-lg font-medium text-red-500 flex items-center justify-center gap-2">
+                   <LogOut className="w-5 h-5" /> Sign Out
+                </button>
+             </>
+          ) : (
+             <>
+                <button onClick={() => { onOpenAuth('login'); setIsMenuOpen(false); }} className="text-2xl font-bold text-foreground hover:text-primary transition-colors">Log In</button>
+                <button onClick={() => { onOpenAuth('signup'); setIsMenuOpen(false); }} className="text-2xl font-bold text-primary">Get Started</button>
+             </>
+          )}
         </div>
-      </header>
+        
+        {/* Close Button at Bottom */}
+        <button 
+          onClick={() => setIsMenuOpen(false)}
+          className="absolute bottom-10 p-4 rounded-full bg-muted/50 text-muted-foreground hover:bg-muted hover:text-foreground transition-all"
+        >
+          <X className="w-6 h-6" />
+        </button>
+      </div>
     </>
   );
 }

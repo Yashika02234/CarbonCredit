@@ -8,18 +8,16 @@ export interface TimelineEvent {
 
 export interface CarbonCredit {
   id: string;
-  unicId: string;
   projectName: string;
+  pricePerCredit: number;
   location: string;
-  country: string;
-  registry: string;
   vintage: number;
-  status: 'active' | 'retired' | 'pending';
+  registry: string;
   trustScore: number;
   availableCredits: number;
-  pricePerCredit: number;
-  projectType: string;
+  status: string;
+  projectType: string; // 'Forestry' | 'Renewable' | 'Blue Carbon' | 'Community' | ...
+  unicId: string;
+  country: string;
   image: string;
-  description?: string; // Extended description
-  timeline?: TimelineEvent[]; // New timeline data
 }
