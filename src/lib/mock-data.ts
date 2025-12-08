@@ -1,6 +1,7 @@
+// src/lib/mock-data.ts
 import { CarbonCredit } from './types';
 
-// --- Updated with Realistic Market Categories ---
+// --- Categories for filters (same as before) ---
 export const projectTypes = [
   'all',
   'Forestry (REDD+)',
@@ -8,10 +9,22 @@ export const projectTypes = [
   'Blue Carbon',
   'Community Projects',
   'Waste Recovery',
-  'Tech-Based Removal'
+  'Tech-Based Removal',
 ];
 
-export const mockCredits: CarbonCredit[] = [
+export const registryTypes = ['all', 'reward', 'purchase', 'payment'];
+
+export const sortOptions: { [key: string]: string } = {
+  trustScore: 'Trust Score',
+  vintage: 'Newest (Vintage)',
+  availableCredits: 'Available (High)',
+  pricePerCredit: 'Price (Low)',
+};
+
+// ------------------------------------------------------------------
+// 1. BASE MOCK PROJECTS (your original 9)
+// ------------------------------------------------------------------
+const baseMockCredits: CarbonCredit[] = [
   {
     id: '1',
     unicId: 'VCS-2891-2023-001',
@@ -24,7 +37,7 @@ export const mockCredits: CarbonCredit[] = [
     trustScore: 94,
     availableCredits: 12500,
     pricePerCredit: 18.5,
-    projectType: 'Forestry (REDD+)', // Major Sector
+    projectType: 'Forestry (REDD+)',
     image: 'https://images.pexels.com/photos/975771/pexels-photo-975771.jpeg',
   },
   {
@@ -39,7 +52,7 @@ export const mockCredits: CarbonCredit[] = [
     trustScore: 88,
     availableCredits: 8400,
     pricePerCredit: 15.2,
-    projectType: 'Renewable Energy', // Major Sector
+    projectType: 'Renewable Energy',
     image: 'https://images.pexels.com/photos/414837/pexels-photo-414837.jpeg',
   },
   {
@@ -54,7 +67,7 @@ export const mockCredits: CarbonCredit[] = [
     trustScore: 91,
     availableCredits: 5600,
     pricePerCredit: 12.8,
-    projectType: 'Community Projects', // High Impact
+    projectType: 'Community Projects',
     image: 'https://images.pexels.com/photos/6473875/pexels-photo-6473875.jpeg',
   },
   {
@@ -69,7 +82,7 @@ export const mockCredits: CarbonCredit[] = [
     trustScore: 86,
     availableCredits: 0,
     pricePerCredit: 16.0,
-    projectType: 'Blue Carbon', // Wetlands/Peatlands
+    projectType: 'Blue Carbon',
     image: 'https://images.pexels.com/photos/1179229/pexels-photo-1179229.jpeg',
   },
   {
@@ -114,7 +127,7 @@ export const mockCredits: CarbonCredit[] = [
     trustScore: 78,
     availableCredits: 4500,
     pricePerCredit: 13.7,
-    projectType: 'Blue Carbon', // Mangroves
+    projectType: 'Blue Carbon',
     image: 'https://images.pexels.com/photos/1619299/pexels-photo-1619299.jpeg',
   },
   {
@@ -129,7 +142,7 @@ export const mockCredits: CarbonCredit[] = [
     trustScore: 85,
     availableCredits: 6300,
     pricePerCredit: 11.9,
-    projectType: 'Waste Recovery', // Biodegradable/Biogas
+    projectType: 'Waste Recovery',
     image: 'https://images.pexels.com/photos/2516423/pexels-photo-2516423.jpeg',
   },
   {
@@ -144,16 +157,69 @@ export const mockCredits: CarbonCredit[] = [
     trustScore: 96,
     availableCredits: 2000,
     pricePerCredit: 120.0,
-    projectType: 'Tech-Based Removal', // New High Tech category
+    projectType: 'Tech-Based Removal',
     image: 'https://images.pexels.com/photos/1834400/pexels-photo-1834400.jpeg',
   },
 ];
 
-export const registryTypes = ['all', 'reward', 'purchase', 'payment'];
+// statuses aligned with Explorer filters (lowercase)
+const STATUSES = ['active', 'retired', 'pending'] as const;
 
-export const sortOptions: { [key: string]: string } = {
-  trustScore: 'Trust Score',
-  vintage: 'Newest (Vintage)',
-  availableCredits: 'Available (High)',
-  pricePerCredit: 'Price (Low)',
-};
+// ------------------------------------------------------------------
+// 2. EXPANDED MOCK DATASET – 10,000 PROJECTS
+// ------------------------------------------------------------------
+
+// tweak helper (keeps values in a nice range)
+const clamp = (value: number, min: number, max: number) =>
+  Math.max(min, Math.min(max, value));
+
+export const mockCredits: CarbonCredit[] = Array.from(
+  { length: 10000 }, // 👉 change this number if you want more/less
+  (_, idx) => {
+    const base = baseMockCredits[idx % baseMockCredits.length];
+
+    const status = STATUSES[idx % STATUSES.length];
+
+    const vintage = 2021 + (idx % 4); // 2021–2024 loop
+    const priceJitter = ((idx % 7) - 3) * 0.4; // -1.2 .. +1.2
+    const trustJitter = (idx % 9) - 4; // -4 .. +4
+
+    const pricePerCredit = clamp(
+      base.pricePerCredit + priceJitter,
+      5,
+      200,
+    );
+
+    const trustScore = clamp(
+      base.trustScore + trustJitter,
+      70,
+      99,
+    );
+
+    const availableCredits =
+      base.availableCredits + (idx % 500) * 10; // some scaling
+
+    // make IDs + UNIC IDs unique-ish but readable
+    const series = Math.floor(idx / baseMockCredits.length)
+      .toString()
+      .padStart(3, '0');
+
+    const id = `${base.id}-${series}-${idx}`;
+    const unicPrefix = base.unicId.split('-')[0]; // e.g. "VCS", "GS"
+    const unicId = `${unicPrefix}-${vintage}-${series}-${String(idx).padStart(
+      4,
+      '0',
+    )}`;
+
+    return {
+      ...base,
+      id,
+      unicId,
+      status,
+      vintage,
+      pricePerCredit,
+      trustScore,
+      availableCredits,
+    };
+  },
+);

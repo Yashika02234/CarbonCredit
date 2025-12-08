@@ -2,62 +2,75 @@ import React, { useState, useEffect, Suspense, lazy } from 'react';
 import { Loader2 } from 'lucide-react';
 import { CarbonCredit } from './lib/types';
 
-// --- IMPORTS (Connecting your existing files) ---
+// --- IMPORTS ---
 import Header from './components/layout/Header';
 import AuthModal from './components/layout/AuthModal';
 
-// --- LAZY IMPORTS (Performance) ---
-// These load only when needed, making the app "Fast as Hell"
+// --- LAZY IMPORTS ---
 const LandingPage = lazy(() => import('./components/landing/LandingPage'));
 const HomePage = lazy(() => import('./components/home/HomePage'));
 const Explorer = lazy(() => import('./components/explorer/Explorer'));
 const Portfolio = lazy(() => import('./components/portfolio/Portfolio'));
 const AboutPage = lazy(() => import('./components/about/AboutPage'));
-const ProjectDetail = lazy(() => import('./components/explorer/ProjectDetail'));
+const ProjectDetail = lazy(
+  () => import('./components/explorer/ProjectDetail')
+);
 
 export type ViewState = 'landing' | 'home' | 'marketplace' | 'portfolio' | 'about';
 
-// --- LOADING SPINNER ---
+// --- LOADING SPINNER (Adaptive) ---
 const PageLoader = () => (
-  <div className="h-screen w-full flex items-center justify-center bg-[#020617]">
-    <Loader2 className="w-10 h-10 text-emerald-500 animate-spin" />
+  <div className="h-screen w-full flex items-center justify-center bg-background">
+    <Loader2 className="w-10 h-10 text-primary animate-spin" />
   </div>
 );
 
 function App() {
-  // --- STATE MANAGEMENT ---
   const [showContent, setShowContent] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [authMode, setAuthMode] = useState<'login' | 'signup'>('signup');
-  const [theme, setTheme] = useState<'dark' | 'light'>('dark');
-  
-  // Navigation
-  const [currentView, setCurrentView] = useState<ViewState>('landing');
-  const [selectedProject, setSelectedProject] = useState<CarbonCredit | null>(null);
 
-  // --- EFFECTS ---
-  
-  // 1. Fade-in on load
-  useEffect(() => {
-    const timer = setTimeout(() => setShowContent(true), 100);
-    return () => clearTimeout(timer);
-  }, []);
+  // THEME: default to light, read from localStorage if present
+  const [theme, setTheme] = useState<'dark' | 'light'>(() => {
+    if (typeof window === 'undefined') return 'light';
+    const stored = localStorage.getItem('offset_theme');
+    if (stored === 'dark' || stored === 'light') return stored;
+    return 'light';
+  });
 
-  // 2. Theme Toggle Class
+  const [currentView, setCurrentView] = useState<ViewState>(() => {
+    const savedAuth = localStorage.getItem('offset_isLoggedIn');
+    return savedAuth === 'true' ? 'home' : 'landing';
+  });
+  const [selectedProject, setSelectedProject] = useState<CarbonCredit | null>(
+    null
+  );
+
+  const [isLoggedIn, setIsLoggedIn] = useState(
+    () => localStorage.getItem('offset_isLoggedIn') === 'true'
+  );
+
+  // Apply Theme Class to HTML Tag + persist theme
   useEffect(() => {
+    const root = window.document.documentElement;
+
     if (theme === 'dark') {
-      document.documentElement.classList.add('dark');
+      root.classList.add('dark');
     } else {
-      document.documentElement.classList.remove('dark');
+      root.classList.remove('dark');
     }
+
+    localStorage.setItem('offset_theme', theme);
   }, [theme]);
 
-  // --- ACTIONS ---
+  // Actions
+  const toggleTheme = () => {
+    setTheme((prev) => (prev === 'dark' ? 'light' : 'dark'));
+  };
 
   const handleNavigate = (view: ViewState) => {
     setCurrentView(view);
-    setSelectedProject(null); // Clear detail view if switching tabs
+    setSelectedProject(null);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -67,78 +80,76 @@ function App() {
   };
 
   const handleAuthSuccess = () => {
+    localStorage.setItem('offset_isLoggedIn', 'true');
     setIsLoggedIn(true);
     setIsAuthModalOpen(false);
-    handleNavigate('home'); // Go to Dashboard on login
+    handleNavigate('home');
   };
 
   const handleLogout = () => {
+    localStorage.removeItem('offset_isLoggedIn');
     setIsLoggedIn(false);
-    handleNavigate('landing'); // Go to Landing on logout
+    handleNavigate('landing');
   };
 
   return (
-    <div className={`min-h-screen font-sans selection:bg-emerald-500/30 transition-colors duration-300 ${theme === 'dark' ? 'bg-[#020617] text-slate-100' : 'bg-slate-50 text-slate-900'}`}>
-      
-      {/* 1. HEADER (Navigation Controller) */}
+    <div className="min-h-screen bg-background text-foreground transition-colors duration-300 font-sans selection:bg-primary/30">
       <Header
-        showContent={showContent}
+        showContent={true}
         isLoggedIn={isLoggedIn}
         currentView={currentView}
         onNavigate={handleNavigate}
         onOpenAuth={handleOpenAuth}
         onLogout={handleLogout}
         theme={theme}
-        onToggleTheme={() => setTheme(prev => prev === 'dark' ? 'light' : 'dark')}
+        onToggleTheme={toggleTheme}
       />
 
-      {/* 2. AUTH MODAL (Global Overlay) */}
-      <AuthModal
-        isOpen={isAuthModalOpen}
-        initialMode={authMode}
-        onClose={() => setIsAuthModalOpen(false)}
-        onSuccess={handleAuthSuccess}
-      />
+      {isAuthModalOpen && (
+        <Suspense fallback={null}>
+          <AuthModal
+            isOpen={isAuthModalOpen}
+            initialMode={authMode}
+            onClose={() => setIsAuthModalOpen(false)}
+            onSuccess={handleAuthSuccess}
+          />
+        </Suspense>
+      )}
 
-      {/* 3. MAIN CONTENT ROUTER */}
-      <main className={`transition-opacity duration-700 ${showContent ? 'opacity-100' : 'opacity-0'}`}>
+      <main className="transition-opacity duration-700">
         <Suspense fallback={<PageLoader />}>
           {isLoggedIn ? (
             <>
               {selectedProject ? (
-                // Show Detail View if a project is selected
-                <ProjectDetail 
-                  project={selectedProject} 
-                  onBack={() => handleNavigate('marketplace')} 
+                <ProjectDetail
+                  project={selectedProject}
+                  onBack={() => handleNavigate('marketplace')}
                 />
               ) : (
-                // Otherwise show the active Tab
                 <>
-                  {currentView === 'home' && <HomePage onNavigate={handleNavigate} />}
-                  
-                  {currentView === 'marketplace' && (
-                    <Explorer onSelectProject={(p: CarbonCredit) => {
-                      setSelectedProject(p);
-                      window.scrollTo(0, 0);
-                    }} />
+                  {currentView === 'home' && (
+                    <HomePage onNavigate={handleNavigate} />
                   )}
-                  
+                  {currentView === 'marketplace' && (
+                    <Explorer
+                      onSelectProject={(p: CarbonCredit) => {
+                        setSelectedProject(p);
+                        window.scrollTo(0, 0);
+                      }}
+                    />
+                  )}
                   {currentView === 'portfolio' && <Portfolio />}
-                  
                   {currentView === 'about' && <AboutPage />}
-                  
-                  {/* Fallback */}
-                  {currentView === 'landing' && <HomePage onNavigate={handleNavigate} />}
+                  {currentView === 'landing' && (
+                    <HomePage onNavigate={handleNavigate} />
+                  )}
                 </>
               )}
             </>
+          ) : currentView === 'about' ? (
+            <AboutPage />
           ) : (
-            // Logged Out Views
-            currentView === 'about' ? (
-               <AboutPage />
-            ) : (
-               <LandingPage onOpenAuth={handleOpenAuth} />
-            )
+            <LandingPage onOpenAuth={handleOpenAuth} />
           )}
         </Suspense>
       </main>

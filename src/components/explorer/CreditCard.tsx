@@ -1,4 +1,5 @@
-import React from 'react';
+
+
 import { MapPin, Calendar, ArrowUpRight, Activity, Leaf, Zap, Droplets, Users, Sun, Wind, Tractor, Recycle } from 'lucide-react';
 import { CarbonCredit } from '../../lib/types';
 

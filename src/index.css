@@ -2,97 +2,289 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Semantic color tokens for light + dark themes */
+
 :root {
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
   line-height: 1.5;
-  --background: 240 10% 3.9%; /* Deep Cosmos Black */
   --logo-final-left: 1rem;
+
+  /* --- LIGHT THEME | EARTH + SKY --- */
+
+  /* Backgrounds & Surfaces */
+  --background: 210 38% 97%;          /* #F4F7FA */
+  --foreground: 203 31% 15%;          /* #1B2A33 (deep blue-grey text) */
+
+  --card: 0 0% 100%;                  /* #FFFFFF */
+  --card-foreground: 203 31% 15%;
+
+  --popover: 0 0% 100%;
+  --popover-foreground: 203 31% 15%;
+
+  /* Brand Colors */
+  --primary: 162 37% 39%;             /* #3F8A74 (teal-green) */
+  --primary-foreground: 210 40% 98%;  /* near-white */
+
+  --accent: 224 54% 45%;              /* #3557B2 (indigo/blue) */
+  --accent-foreground: 210 40% 98%;
+
+  /* Secondary / Muted Surfaces */
+  --secondary: 203 35% 93%;           /* #E6EEF3 (soft blue-grey) */
+  --secondary-foreground: 203 31% 20%;
+
+  --muted: 203 35% 93%;               /* #E6EEF3 */
+  --muted-foreground: 207 14% 41%;    /* #5B6B78 */
+
+  /* Borders / Inputs / Focus */
+  --border: 213 32% 88%;              /* #D6DFEA */
+  --input: 213 32% 88%;
+  --ring: 162 37% 39%;                /* follows primary */
+
+  /* Status */
+  --destructive: 0 72% 50%;
+  --destructive-foreground: 0 0% 98%;
 }
 
-html { scroll-behavior: smooth; }
-body { 
-  margin: 0; 
-  min-width: 320px; 
-  min-height: 100vh; 
-  background-color: #050505; /* Hardcoded Deep Black */
-  overflow-x: hidden;
+.dark {
+  /* --- DARK THEME | EARTH + SKY VARIANT --- */
+
+  /* Backgrounds & Surfaces */
+  --background: 220 35% 8%;           /* deep navy */
+  --foreground: 210 40% 98%;          /* near-white */
+
+  --card: 222 36% 12%;                /* dark surface */
+  --card-foreground: 210 40% 98%;
+
+  --popover: 222 36% 12%;
+  --popover-foreground: 210 40% 98%;
+
+  /* Brand Colors */
+  --primary: 162 45% 45%;             /* brighter teal-green on dark */
+  --primary-foreground: 203 31% 12%;  /* deep background for contrast */
+
+  --accent: 224 55% 55%;              /* brighter indigo on dark */
+  --accent-foreground: 210 40% 98%;
+
+  /* Secondary / Muted Surfaces */
+  --secondary: 220 22% 18%;
+  --secondary-foreground: 210 40% 98%;
+
+  --muted: 220 22% 18%;
+  --muted-foreground: 215 15% 65%;
+
+  /* Borders / Inputs / Focus */
+  --border: 220 22% 20%;
+  --input: 220 22% 20%;
+  --ring: 162 45% 45%;
+
+  /* Status */
+  --destructive: 0 62.8% 40.6%;
+  --destructive-foreground: 0 0% 98%;
 }
 
+html {
+  scroll-behavior: smooth;
+  /* Apply transition to HTML elements for smooth theme change */
+  transition: background-color 0.3s, color 0.3s;
+}
+
+/* Base Body Styles (Managed by CSS Variables) */
 @layer base {
-  * { @apply border-border; }
-  body { @apply bg-[#050505] text-slate-100; }
+  * {
+    @apply border-border;
+  }
+  body {
+    margin: 0;
+    min-width: 320px;
+    min-height: 100vh;
+    overflow-x: hidden;
+    /* Use semantic background/foreground colors defined in :root/.dark */
+    @apply bg-background text-foreground transition-colors duration-300;
+  }
 }
 
-/* --- Cosmos Hero Animations --- */
+/* --- ANIMATION DEFINITIONS (Unchanged) --- */
 
 /* Floating Animation (Up/Down) */
 @keyframes float-y {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-20px); }
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-20px);
+  }
 }
-.animate-float-slow { animation: float-y 6s ease-in-out infinite; }
-.animate-float-medium { animation: float-y 5s ease-in-out infinite; }
-.animate-float-fast { animation: float-y 4s ease-in-out infinite; }
+.animate-float-slow {
+  animation: float-y 6s ease-in-out infinite;
+}
+.animate-float-medium {
+  animation: float-y 5s ease-in-out infinite;
+}
+.animate-float-fast {
+  animation: float-y 4s ease-in-out infinite;
+}
 
 /* Orbit Animation (Circular Drifting) */
 @keyframes orbit-drift {
-  0% { transform: rotate(0deg) translateX(10px) rotate(0deg); }
-  100% { transform: rotate(360deg) translateX(10px) rotate(-360deg); }
+  0% {
+    transform: rotate(0deg) translateX(10px) rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg) translateX(10px) rotate(-360deg);
+  }
 }
-.animate-orbit { animation: orbit-drift 20s linear infinite; }
+.animate-orbit {
+  animation: orbit-drift 20s linear infinite;
+}
 
 /* Star Twinkle */
 @keyframes twinkle {
-  0%, 100% { opacity: 0.2; transform: scale(0.8); }
-  50% { opacity: 0.8; transform: scale(1.2); }
-}
-.star {
-  position: absolute;
-  background: white;
-  border-radius: 50%;
-  animation: twinkle 3s infinite ease-in-out;
+  0%,
+  100% {
+    opacity: 0.2;
+    transform: scale(0.8);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.2);
+  }
 }
 
-/* --- Existing Styles (Kept for compatibility) --- */
-@media (min-width: 640px) { :root { --logo-final-left: 1.5rem; } }
-@media (min-width: 1024px) { :root { --logo-final-left: 2rem; } }
+/* Logo Animation (Kept for compatibility) */
+@media (min-width: 640px) {
+  :root {
+    --logo-final-left: 1.5rem;
+  }
+}
+@media (min-width: 1024px) {
+  :root {
+    --logo-final-left: 2rem;
+  }
+}
 
 @keyframes logo-sequence {
-  0% { transform: scale(0.8); opacity: 0; }
-  20% { transform: scale(2.5); opacity: 1; }
-  40% { transform: scale(2.5); }
-  50% { transform: scale(2.2); }
-  100% { transform: translate(calc(-50vw + var(--logo-final-left) + 30px), calc(-50vh + 40px)) scale(1); }
+  0% {
+    transform: scale(0.8);
+    opacity: 0;
+  }
+  20% {
+    transform: scale(2.5);
+    opacity: 1;
+  }
+  40% {
+    transform: scale(2.5);
+  }
+  50% {
+    transform: scale(2.2);
+  }
+  100% {
+    transform: translate(
+        calc(-50vw + var(--logo-final-left) + 30px),
+        calc(-50vh + 40px)
+      )
+      scale(1);
+  }
 }
 @keyframes bg-fade-out {
-  0% { background-color: #050505; }
-  80% { background-color: #050505; }
-  100% { background-color: transparent; }
+  0%,
+  80% {
+    background-color: hsl(var(--background));
+  }
+  100% {
+    background-color: transparent;
+  }
 }
 .animated-logo-container {
-  position: fixed; inset: 0; z-index: 60; display: flex; justify-content: center; align-items: center;
-  animation: bg-fade-out 2.5s cubic-bezier(0.4, 0, 0.2, 1) forwards; pointer-events: none;
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  animation: bg-fade-out 2.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  pointer-events: none;
 }
 .animated-logo-container > div {
-  animation: logo-sequence 2.5s cubic-bezier(0.22, 1, 0.36, 1) forwards; will-change: transform;
+  animation: logo-sequence 2.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  will-change: transform;
 }
 
-.status-badge { font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; border: 1px solid transparent; backdrop-filter: blur(8px); }
-.status-active { background-color: rgba(16, 185, 129, 0.1) !important; color: #34d399 !important; border-color: rgba(16, 185, 129, 0.2) !important; }
-.status-pending { background-color: rgba(251, 191, 36, 0.1) !important; color: #fbbf24 !important; border-color: rgba(251, 191, 36, 0.2) !important; }
-.status-retired { background-color: rgba(148, 163, 184, 0.1) !important; color: #94a3b8 !important; border-color: rgba(148, 163, 184, 0.2) !important; }
-.status-default { background-color: rgba(99, 102, 241, 0.1) !important; color: #818cf8 !important; border-color: rgba(99, 102, 241, 0.2) !important; }
+/* Sort dropdown */
+.sort-dropdown {
+  @apply absolute top-full right-0 mt-2 bg-popover border border-border shadow-md w-[180px] z-50 p-2 rounded-lg list-none;
+}
+.sort-dropdown-item {
+  @apply px-3 py-2 text-sm text-muted-foreground cursor-pointer transition-colors;
+}
+.sort-dropdown-item:hover {
+  @apply bg-accent text-accent-foreground;
+}
+/* Floating fog blobs behind hero */
 
-@keyframes slow-pan-zoom { 0% { transform: scale(1.0) translate(0, 0); } 100% { transform: scale(1.15) translate(-1%, -1%); } }
-.live-photo-img { transition: transform 0.5s ease-out; }
-.group:hover .live-photo-img { animation: slow-pan-zoom 8s alternate infinite linear; }
+.fog-orb {
+  position: absolute;
+  border-radius: 9999px;
+  filter: blur(40px);
+  opacity: 0.9;
+  pointer-events: none;
+}
 
-.main-site-wrapper { opacity: 0; transition: opacity 0.8s ease-in; }
-.main-site-wrapper.fade-in { opacity: 1; }
+/* Top-left green blob */
+.fog-orb-1 {
+  width: 520px;
+  height: 520px;
+  top: -180px;
+  left: -160px;
+  background: radial-gradient(circle at 30% 30%, #bbf7d0, #22c55e);
+  animation: fogDrift1 38s ease-in-out infinite;
+}
 
-.sort-dropdown { position: absolute; top: 110%; right: 0; background-color: #0f172a; border-radius: 0.5rem; border: 1px solid #1e293b; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5); width: 180px; z-index: 50; padding: 0.5rem 0; list-style: none; margin: 0; }
-.sort-dropdown-item { padding: 0.5rem 1rem; font-size: 0.875rem; color: #cbd5e1; cursor: pointer; transition: all 0.2s; }
-.sort-dropdown-item:hover { background-color: #1e293b; color: #34d399; }
+/* Top-right teal blob */
+.fog-orb-2 {
+  width: 520px;
+  height: 520px;
+  top: -140px;
+  right: -200px;
+  background: radial-gradient(circle at 30% 30%, #cffafe, #06b6d4);
+  animation: fogDrift2 46s ease-in-out infinite;
+}
 
-.dummy-select-content { @apply bg-slate-900 border-slate-800 text-slate-300; }
-.dummy-select-item:hover { @apply bg-slate-800 text-emerald-400; }
+/* Bottom-center soft green blob */
+.fog-orb-3 {
+  width: 520px;
+  height: 520px;
+  bottom: -220px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: radial-gradient(circle at 30% 30%, #bbf7d0, #22c55e);
+  animation: fogDrift3 52s ease-in-out infinite;
+}
+
+@keyframes fogDrift1 {
+  0%   { transform: translateX(0) translateY(0); }
+  50%  { transform: translateX(40px) translateY(20px); }
+  100% { transform: translateX(0) translateY(0); }
+}
+
+@keyframes fogDrift2 {
+  0%   { transform: translateX(0) translateY(0); }
+  50%  { transform: translateX(-40px) translateY(25px); }
+  100% { transform: translateX(0) translateY(0); }
+}
+
+@keyframes fogDrift3 {
+  0%   { transform: translate(-50%, 0); }
+  50%  { transform: translate(-50%, -30px); }
+  100% { transform: translate(-50%, 0); }
+}
+
+/* Slow bounce for scroll arrow */
+@keyframes bounceSlow {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(4px); }
+}
+
+.animate-bounce-slow {
+  animation: bounceSlow 1.8s ease-in-out infinite;
+}

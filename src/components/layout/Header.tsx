@@ -125,7 +125,7 @@ export default function Header({
              {isLoggedIn ? (
                <div className="flex items-center gap-2 text-xs font-mono text-muted-foreground">
                  <Command className="w-3 h-3" />
-                 <span>CMD+K</span>
+                
                </div>
              ) : (
                 <span className="text-sm font-semibold text-foreground">Offset Platform</span>
