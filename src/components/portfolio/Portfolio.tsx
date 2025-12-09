@@ -327,9 +327,7 @@ const generateAndDownloadPDF = (contentElement: JSX.Element, filename: string) =
 
 // This handler is now controlled by useState in the Portfolio component
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-const handleAddAssets = () => {
-    alert("Functionality triggered: Opening Add Assets Modal.");
-};
+
 
 const handleDownloadReport = () => {
     const reportData = generateAnnualReportData();
