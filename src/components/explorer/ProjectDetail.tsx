@@ -359,14 +359,14 @@ export default function ProjectDetail({ project, onBack }: ProjectDetailProps) {
       {/* --- 1. CINEMATIC HERO (60vh) --- */}
       <div className="relative h-[65vh] w-full overflow-hidden border-b border-border group bg-card">
         <div className="absolute top-24 left-6 z-30">
-          <button onClick={onBack} className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/90 backdrop-blur border border-border text-foreground text-xs font-bold uppercase tracking-widest hover:bg-primary hover:text-primary-foreground transition-all hover:-translate-x-1">
-            <ArrowLeft className="w-4 h-4" /> Market Index
+          <button onClick={onBack} className="flex items-center gap-2 px-3 py-3  rounded-full bg-emerald-500 backdrop-blur border border-border text-foreground text-xs font-bold uppercase tracking-widest hover:bg-primary hover:text-white transition-all hover:-translate-x-1 ">
+            <ArrowLeft className="w-4 h-4 " /> Market Index
           </button>
         </div>
 
         <div className="absolute inset-0 z-0">
            <img src={project.image} alt={project.projectName} className={`w-full h-full object-cover transition-transform duration-[30s] ease-out ${mounted ? 'scale-105' : 'scale-100'}`} />
-           <div className="absolute inset-0 bg-gradient-to-t from-white/90 via-white/70 to-transparent" />
+           <div className="absolute inset-0 bg-gradient-to-t from-white/10 via-white/70 to-transparent" />
            <div className="absolute inset-0 bg-[linear-gradient(rgba(0,0,0,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(0,0,0,0.02)_1px,transparent_1px)] bg-[size:100px_100px] opacity-30" />
         </div>
 

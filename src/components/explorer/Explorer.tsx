@@ -491,22 +491,11 @@ export default function Explorer({ onSelectProject }: ExplorerProps) {
       {/* HERO CONTENT */}
       <section className="relative h-screen flex flex-col items-center justify-center overflow-hidden">
         <div className="absolute top-10 inset-x-0 flex justify-center">
-          <div className="inline-flex items-center gap-3 px-3 py-1 rounded-full bg-card/90 border border-border text-foreground text-xs md:text-sm shadow-xl backdrop-blur">
-            <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-500 opacity-75" />
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-600" />
-            </span>
-            Live Marketplace
-            <span className="w-px h-3 bg-emerald-300" />
-            <span className="flex items-center gap-1 text-[11px] text-emerald-600">
-              <Activity className="w-3 h-3" />
-              Real-time data
-            </span>
-          </div>
+          
         </div>
 
-        <div className="relative z-10 text-center px-4 max-w-3xl mx-auto">
-          <h1 className="text-5xl md:text-7xl lg:text-8xl font-semibold text-foreground leading-[0.95] tracking-tight mb-8 animate-in slide-in-from-bottom-6 duration-1000">
+        <div className="relative  z-10 text-center px-6 max-w-3xl  mx-auto">
+          <h1 className="text-5xl md:text-7xl lg:text-8xl mr-10 font-semibold text-foreground leading-[0.95] tracking-tight mb-8 animate-in slide-in-from-bottom-6 duration-1000">
             Carbon Credit
           </h1>
 
@@ -550,7 +539,7 @@ export default function Explorer({ onSelectProject }: ExplorerProps) {
 
           <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between mb-4">
             <div>
-              <h3 className="text-3xl font-bold text-foreground">Available Projects</h3>
+              <h3 className="text-3xl font-bold text-foreground">Recent Projects</h3>
               <p className="text-sm text-muted-foreground mt-1">Filter, sort and explore high-integrity climate assets.</p>
             </div>
             <span className="text-muted-foreground text-xs sm:text-sm">Showing {paginatedCredits.length} of {processedCredits.length} results</span>

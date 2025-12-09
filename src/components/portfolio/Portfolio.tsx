@@ -1,5 +1,8 @@
 /* eslint-disable no-irregular-whitespace */
-import React from 'react';
+import React, { useState } from 'react';
+import ReactDOMServer from 'react-dom/server'; 
+import html2canvas from 'html2canvas'; 
+import jsPDF from 'jspdf'; 
 import {
   Leaf,
   TrendingUp,
@@ -15,9 +18,27 @@ import {
   Share2,
   Maximize2,
   Layers,
+    Gauge, // Trust Score Icon
+    AlertTriangle, // Risk Flag Icon
 } from 'lucide-react';
-
-// Define the Asset type used in the certificates
+import AddAssetModal from './AddAssetModal'; 
+// Assuming the types are defined in a separate file (e.g., ../../lib/types)
+// If you don't have this structure, define these interfaces directly above the mock data.
+interface CarbonCredit {
+    id: string;
+    projectName: string;
+    pricePerCredit: number;
+    availableCredits: number;
+    location: string;
+    country: string;
+    vintage: number;
+    registry: string;
+    trustScore: number;
+    status: string;
+    projectType: string;
+    unicId: string;
+    image: string;
+}
 interface CertificateAsset {
     id: string;
     project: string;
@@ -27,56 +48,9 @@ interface CertificateAsset {
     type: string;
     color: string;
     status: string;
+    trustScore: number; 
+    riskFlags: string[]; 
 }
-
-// Mock Data for the Certificates
-const mockCertificates: CertificateAsset[] = [
-    { id: "CRT-2024-8892", project: "Amazon Conservation", amount: "500", date: "Oct 12, 2024", image: "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b", type: "Forestry", color: "text-emerald-500", status: "Retired" },
-    { id: "CRT-2024-7721", project: "Wind Energy Maharashtra", amount: "1,200", date: "Sep 28, 2024", image: "https://images.unsplash.com/photo-1466611653911-95081537e5b7", type: "Renewable", color: "text-cyan-500", status: "Retired" },
-    { id: "CRT-2024-6654", project: "Blue Carbon Mangrove", amount: "350", date: "Aug 15, 2024", image: "https://images.unsplash.com/photo-1583212292454-1fe6229603b7", type: "Blue Carbon", color: "text-blue-500", status: "Retired" },
-    { id: "CRT-2024-5510", project: "Clean Cookstoves", amount: "400", date: "Jul 02, 2024", image: "https://images.unsplash.com/photo-1595278069441-2cf29f525a3c", type: "Community", color: "text-orange-500", status: "Retired" },
-];
-
-
-// ==========================================
-// 1. PDF DESIGN TEMPLATES (Print-Ready HTML/CSS)
-// ==========================================
-
-const PDFCertificateTemplate: React.FC<{ certificate: CertificateAsset }> = ({ certificate }) => (
-    <div className="p-8 border-4 border-emerald-500 bg-white shadow-xl max-w-lg mx-auto" style={{ width: '210mm', height: '148mm' }}>
-        <div className="flex justify-between items-center mb-6">
-            <h2 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
-                <Leaf className="w-6 h-6 text-emerald-600" /> CarbonVault Certificate
-            </h2>
-            <span className="text-sm font-mono text-gray-500">{certificate.date}</span>
-        </div>
-
-        <div className="text-center my-12">
-            <p className="text-xl font-medium text-gray-600 mb-2">Certificate of Permanent Retirement</p>
-            <h1 className="text-6xl font-extrabold text-emerald-700 tracking-tight mb-4">
-                {certificate.amount} tCO₂e
-            </h1>
-            <p className="text-lg font-semibold text-gray-700">from the {certificate.project} project</p>
-        </div>
-
-        <div className="flex justify-between border-t border-b border-gray-200 py-4 text-sm">
-            <div className="flex flex-col">
-                <span className="text-xs font-mono text-gray-500 uppercase">Certificate ID</span>
-                <span className="font-semibold text-gray-900">{certificate.id}</span>
-            </div>
-            <div className="flex flex-col text-right">
-                <span className="text-xs font-mono text-gray-500 uppercase">Asset Type</span>
-                <span className="font-semibold text-gray-900">{certificate.type}</span>
-            </div>
-        </div>
-
-        <div className="mt-6 text-center text-xs text-gray-500">
-            <p>This document verifies the permanent and irreversible retirement of the listed carbon credits on the blockchain.</p>
-            <p>Status: {certificate.status}</p>
-        </div>
-    </div>
-);
-
 interface ReportData {
     reportDate: string;
     company: string;
@@ -88,182 +62,310 @@ interface ReportData {
     sdgs: { num: string, label: string }[];
 }
 
-const PDFReportTemplate: React.FC<{ data: ReportData }> = ({ data }) => (
-    <div className="p-10 bg-white shadow-lg" style={{ width: '210mm', minHeight: '297mm' }}>
-        <div className="border-b-4 border-primary pb-4 mb-8">
-            <h1 className="text-3xl font-extrabold text-gray-800">Annual Climate Impact Report</h1>
-            <p className="text-sm text-gray-500 mt-1">Generated for {data.company} | Date: {data.reportDate}</p>
-        </div>
-
-        <h2 className="text-xl font-bold text-emerald-600 mb-4">1. Portfolio Summary</h2>
-        <div className="grid grid-cols-3 gap-6 mb-8 text-gray-700">
-            <div>
-                <p className="text-xs uppercase font-mono text-gray-500">Net Offset</p>
-                <p className="text-2xl font-bold">{data.netOffset}</p>
-            </div>
-            <div>
-                <p className="text-xs uppercase font-mono text-gray-500">Portfolio Value</p>
-                <p className="text-2xl font-bold">{data.portfolioValue}</p>
-            </div>
-            <div>
-                <p className="text-xs uppercase font-mono text-gray-500">Retirement Ratio</p>
-                <p className="text-2xl font-bold text-emerald-600">{data.retirementRatio}</p>
-            </div>
-        </div>
-
-        <h2 className="text-xl font-bold text-emerald-600 mb-4 mt-8">2. Asset Allocation & SDGs</h2>
-        <div className="grid grid-cols-2 gap-8">
-            <div>
-                <h3 className="text-lg font-semibold mb-3">Allocation Breakdown</h3>
-                {data.breakdown.map((b, i) => (
-                    <div key={i} className="flex justify-between py-1 border-b border-gray-100 text-sm">
-                        <span>{b.type}</span>
-                        <span className="font-mono font-semibold">{b.percentage}</span>
-                    </div>
-                ))}
-            </div>
-            <div>
-                <h3 className="text-lg font-semibold mb-3">SDG Contribution</h3>
-                <ul className="list-disc list-inside space-y-1 text-sm">
-                    {data.sdgs.map((s, i) => (
-                        <li key={i}>{s.label} (Goal {s.num})</li>
-                    ))}
-                </ul>
-            </div>
-        </div>
-
-        <h2 className="text-xl font-bold text-emerald-600 mb-4 mt-12">3. Retired Certificates</h2>
-        <table className="w-full text-left border-collapse table-auto text-sm">
-            <thead>
-                <tr className="bg-gray-100 text-gray-600 uppercase text-xs">
-                    <th className="py-2 px-4">ID</th>
-                    <th className="py-2 px-4">Project</th>
-                    <th className="py-2 px-4">Amount (t)</th>
-                    <th className="py-2 px-4">Date</th>
-                </tr>
-            </thead>
-            <tbody>
-                {data.assets.map((a, i) => (
-                    <tr key={i} className="border-t border-gray-200 hover:bg-gray-50">
-                        <td className="py-2 px-4 font-mono">{a.id}</td>
-                        <td className="py-2 px-4">{a.project}</td>
-                        <td className="py-2 px-4 font-mono">{a.amount}</td>
-                        <td className="py-2 px-4 font-mono text-gray-500">{a.date}</td>
-                    </tr>
-                ))}
-            </tbody>
-        </table>
-        
-        <div className="mt-20 pt-5 border-t border-gray-200 text-xs text-gray-500 text-center">
-            Verification via CarbonVault Blockchain Ledger.
-        </div>
-    </div>
-);
+// Mock Data for the Certificates (UPDATED)
+const mockCertificates: CertificateAsset[] = [
+    { id: "CRT-2024-8892", project: "Amazon Conservation", amount: "500", date: "Oct 12, 2024", image: "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b", type: "Forestry", color: "text-emerald-500", status: "Retired", trustScore: 92, riskFlags: ["Low Additionality"] },
+    { id: "CRT-2024-7721", project: "Wind Energy Maharashtra", amount: "1,200", date: "Sep 28, 2024", image: "https://images.unsplash.com/photo-1466611653911-95081537e5b7", type: "Renewable", color: "text-cyan-500", status: "Retired", trustScore: 98, riskFlags: [] },
+    { id: "CRT-2024-6654", project: "Blue Carbon Mangrove", amount: "350", date: "Aug 15, 2024", image: "https://images.unsplash.com/photo-1583212292454-1fe6229603b7", type: "Blue Carbon", color: "text-blue-500", status: "Retired", trustScore: 65, riskFlags: ["High Permanence Risk", "Leakage Concern"] },
+    { id: "CRT-2024-5510", project: "Clean Cookstoves", amount: "400", date: "Jul 02, 2024", image: "https://images.unsplash.com/photo-1595278069441-2cf29f525a3c", type: "Community", color: "text-orange-500", status: "Retired", trustScore: 78, riskFlags: ["Community Displacement"] },
+];
 
 
 // ==========================================
-// 2. REPORT GENERATION FUNCTIONS (Simulated Functionality)
+// 1. PDF DESIGN TEMPLATES (MODIFIED)
+// ==========================================
+
+// Trust Score Progress Bar (PDF Layout)
+const TrustScoreBadge: React.FC<{ score: number }> = ({ score }) => {
+    const color = score >= 90 ? 'bg-emerald-500' : score >= 70 ? 'bg-amber-500' : 'bg-red-500';
+
+    return (
+        <div className="w-1/3 flex flex-col items-center">
+            <span className="text-xs font-mono text-gray-500 uppercase mb-2 flex items-center gap-1">
+                <Gauge className="w-3 h-3 text-emerald-600" /> Trust Score
+            </span>
+            <div className="text-3xl font-extrabold" style={{ color: color }}>
+                {score}
+                <span className="text-base font-normal align-top">%</span>
+            </div>
+            <div className="w-full h-1.5 bg-gray-200 rounded-full mt-1">
+                <div
+                    className={`h-full rounded-full ${color}`}
+                    style={{ width: `${score}%` }}
+                />
+            </div>
+        </div>
+    );
+};
+
+// Risk Flags Display (PDF Layout)
+const RiskFlagsDisplay: React.FC<{ flags: string[] }> = ({ flags }) => {
+    if (flags.length === 0) return (
+        <div className="w-full text-center py-2 text-sm text-gray-500 border-b border-gray-200">
+            No major risk flags detected.
+        </div>
+    );
+
+    return (
+        <div className="w-full mt-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+            <div className="flex items-center gap-2 text-red-700 font-semibold text-sm mb-2">
+                <AlertTriangle className="w-4 h-4" /> Risk Flags ({flags.length})
+            </div>
+            <ul className="text-xs text-red-600 list-disc list-inside space-y-0.5 ml-4">
+                {flags.map((flag, index) => (
+                    <li key={index}>{flag}</li>
+                ))}
+            </ul>
+        </div>
+    );
+};
+
+const PDFCertificateTemplate: React.FC<{ certificate: CertificateAsset }> = ({ certificate }) => (
+    <div className="p-8 border-4 border-emerald-500 bg-white shadow-xl max-w-lg mx-auto" style={{ width: '210mm', height: '148mm' }}>
+        <div className="flex justify-between items-center mb-6">
+            <h2 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
+                <Leaf className="w-6 h-6 text-emerald-600" /> CarbonVault Certificate
+            </h2>
+            <span className="text-sm font-mono text-gray-500">{certificate.date}</span>
+        </div>
+
+        {/* Centerpiece: Amount */}
+        <div className="text-center my-10 flex flex-col items-center">
+            <p className="text-xl font-medium text-gray-600 mb-2">Certificate of Permanent Retirement</p>
+            <h1 className="text-6xl font-extrabold text-emerald-700 tracking-tight mb-4">
+                {certificate.amount} tCO₂e
+            </h1>
+            <p className="text-lg font-semibold text-gray-700">from the {certificate.project} project</p>
+        </div>
+
+        {/* TRUST SCORE DISPLAY */}
+        <div className="flex justify-center my-6">
+            <TrustScoreBadge score={certificate.trustScore} />
+        </div>
+
+        <div className="flex justify-between border-t border-gray-200 py-4 text-sm">
+            <div className="flex flex-col">
+                <span className="text-xs font-mono text-gray-500 uppercase">Certificate ID</span>
+                <span className="font-semibold text-gray-900">{certificate.id}</span>
+            </div>
+            <div className="flex flex-col text-right">
+                <span className="text-xs font-mono text-gray-500 uppercase">Asset Type</span>
+                <span className="font-semibold text-gray-900">{certificate.type}</span>
+            </div>
+        </div>
+        
+        {/* RISK FLAGS DISPLAY */}
+        <div className="border-b border-gray-200">
+            <RiskFlagsDisplay flags={certificate.riskFlags} />
+        </div>
+        
+
+        <div className="mt-6 text-center text-xs text-gray-500">
+            <p>This document verifies the permanent and irreversible retirement of the listed carbon credits on the blockchain.</p>
+            <p>Status: {certificate.status}</p>
+        </div>
+    </div>
+);
+
+// PDF Report Template (UNMODIFIED)
+const PDFReportTemplate: React.FC<{ data: ReportData }> = ({ data }) => (
+    <div className="p-10 bg-white shadow-lg" style={{ width: '210mm', minHeight: '297mm' }}>
+        <div className="border-b-4 border-primary pb-4 mb-8">
+            <h1 className="text-3xl font-extrabold text-gray-800">Annual Climate Impact Report</h1>
+            <p className="text-sm text-gray-500 mt-1">Generated for {data.company} | Date: {data.reportDate}</p>
+        </div>
+
+        <h2 className="text-xl font-bold text-emerald-600 mb-4">1. Portfolio Summary</h2>
+        <div className="grid grid-cols-3 gap-6 mb-8 text-gray-700">
+            <div>
+                <p className="text-xs uppercase font-mono text-gray-500">Net Offset</p>
+                <p className="text-2xl font-bold">{data.netOffset}</p>
+            </div>
+            <div>
+                <p className="text-xs uppercase font-mono text-gray-500">Portfolio Value</p>
+                <p className="text-2xl font-bold">{data.portfolioValue}</p>
+            </div>
+            <div>
+                <p className="text-xs uppercase font-mono text-gray-500">Retirement Ratio</p>
+                <p className="text-2xl font-bold text-emerald-600">{data.retirementRatio}</p>
+            </div>
+        </div>
+
+        <h2 className="text-xl font-bold text-emerald-600 mb-4 mt-8">2. Asset Allocation & SDGs</h2>
+        <div className="grid grid-cols-2 gap-8">
+            <div>
+                <h3 className="text-lg font-semibold mb-3">Allocation Breakdown</h3>
+                {data.breakdown.map((b, i) => (
+                    <div key={i} className="flex justify-between py-1 border-b border-gray-100 text-sm">
+                        <span>{b.type}</span>
+                        <span className="font-mono font-semibold">{b.percentage}</span>
+                    </div>
+                ))}
+            </div>
+            <div>
+                <h3 className="text-lg font-semibold mb-3">SDG Contribution</h3>
+                <ul className="list-disc list-inside space-y-1 text-sm">
+                    {data.sdgs.map((s, i) => (
+                        <li key={i}>{s.label} (Goal {s.num})</li>
+                    ))}
+                </ul>
+            </div>
+        </div>
+
+        <h2 className="text-xl font-bold text-emerald-600 mb-4 mt-12">3. Retired Certificates</h2>
+        <table className="w-full text-left border-collapse table-auto text-sm">
+            <thead>
+                <tr className="bg-gray-100 text-gray-600 uppercase text-xs">
+                    <th className="py-2 px-4">ID</th>
+                    <th className="py-2 px-4">Project</th>
+                    <th className="py-2 px-4">Amount (t)</th>
+                    <th className="py-2 px-4">Date</th>
+                </tr>
+            </thead>
+            <tbody>
+                {data.assets.map((a, i) => (
+                    <tr key={i} className="border-t border-gray-200 hover:bg-gray-50">
+                        <td className="py-2 px-4 font-mono">{a.id}</td>
+                        <td className="py-2 px-4">{a.project}</td>
+                        <td className="py-2 px-4 font-mono">{a.amount}</td>
+                        <td className="py-2 px-4 font-mono text-gray-500">{a.date}</td>
+                    </tr>
+                ))}
+            </tbody>
+        </table>
+        
+        <div className="mt-20 pt-5 border-t border-gray-200 text-xs text-gray-500 text-center">
+            Verification via CarbonVault Blockchain Ledger.
+        </div>
+    </div>
+);
+
+// ==========================================
+// 2. REPORT GENERATION FUNCTIONS (FUNCTIONAL PDF DOWNLOAD)
 // ==========================================
 
 const generateAnnualReportData = (): ReportData => {
+    // ... implementation remains unchanged
     return {
-        reportDate: new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }),
-        company: "Acme Corp.",
-        netOffset: "2,450 tCO2e",
-        portfolioValue: "$42,890",
-        retirementRatio: "98.5%",
-        assets: mockCertificates.map(c => ({ id: c.id, project: c.project, amount: c.amount, type: c.type, date: c.date })),
-        breakdown: [
-            { type: 'Forestry', percentage: '45%' },
-            { type: 'Renewable', percentage: '30%' },
-            { type: 'Community', percentage: '25%' },
-        ],
-        sdgs: [
-            { num: '13', label: 'Climate Action' },
-            { num: '15', label: 'Life on Land' },
-            { num: '07', label: 'Affordable Energy' },
-        ]
-    };
+        reportDate: new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }),
+        company: "Acme Corp.",
+        netOffset: "2,450 tCO2e",
+        portfolioValue: "$42,890",
+        retirementRatio: "98.5%",
+        assets: mockCertificates.map(c => ({ id: c.id, project: c.project, amount: c.amount, type: c.type, date: c.date })),
+        breakdown: [
+            { type: 'Forestry', percentage: '45%' },
+            { type: 'Renewable', percentage: '30%' },
+            { type: 'Community', percentage: '25%' },
+        ],
+        sdgs: [
+            { num: '13', label: 'Climate Action' },
+            { num: '15', label: 'Life on Land' },
+            { num: '07', label: 'Affordable Energy' },
+        ]
+    };
 };
 
 /**
- * Helper function to simulate rendering React component to string and initiating PDF download.
+ * Functional PDF generator using html2canvas and jspdf.
  */
-const simulatePDFDownload = (contentElement: JSX.Element, filename: string) => {
-    // NOTE: In a live app, you would use ReactDOMServer.renderToString(contentElement)
-    // and then pass that HTML string to a PDF library like jsPDF or a backend service.
+const generateAndDownloadPDF = (contentElement: JSX.Element, filename: string) => {
+    // 1. Create a hidden container element to render the component temporarily
+    const container = document.createElement('div');
+    // Apply styling to hide the temporary container off-screen
+    container.style.position = 'absolute';
+    container.style.left = '-9999px';
+    document.body.appendChild(container);
 
-    const downloadMessage = `[PDF Download Simulation] The highly styled content for "${filename}" has been generated.
-    
-*** TO ACHIEVE TRUE PDF OUTPUT (e.g., in a React/JS environment), you would need to use external libraries:
-1. Client-Side: html2canvas (to render HTML/CSS to an image) + jsPDF (to convert the image to PDF).
-2. Server-Side: A library like Puppeteer or wkhtmltopdf to render the HTML/CSS accurately.
-    
-    This function will now download a file with the correct .pdf extension (containing the simulation log).`;
+    // 2. Render the React component into the hidden container using SSR utility
+    try {
+        container.innerHTML = ReactDOMServer.renderToString(contentElement);
+    } catch (e) {
+        console.error("Error rendering component to string:", e);
+        document.body.removeChild(container);
+        alert("Error during PDF rendering preparation.");
+        return;
+    }
+    const elementToCapture = container.firstChild as HTMLElement;
 
-    const blob = new Blob([downloadMessage], { type: 'application/pdf' });
-    const url = URL.createObjectURL(blob);
-    
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `${filename}.pdf`; // Downloads as PDF
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-    
-    console.log(`Download initiated successfully for ${filename}.pdf. (Check downloads)`);
-    alert(`Downloading ${filename}.pdf! (Simulated PDF generation)`);
+    if (!elementToCapture) {
+        alert("Error: Could not render component for capture.");
+        document.body.removeChild(container);
+        return;
+    }
+
+    // 3. Use html2canvas to capture the rendered HTML/CSS content
+    html2canvas(elementToCapture, { 
+        scale: 2, // Use higher scale for better quality
+        logging: false 
+    }).then(canvas => {
+        const imgData = canvas.toDataURL('image/jpeg', 1.0);
+        // A5 landscape is used here to fit the certificate design
+        const pdf = new jsPDF({
+            orientation: 'landscape', 
+            unit: 'mm',
+            format: 'a5' 
+        });
+        
+        const pdfWidth = pdf.internal.pageSize.getWidth();
+        const pdfHeight = pdf.internal.pageSize.getHeight();
+        
+        pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight);
+        pdf.save(`${filename}.pdf`);
+
+        // 4. Clean up the temporary element
+        document.body.removeChild(container);
+        console.log(`Successfully generated and downloaded ${filename}.pdf!`);
+        alert(`Successfully generated and downloaded ${filename}.pdf!`);
+    });
 };
 
 
 // =======================
-// 3. FUNCTIONAL HANDLERS
+// 3. FUNCTIONAL HANDLERS (UPDATED TO USE NEW PDF FUNCTION)
 // =======================
 
+// This handler is now controlled by useState in the Portfolio component
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const handleAddAssets = () => {
-    alert("Functionality triggered: Navigating to Marketplace/Add Assets page.");
-    console.log("Navigating to Marketplace/Add Assets page...");
-    // window.location.href = '/marketplace/add'; // Example redirect
+    alert("Functionality triggered: Opening Add Assets Modal.");
 };
 
 const handleDownloadReport = () => {
-    const reportData = generateAnnualReportData();
-    const filename = `Annual_Impact_Report_${reportData.company}_${new Date().getFullYear()}`;
-    
-    // Render the report template for simulation
-    const reportElement = <PDFReportTemplate data={reportData} />;
-    
-    simulatePDFDownload(reportElement, filename);
+    const reportData = generateAnnualReportData();
+    const filename = `Annual_Impact_Report_${reportData.company}_${new Date().getFullYear()}`;
+    
+    const reportElement = <PDFReportTemplate data={reportData} />;
+    
+    generateAndDownloadPDF(reportElement, filename);
 };
 
 const handleShare = (certificate: CertificateAsset) => {
-    const shareText = `Check out my retired carbon offset certificate! Project: ${certificate.project} (${certificate.amount} tCO2e). ID: ${certificate.id}.`;
-    
-    if (navigator.share) {
-        navigator.share({
-            title: 'Carbon Certificate Offset',
-            text: shareText,
-            url: `[Link to Certificate Proof]`, 
-        }).catch((error) => console.error('Error sharing:', error));
-    } else {
-        navigator.clipboard.writeText(shareText);
-        alert('Share link copied to clipboard!');
-    }
+    const shareText = `Check out my retired carbon offset certificate! Project: ${certificate.project} (${certificate.amount} tCO2e). ID: ${certificate.id}.`;
+    
+    if (navigator.share) {
+        navigator.share({
+            title: 'Carbon Certificate Offset',
+            text: shareText,
+            url: `[Link to Certificate Proof]`, 
+        }).catch((error) => console.error('Error sharing:', error));
+    } else {
+        navigator.clipboard.writeText(shareText);
+        alert('Share link copied to clipboard!');
+    }
 };
 
 const handleDownloadCertificate = (certificate: CertificateAsset) => {
-    const filename = `${certificate.id}_Certificate`;
-    
-    // Render the certificate template for simulation
-    const certificateElement = <PDFCertificateTemplate certificate={certificate} />;
-    
-    simulatePDFDownload(certificateElement, filename);
+    const filename = `${certificate.id}_Certificate`;
+    
+    const certificateElement = <PDFCertificateTemplate certificate={certificate} />;
+    
+    generateAndDownloadPDF(certificateElement, filename);
 };
 
 
 // =======================
-// 4. SUB-COMPONENTS (Original structure, minor updates)
+// 4. SUB-COMPONENTS 
 // =======================
 
 interface ImpactCardProps {
@@ -272,7 +374,7 @@ interface ImpactCardProps {
   value: string;
   sub: string;
   trend?: string;
-  color: string; // e.g. "text-emerald-500"
+  color: string; 
   delay?: string;
 }
 
@@ -325,8 +427,8 @@ const ImpactCard: React.FC<ImpactCardProps> = ({
 );
 
 interface CertificateCardProps extends CertificateAsset {
-    onShare: (certificate: CertificateAsset) => void;
-    onDownload: (certificate: CertificateAsset) => void;
+    onShare: (certificate: CertificateAsset) => void;
+    onDownload: (certificate: CertificateAsset) => void;
 }
 
 const CertificateCard: React.FC<CertificateCardProps> = ({
@@ -338,94 +440,111 @@ const CertificateCard: React.FC<CertificateCardProps> = ({
   type,
   color,
   status = 'Retired',
-    onShare,
-    onDownload,
+    trustScore, 
+    riskFlags, 
+    onShare,
+    onDownload,
 }) => {
-    const certificate = { id, project, amount, date, image, type, color, status };
+    const certificate = { id, project, amount, date, image, type, color, status, trustScore, riskFlags };
+    const scoreColor = trustScore >= 90 ? 'text-emerald-500' : trustScore >= 70 ? 'text-amber-500' : 'text-red-500';
 
-    return (
-        <div className="group relative bg-card border border-border rounded-2xl overflow-hidden hover:border-primary/40 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl cursor-pointer">
-        {/* Top Image Section */}
-        <div className="h-40 relative overflow-hidden">
-            <img
-                src={`${image}?auto=format&fit=crop&q=80&w=800`}
-                alt={project}
-                className="w-full h-full object-cover"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+    return (
+        <div className="group relative bg-card border border-border rounded-2xl overflow-hidden hover:border-primary/40 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl cursor-pointer">
+        {/* Top Image Section */}
+        <div className="h-40 relative overflow-hidden">
+            <img
+                src={`${image}?auto=format&fit=crop&q=80&w=800`}
+                alt={project}
+                className="w-full h-full object-cover"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
 
-            <div
-                className={`absolute top-3 left-3 px-2 py-1 rounded text-[9px] font-bold uppercase tracking-wider bg-black/70 backdrop-blur text-white flex items-center gap-1.5 shadow-sm`}
-            >
-                <div
-                    className={`w-1.5 h-1.5 rounded-full ${color.replace('text-', 'bg-')}`}
-                />
-                {type}
-            </div>
+            <div
+                className={`absolute top-3 left-3 px-2 py-1 rounded text-[9px] font-bold uppercase tracking-wider bg-black/70 backdrop-blur text-white flex items-center gap-1.5 shadow-sm`}
+            >
+                <div
+                    className={`w-1.5 h-1.5 rounded-full ${color.replace('text-', 'bg-')}`}
+                />
+                {type}
+            </div>
 
-            <div className="absolute top-3 right-3 px-2 py-1 rounded text-[9px] font-bold uppercase tracking-wider bg-emerald-50 text-emerald-700 border border-emerald-200">
-                {status}
-            </div>
-        </div>
+            <div className="absolute top-3 right-3 px-2 py-1 rounded text-[9px] font-bold uppercase tracking-wider bg-emerald-50 text-emerald-700 border border-emerald-200">
+                {status}
+            </div>
+        </div>
 
-        {/* Content */}
-        <div className="p-5 relative bg-card">
-            {/* Decorative Line */}
-            <div
-                className={`absolute top-0 left-6 w-8 h-1 -mt-0.5 rounded-b-full ${color.replace(
-                    'text-',
-                    'bg-',
-                )}`}
-            />
+        {/* Content */}
+        <div className="p-5 relative bg-card">
+            {/* Decorative Line */}
+            <div
+                className={`absolute top-0 left-6 w-8 h-1 -mt-0.5 rounded-b-full ${color.replace(
+                    'text-',
+                    'bg-',
+                )}`}
+            />
 
-            <div className="flex justify-between items-start mb-4 mt-2">
-                <div>
-                    <p className="text-[9px] text-muted-foreground font-mono mb-1 uppercase tracking-widest">
-                        Certificate ID
-                    </p>
-                    <p className="text-xs text-foreground font-mono tracking-wide">
-                        {id}
-                    </p>
+            <div className="flex justify-between items-start mb-4 mt-2">
+                <div>
+                    <p className="text-[9px] text-muted-foreground font-mono mb-1 uppercase tracking-widest">
+                        Certificate ID
+                    </p>
+                    <p className="text-xs text-foreground font-mono tracking-wide">
+                        {id}
+                    </p>
+                </div>
+                <div className="text-right">
+                    <p className="text-[9px] text-muted-foreground font-mono mb-1 uppercase tracking-widest">
+                        Amount
+                    </p>
+                    <p className="text-lg font-semibold text-foreground">{amount} t</p>
+                </div>
+            </div>
+
+            {/* Trust Score and Risk Flag Summary UI */}
+            <div className='flex items-center justify-between mt-2 mb-3'>
+                <div className='flex items-center gap-2'>
+                    <Gauge className={`w-3.5 h-3.5 ${scoreColor}`} />
+                    <span className={`text-sm font-bold ${scoreColor}`}>Score: {trustScore}%</span>
                 </div>
-                <div className="text-right">
-                    <p className="text-[9px] text-muted-foreground font-mono mb-1 uppercase tracking-widest">
-                        Amount
-                    </p>
-                    <p className="text-lg font-semibold text-foreground">{amount} t</p>
-                </div>
+                {riskFlags.length > 0 && (
+                    <div className='flex items-center gap-1 text-xs text-red-500 bg-red-50 border border-red-100 px-2 py-0.5 rounded-full'>
+                        <AlertTriangle className='w-3 h-3' /> 
+                        {riskFlags.length} Risk{riskFlags.length > 1 ? 's' : ''}
+                    </div>
+                )}
             </div>
 
-            <h4 className="text-sm font-semibold text-foreground mb-4 line-clamp-1 group-hover:text-primary transition-colors">
-                {project}
-            </h4>
+            <h4 className="text-sm font-semibold text-foreground mb-4 line-clamp-1 group-hover:text-primary transition-colors">
+                {project}
+            </h4>
 
-            <div className="flex items-center justify-between pt-4 border-t border-border">
-                <span className="text-xs text-muted-foreground font-mono">{date}</span>
-                <div className="flex gap-2">
-                    <button
-                        onClick={(e) => { e.stopPropagation(); onShare(certificate); }}
-                        className="p-2 rounded-lg bg-muted hover:bg-muted/80 text-muted-foreground hover:text-foreground transition-colors"
-                        title="Share"
-                    >
-                        <Share2 className="w-3.5 h-3.5" />
-                    </button>
-                    <button
-                        onClick={(e) => { e.stopPropagation(); onDownload(certificate); }}
-                        className="p-2 rounded-lg bg-primary/10 hover:bg-primary/20 text-primary flex items-center gap-2 text-[10px] font-bold uppercase px-3 transition-colors border border-primary/30"
-                        title="Download"
-                    >
-                        <Download className="w-3.5 h-3.5" /> PDF
-                    </button>
-                </div>
-            </div>
-        </div>
-        </div>
-    );
+            <div className="flex items-center justify-between pt-4 border-t border-border">
+                <span className="text-xs text-muted-foreground font-mono">{date}</span>
+                <div className="flex gap-2">
+                    <button
+                        onClick={(e) => { e.stopPropagation(); onShare(certificate); }}
+                        className="p-2 rounded-lg bg-muted hover:bg-muted/80 text-muted-foreground hover:text-foreground transition-colors"
+                        title="Share"
+                    >
+                        <Share2 className="w-3.5 h-3.5" />
+                    </button>
+                    <button
+                        onClick={(e) => { e.stopPropagation(); onDownload(certificate); }}
+                        className="p-2 rounded-lg bg-primary/10 hover:bg-primary/20 text-primary flex items-center gap-2 text-[10px] font-bold uppercase px-3 transition-colors border border-primary/30"
+                        title="Download"
+                    >
+                        <Download className="w-3.5 h-3.5" /> PDF
+                    </button>
+                </div>
+            </div>
+        </div>
+        </div>
+    );
 };
 
 interface SDGChipProps {
   num: string;
-  color: string; // bg-*
+  color: string; 
   label: string;
 }
 
@@ -452,7 +571,19 @@ const SDGChip: React.FC<SDGChipProps> = ({ num, color, label }) => (
 // =======================
 
 const Portfolio: React.FC = () => {
-    const reportData = generateAnnualReportData();
+    const reportData = generateAnnualReportData();
+    // 1. STATE FOR MODAL VISIBILITY
+    const [isModalOpen, setIsModalOpen] = useState(false);
+
+    // 2. MODAL CONTROL HANDLERS
+    const handleOpenModal = () => setIsModalOpen(true);
+    const handleCloseModal = () => setIsModalOpen(false);
+
+    // 3. MOCK HANDLER FOR ADDING ASSET
+    const handleAddNewAsset = (newAsset: CarbonCredit) => {
+        console.log("New Asset Added (Simulated):", newAsset.projectName, newAsset.availableCredits);
+        handleCloseModal();
+    };
 
   return (
     <div className="min-h-screen bg-background text-foreground pt-28 pb-20 font-sans selection:bg-emerald-500/20 overflow-x-hidden">
@@ -482,18 +613,18 @@ const Portfolio: React.FC = () => {
                 Portfolio.
               </span>
               </h1>
-            </div>
+              </div>
             <div className="flex gap-3">
               <button 
-                    onClick={handleDownloadReport} 
-                    className="flex items-center gap-2 px-6 py-3 rounded-xl bg-card border border-border hover:bg-muted transition-all text-xs font-bold uppercase tracking-wider"
-                >
+                    onClick={handleDownloadReport} 
+                    className="flex items-center gap-2 px-6 py-3 rounded-xl bg-card border border-border hover:bg-muted transition-all text-xs font-bold uppercase tracking-wider"
+                >
                 <Download className="w-4 h-4" /> Annual Report
               </button>
               <button 
-                    onClick={handleAddAssets} 
-                    className="flex items-center gap-2 px-6 py-3 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg transition-all text-xs font-bold uppercase tracking-wider"
-                >
+                    onClick={handleOpenModal} 
+                    className="flex items-center gap-2 px-6 py-3 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg transition-all text-xs font-bold uppercase tracking-wider"
+                >
                 Add Assets <ArrowRight className="w-4 h-4" />
               </button>
             </div>
@@ -557,7 +688,7 @@ const Portfolio: React.FC = () => {
               <img
                 src="https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=2000&auto=format&fit=crop"
                 alt="World map"
-                className="w-full h-full object-cover opacity-70 group-hover:scale-105 transition-transform duration-[10s]"
+                className="w-full h-full object-cover opacity-70 group-hover:scale-105 transition-transform duration-&lsqb;10s&rsqb;"
               />
               <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0)_0%,rgba(15,23,42,0.3)_100%)]" />
 
@@ -595,10 +726,10 @@ const Portfolio: React.FC = () => {
                     <div className="flex justify-between text-xs mb-2">
                       <span className="text-muted-foreground flex items-center gap-2">
                         {item.type === 'Forestry' && <Trees className={`w-3.5 h-3.5 text-emerald-500`} />}
-                        {item.type === 'Renewable' && <Wind className={`w-3.5 h-3.5 text-cyan-500`} />}
-                        {item.type === 'Community' && <Maximize2 className={`w-3.5 h-3.5 text-orange-500`} />}
+                        {item.type === 'Renewable' && <Wind className={`w-3.5 h-3.5 text-cyan-500`} />}
+                        {item.type === 'Community' && <Maximize2 className={`w-3.5 h-3.5 text-orange-500`} />}
                         {item.type}
-                      </span>
+                    </span>
                       <span className="text-foreground font-mono">{item.percentage}</span>
                     </div>
                     <div className="h-1.5 w-full bg-slate-200 rounded-full overflow-hidden">
@@ -619,8 +750,8 @@ const Portfolio: React.FC = () => {
               </h3>
               <div className="grid grid-cols-1 gap-3">
                 {reportData.sdgs.map((sdg) => (
-                    <SDGChip key={sdg.num} num={sdg.num} color={sdg.num === '13' ? 'bg-[#3F7E44]' : sdg.num === '15' ? 'bg-[#56C02B]' : 'bg-[#FCC30B]'} label={sdg.label} />
-                ))}
+                    <SDGChip key={sdg.num} num={sdg.num} color={sdg.num === '13' ? 'bg-[#3F7E44]' : sdg.num === '15' ? 'bg-[#56C02B]' : 'bg-[#FCC30B]'} label={sdg.label} />
+                ))}
               </div>
             </div>
           </div>
@@ -644,16 +775,23 @@ const Portfolio: React.FC = () => {
 
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
             {mockCertificates.map((cert) => (
-                    <CertificateCard
-                        key={cert.id}
-                        {...cert}
-                        onShare={handleShare}
-                        onDownload={handleDownloadCertificate}
-                    />
-                ))}
+                    <CertificateCard
+                        key={cert.id}
+                        {...cert}
+                        onShare={handleShare}
+                        onDownload={handleDownloadCertificate}
+                    />
+                ))}
           </div>
         </div>
       </div>
+    
+    {/* MODAL RENDERING */}
+    <AddAssetModal
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+        onAdd={handleAddNewAsset}
+    />
     </div>
   );
 };

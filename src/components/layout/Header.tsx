@@ -143,7 +143,7 @@ export default function Header({
                 
                </div>
              ) : (
-                <span className="text-sm font-semibold text-foreground">Offset Platform</span>
+                <span className="text-sm mr-20 font-semibold text-foreground">Offset Platform</span>
              )}
           </div>
 
@@ -156,7 +156,7 @@ export default function Header({
               onClick={onToggleTheme}
               aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
               title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
-              className="inline-flex items-center justify-center w-9 h-9 rounded-md border border-border bg-card hover:shadow-sm transition-all"
+              className="inline-flex items-center justify-center w-9 h-9  rounded-md border border-border bg-card hover:shadow-sm transition-all"
             >
               {theme === 'dark' ? (
                 <Sun className="w-5 h-5 text-amber-400" />
