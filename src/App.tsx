@@ -1,4 +1,4 @@
-import React, { useState, useEffect, Suspense, lazy } from 'react';
+import { useState, useEffect, Suspense, lazy } from 'react';
 import { Loader2 } from 'lucide-react';
 import { CarbonCredit } from './lib/types';
 
@@ -26,7 +26,7 @@ const PageLoader = () => (
 );
 
 function App() {
-  const [showContent, setShowContent] = useState(false);
+  
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [authMode, setAuthMode] = useState<'login' | 'signup'>('signup');
 

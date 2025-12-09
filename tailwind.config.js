@@ -1,15 +1,24 @@
 /** @type {import('tailwindcss').Config} */
 export default {
-  darkMode: ['class'],
+  darkMode: 'class',
   content: [
     './pages/**/*.{ts,tsx}',
     './components/**/*.{ts,tsx}',
     './app/**/*.{ts,tsx}',
-    './src/**/*.{ts,tsx}',
+    './src/**/*.{js,ts,jsx,tsx}',
     './index.html',
   ],
   theme: {
     extend: {
+
+      transitionDuration: {
+        "2000": "2000ms",
+        "10000": "10000ms",
+        "30000": "30000ms",
+      },
+      transitionTimingFunction: {
+        smooth: "cubic-bezier(0.32,0.72,0,1)",
+      },
       borderRadius: {
         lg: 'var(--radius)',
         md: 'calc(var(--radius) - 2px)',
@@ -58,6 +67,10 @@ export default {
         },
       },
       keyframes: {
+        float: {
+          "0%, 100%": { transform: "translateY(0px)" },
+          "50%": { transform: "translateY(-12px)" },
+        },
         'accordion-down': {
           from: {
             height: '0',
@@ -78,6 +91,7 @@ export default {
       animation: {
         'accordion-down': 'accordion-down 0.2s ease-out',
         'accordion-up': 'accordion-up 0.2s ease-out',
+        float: "float 6s ease-in-out infinite",
       },
     },
   },

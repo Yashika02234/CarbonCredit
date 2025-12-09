@@ -1,22 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import {
-  Leaf,
-  Globe2,
+  
   ShieldCheck,
-  Users,
-  Sparkles,
+
   Target,
   Handshake,
   ArrowRight,
-  ArrowUpRight,
+ 
   Cpu,
   Code,
   Zap,
   Network,
   History,
   TrendingUp,
-  BarChart3,
-  Map,
+
   Activity,
 } from 'lucide-react';
 

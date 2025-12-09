@@ -1,290 +1,269 @@
+/* ==========================================================================
+   CUSTOM FONT IMPORTS (MUST be first)
+   ========================================================================== */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Roboto+Flex:opsz,wght@8..144,300;8..144,500;8..144,700&display=swap');
+
+/* ==========================================================================
+   TAILWIND DIRECTIVES
+   ========================================================================== */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Semantic color tokens for light + dark themes */
+/* ==========================================================================
+   THEME TOKENS & BASE RESETS
+   ========================================================================== */
 
 :root {
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
-  line-height: 1.5;
-  --logo-final-left: 1rem;
+  /* Font Family - FIXED: Use the Inter stack as the primary default */
+  --font-family: 'Inter', system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
 
-  /* --- LIGHT THEME | EARTH + SKY --- */
+  /* LIGHT THEME: Earth / Sky palette (H S% L%) */
+  --background: 210 38% 97%;
+  --foreground: 203 31% 15%;
 
-  /* Backgrounds & Surfaces */
-  --background: 210 38% 97%;          /* #F4F7FA */
-  --foreground: 203 31% 15%;          /* #1B2A33 (deep blue-grey text) */
-
-  --card: 0 0% 100%;                  /* #FFFFFF */
+  --card: 0 0% 100%;
   --card-foreground: 203 31% 15%;
 
   --popover: 0 0% 100%;
   --popover-foreground: 203 31% 15%;
 
-  /* Brand Colors */
-  --primary: 162 37% 39%;             /* #3F8A74 (teal-green) */
-  --primary-foreground: 210 40% 98%;  /* near-white */
+  --primary: 162 37% 39%;
+  --primary-foreground: 210 40% 98%;
 
-  --accent: 224 54% 45%;              /* #3557B2 (indigo/blue) */
+  --accent: 224 54% 45%;
   --accent-foreground: 210 40% 98%;
 
-  /* Secondary / Muted Surfaces */
-  --secondary: 203 35% 93%;           /* #E6EEF3 (soft blue-grey) */
+  --secondary: 203 35% 93%;
   --secondary-foreground: 203 31% 20%;
 
-  --muted: 203 35% 93%;               /* #E6EEF3 */
-  --muted-foreground: 207 14% 41%;    /* #5B6B78 */
+  --muted: 203 35% 93%;
+  --muted-foreground: 207 14% 41%;
 
-  /* Borders / Inputs / Focus */
-  --border: 213 32% 88%;              /* #D6DFEA */
+  --border: 213 32% 88%;
   --input: 213 32% 88%;
-  --ring: 162 37% 39%;                /* follows primary */
+  --ring: 162 37% 39%;
 
-  /* Status */
   --destructive: 0 72% 50%;
   --destructive-foreground: 0 0% 98%;
 }
 
 .dark {
-  /* --- DARK THEME | EARTH + SKY VARIANT --- */
+  --background: 220 35% 8%;
+  --foreground: 210 40% 98%;
 
-  /* Backgrounds & Surfaces */
-  --background: 220 35% 8%;           /* deep navy */
-  --foreground: 210 40% 98%;          /* near-white */
-
-  --card: 222 36% 12%;                /* dark surface */
+  --card: 222 36% 12%;
   --card-foreground: 210 40% 98%;
 
   --popover: 222 36% 12%;
   --popover-foreground: 210 40% 98%;
 
-  /* Brand Colors */
-  --primary: 162 45% 45%;             /* brighter teal-green on dark */
-  --primary-foreground: 203 31% 12%;  /* deep background for contrast */
+  --primary: 162 45% 45%;
+  --primary-foreground: 203 31% 12%;
 
-  --accent: 224 55% 55%;              /* brighter indigo on dark */
+  --accent: 224 55% 55%;
   --accent-foreground: 210 40% 98%;
 
-  /* Secondary / Muted Surfaces */
   --secondary: 220 22% 18%;
   --secondary-foreground: 210 40% 98%;
 
   --muted: 220 22% 18%;
   --muted-foreground: 215 15% 65%;
 
-  /* Borders / Inputs / Focus */
   --border: 220 22% 20%;
   --input: 220 22% 20%;
   --ring: 162 45% 45%;
-
-  /* Status */
-  --destructive: 0 62.8% 40.6%;
-  --destructive-foreground: 0 0% 98%;
 }
 
-html {
-  scroll-behavior: smooth;
-  /* Apply transition to HTML elements for smooth theme change */
-  transition: background-color 0.3s, color 0.3s;
-}
-
-/* Base Body Styles (Managed by CSS Variables) */
+/* Base layer */
 @layer base {
-  * {
-    @apply border-border;
-  }
+  * { box-sizing: border-box; }
+  html, body, #root { height: 100%; }
   body {
     margin: 0;
     min-width: 320px;
     min-height: 100vh;
     overflow-x: hidden;
-    /* Use semantic background/foreground colors defined in :root/.dark */
-    @apply bg-background text-foreground transition-colors duration-300;
-  }
-}
-
-/* --- ANIMATION DEFINITIONS (Unchanged) --- */
-
-/* Floating Animation (Up/Down) */
-@keyframes float-y {
-  0%,
-  100% {
-    transform: translateY(0px);
-  }
-  50% {
-    transform: translateY(-20px);
-  }
-}
-.animate-float-slow {
-  animation: float-y 6s ease-in-out infinite;
-}
-.animate-float-medium {
-  animation: float-y 5s ease-in-out infinite;
-}
-.animate-float-fast {
-  animation: float-y 4s ease-in-out infinite;
-}
-
-/* Orbit Animation (Circular Drifting) */
-@keyframes orbit-drift {
-  0% {
-    transform: rotate(0deg) translateX(10px) rotate(0deg);
-  }
-  100% {
-    transform: rotate(360deg) translateX(10px) rotate(-360deg);
-  }
-}
-.animate-orbit {
-  animation: orbit-drift 20s linear infinite;
-}
-
-/* Star Twinkle */
-@keyframes twinkle {
-  0%,
-  100% {
-    opacity: 0.2;
-    transform: scale(0.8);
-  }
-  50% {
-    opacity: 0.8;
-    transform: scale(1.2);
-  }
-}
-
-/* Logo Animation (Kept for compatibility) */
-@media (min-width: 640px) {
-  :root {
-    --logo-final-left: 1.5rem;
-  }
-}
-@media (min-width: 1024px) {
-  :root {
-    --logo-final-left: 2rem;
-  }
-}
-
-@keyframes logo-sequence {
-  0% {
-    transform: scale(0.8);
-    opacity: 0;
-  }
-  20% {
-    transform: scale(2.5);
-    opacity: 1;
-  }
-  40% {
-    transform: scale(2.5);
-  }
-  50% {
-    transform: scale(2.2);
-  }
-  100% {
-    transform: translate(
-        calc(-50vw + var(--logo-final-left) + 30px),
-        calc(-50vh + 40px)
-      )
-      scale(1);
-  }
-}
-@keyframes bg-fade-out {
-  0%,
-  80% {
+    font-family: var(--font-family);
+    line-height: 1.5;
     background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
+    transition: background-color 0.28s ease, color 0.28s ease;
   }
-  100% {
-    background-color: transparent;
-  }
-}
-.animated-logo-container {
-  position: fixed;
-  inset: 0;
-  z-index: 60;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  animation: bg-fade-out 2.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
-  pointer-events: none;
-}
-.animated-logo-container > div {
-  animation: logo-sequence 2.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
-  will-change: transform;
+
+  /* lightweight default utilities */
+  .bg-card { background-color: hsl(var(--card)); }
+  .text-foreground { color: hsl(var(--foreground)); }
+  .border-border { border-color: hsl(var(--border)); }
+  .bg-background { background-color: hsl(var(--background)); }
 }
 
-/* Sort dropdown */
-.sort-dropdown {
-  @apply absolute top-full right-0 mt-2 bg-popover border border-border shadow-md w-[180px] z-50 p-2 rounded-lg list-none;
-}
-.sort-dropdown-item {
-  @apply px-3 py-2 text-sm text-muted-foreground cursor-pointer transition-colors;
-}
-.sort-dropdown-item:hover {
-  @apply bg-accent text-accent-foreground;
-}
-/* Floating fog blobs behind hero */
+/* ==========================================================================
+   CUSTOM FONT UTILITY CLASSES (Removed redundant Inter/Roboto Flex)
+   ========================================================================== */
 
+/* If you still want to use Space Mono for data fields: */
+/* .font-data {
+   font-family: 'Space Mono', monospace;
+} */
+
+
+/* ==========================================================================
+   ANIMATIONS (Optimized for GPU)
+   ========================================================================== */
+
+/* slow float for subtle movement */
+@keyframes float-y {
+  0%, 100% { transform: translateY(0px) translateZ(0); }
+  50% { transform: translateY(-18px) translateZ(0); }
+}
+.animate-float-slow { animation: float-y 7.6s ease-in-out infinite; will-change: transform; }
+
+/* orbit drift for subtle circular motion (transform only) */
+@keyframes orbit-drift {
+  0%  { transform: translateX(0) translateY(0) rotate(0deg); }
+  100% { transform: translateX(0) translateY(0) rotate(360deg); }
+}
+.animate-orbit { animation: orbit-drift 28s linear infinite; will-change: transform; }
+
+/* slow bounce for arrow (The correct definition for the JSX component) */
+@keyframes bounce-slow {
+  0%, 100% { transform: translateY(-10%); animation-timing-function: cubic-bezier(0.8, 0, 1, 1); }
+  50%  { transform: translateY(0); animation-timing-function: cubic-bezier(0, 0, 0.2, 1); }
+}
+.animate-bounce-slow { animation: bounce-slow 2.5s ease-in-out infinite; will-change: transform; }
+
+/* subtle twinkle (opacity + scale) */
+@keyframes twinkle {
+  0%,100% { opacity: 0.18; transform: scale(0.9); }
+  50%  { opacity: 0.9; transform: scale(1.08); }
+}
+
+/* Custom CSS for Emoji Filter pulse */
+@keyframes ping-slow {
+    0% { transform: scale(0.2); opacity: 0.8; }
+    80%, 100% { transform: scale(1.5); opacity: 0; }
+}
+.animate-ping-slow {
+    animation: ping-slow 2s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+
+/* ==========================================================================
+   MOVING FOG / ORB VISUALS (Doodling)
+   ========================================================================== */
+
+/* base fog class */
 .fog-orb {
   position: absolute;
   border-radius: 9999px;
-  filter: blur(40px);
-  opacity: 0.9;
+  filter: blur(56px);
+  opacity: 0.56;
   pointer-events: none;
+  mix-blend-mode: screen;
+  will-change: transform, opacity;
+  transform: translateZ(0); /* GPU hint */
 }
 
-/* Top-left green blob */
-.fog-orb-1 {
-  width: 520px;
-  height: 520px;
-  top: -180px;
-  left: -160px;
-  background: radial-gradient(circle at 30% 30%, #bbf7d0, #22c55e);
-  animation: fogDrift1 38s ease-in-out infinite;
-}
-
-/* Top-right teal blob */
-.fog-orb-2 {
-  width: 520px;
-  height: 520px;
-  top: -140px;
-  right: -200px;
-  background: radial-gradient(circle at 30% 30%, #cffafe, #06b6d4);
-  animation: fogDrift2 46s ease-in-out infinite;
-}
-
-/* Bottom-center soft green blob */
-.fog-orb-3 {
-  width: 520px;
-  height: 520px;
-  bottom: -220px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: radial-gradient(circle at 30% 30%, #bbf7d0, #22c55e);
-  animation: fogDrift3 52s ease-in-out infinite;
-}
-
+/* orb motion keyframes */
 @keyframes fogDrift1 {
-  0%   { transform: translateX(0) translateY(0); }
-  50%  { transform: translateX(40px) translateY(20px); }
-  100% { transform: translateX(0) translateY(0); }
+  0%  { transform: translate(0px, 0px) scale(1); opacity: 0.56; }
+  25% { transform: translate(24px, -8px) scale(1.02); opacity: 0.62; }
+  50% { transform: translate(40px, 18px) scale(1.03); opacity: 0.56; }
+  75% { transform: translate(18px, -10px) scale(1.01); opacity: 0.60; }
+  100% { transform: translate(0px, 0px) scale(1); opacity: 0.56; }
 }
 
 @keyframes fogDrift2 {
-  0%   { transform: translateX(0) translateY(0); }
-  50%  { transform: translateX(-40px) translateY(25px); }
-  100% { transform: translateX(0) translateY(0); }
+  0%  { transform: translate(0px, 0px) scale(1); opacity: 0.50; }
+  25% { transform: translate(-18px, 10px) scale(1.01); opacity: 0.56; }
+  50% { transform: translate(-40px, -20px) scale(1.02); opacity: 0.50; }
+  75% { transform: translate(-10px, 12px) scale(1.01); opacity: 0.54; }
+  100% { transform: translate(0px, 0px) scale(1); opacity: 0.50; }
 }
 
 @keyframes fogDrift3 {
-  0%   { transform: translate(-50%, 0); }
-  50%  { transform: translate(-50%, -30px); }
-  100% { transform: translate(-50%, 0); }
+  0%  { transform: translate(-50%, 0px) scale(1); opacity: 0.48; }
+  25% { transform: translate(-58%, -12px) scale(1.02); opacity: 0.52; }
+  50% { transform: translate(-50%, -30px) scale(1.03); opacity: 0.46; }
+  75% { transform: translate(-42%, -8px) scale(1.01); opacity: 0.50; }
+  100% { transform: translate(-50%, 0px) scale(1); opacity: 0.48; }
 }
 
-/* Slow bounce for scroll arrow */
-@keyframes bounceSlow {
-  0%, 100% { transform: translateY(0); }
-  50%      { transform: translateY(4px); }
+@keyframes fogDrift4 {
+  0% { transform: translateX(0px) scale(1); opacity: 0.36; }
+  50% { transform: translateX(40px) scale(1.08); opacity: 0.52; }
+  100% { transform: translateX(0px) scale(1); opacity: 0.36; }
 }
 
-.animate-bounce-slow {
-  animation: bounceSlow 1.8s ease-in-out infinite;
+/* Orb Variants (CSS used in the React component for the moving fog) */
+.fog-orb-1 {
+  background: radial-gradient(circle at 30% 30%, rgba(187,247,208,0.95) 0%, rgba(34,197,94,0.88) 52%, rgba(34,197,94,0.15) 70%, transparent 80%);
+  animation: fogDrift1 38s ease-in-out infinite;
+  transform-origin: center;
+}
+
+.fog-orb-2 {
+  background: radial-gradient(circle at 30% 30%, rgba(207,250,254,0.95) 0%, rgba(6,182,212,0.92) 52%, rgba(6,182,212,0.14) 72%, transparent 82%);
+  animation: fogDrift2 46s ease-in-out infinite;
+  transform-origin: center;
+}
+
+.fog-orb-3 {
+  background: radial-gradient(circle at 30% 30%, rgba(187,247,208,0.95) 0%, rgba(34,197,94,0.88) 52%, rgba(34,197,94,0.12) 72%, transparent 82%);
+  animation: fogDrift3 52s ease-in-out infinite;
+  transform-origin: center;
+}
+
+/* ==========================================================================
+   UX POLISH & COMPONENTS (Tailwind component layer conventions)
+   ========================================================================== */
+
+@layer components {
+  /* Faint grid overlay for subtle structure */
+  .hero-grid-overlay {
+    @apply absolute inset-0 opacity-20 pointer-events-none;
+    background-image:
+      linear-gradient(rgba(15,23,42,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(15,23,42,0.04) 1px, transparent 1px);
+    background-size: 80px 80px;
+  }
+  
+  /* Accent line under hero */
+  .hero-accent-line {
+    @apply h-1.5 w-full rounded-full shadow-lg;
+    background: linear-gradient(90deg, hsl(var(--primary)), #06b6d4 50%, #3b82f6);
+    box-shadow: 0 8px 30px rgba(34,197,94,0.06);
+  }
+
+  /* subtle card hover lift used across grid */
+  .card-hover-lift {
+    @apply transition duration-300 ease-in-out will-change-transform;
+  }
+  .card-hover-lift:hover {
+    @apply transform -translate-y-2 shadow-xl;
+    box-shadow: 0 16px 36px rgba(2,6,23,0.1);
+  }
+}
+
+/* ==========================================================================
+   RESPONSIVE & ACCESSIBILITY (Crucial for performance)
+   ========================================================================== */
+
+/* responsive: hide heavy elements on small screens for perf */
+@media (max-width: 768px) {
+  .fog-orb { display: none !important; }
+}
+
+/* reduced-motion accessibility */
+@media (prefers-reduced-motion: reduce) {
+  .fog-orb,
+  .animate-float-slow,
+  .animate-orbit,
+  .animate-bounce-slow,
+  .animate-ping-slow {
+    animation: none !important;
+    transition: none !important;
+  }
 }

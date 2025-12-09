@@ -42,7 +42,7 @@ export function CreditCard({ credit, onClick }: CreditCardProps) {
     >
       {/* --- 1. IMAGE SECTION (Top Half) --- */}
       <div className="absolute inset-0 z-0 h-1/2 overflow-hidden">
-        <img 
+        <img loading="lazy"
           src={credit.image} 
           alt={credit.projectName} 
           className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 opacity-60 group-hover:opacity-100 grayscale group-hover:grayscale-0"

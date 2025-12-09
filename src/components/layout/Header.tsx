@@ -1,5 +1,16 @@
-import React, { useState, useEffect, ButtonHTMLAttributes } from 'react';
-import { Leaf, Menu, X, User, LogOut, Command, ChevronRight } from 'lucide-react';
+// src/components/layout/Header.tsx
+import { useState, useEffect, ButtonHTMLAttributes } from 'react';
+import {
+  Leaf,
+  Menu,
+  X,
+  User,
+  LogOut,
+  Command,
+  ChevronRight,
+  Sun,
+  Moon,
+} from 'lucide-react';
 
 type ViewState = 'landing' | 'home' | 'marketplace' | 'portfolio' | 'about';
 
@@ -11,7 +22,7 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 const NavButton = ({ variant = 'ghost', active, className = '', children, onClick, ...props }: ButtonProps) => {
   const base = "relative px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 flex items-center gap-2 group";
   
-  const variants = {
+  const variants: Record<string, string> = {
     primary: "bg-primary text-primary-foreground hover:shadow-[0_0_20px_rgba(16,185,129,0.4)] hover:scale-105",
     ghost: `hover:bg-muted/50 ${active ? 'text-foreground bg-muted/30' : 'text-muted-foreground hover:text-foreground'}`,
     icon: "p-2 hover:bg-muted/50 text-muted-foreground hover:text-foreground rounded-full aspect-square justify-center",
@@ -35,6 +46,8 @@ interface HeaderProps {
   currentView?: ViewState;
   onNavigate?: (view: ViewState) => void;
   onLogout?: () => void;
+
+  // Theme props (new / required for toggle)
   theme: 'dark' | 'light';
   onToggleTheme: () => void;
 }
@@ -46,6 +59,8 @@ export default function Header({
   onNavigate = () => {},
   onOpenAuth,
   onLogout,
+  theme,
+  onToggleTheme,
 }: HeaderProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -136,6 +151,20 @@ export default function Header({
           {/* 3. Right: Actions */}
           <div className="flex items-center gap-2">
             
+            {/* THEME TOGGLE - visible for both logged-in and logged-out states */}
+            <button
+              onClick={onToggleTheme}
+              aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+              title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+              className="inline-flex items-center justify-center w-9 h-9 rounded-md border border-border bg-card hover:shadow-sm transition-all"
+            >
+              {theme === 'dark' ? (
+                <Sun className="w-5 h-5 text-amber-400" />
+              ) : (
+                <Moon className="w-5 h-5 text-slate-700" />
+              )}
+            </button>
+
             {isLoggedIn ? (
               <>
                 <div className={`hidden md:flex flex-col items-end mr-2 transition-all duration-300 ${scrolled ? 'opacity-0 w-0 overflow-hidden' : 'opacity-100 w-auto'}`}>

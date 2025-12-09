@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { X, ShieldCheck, Loader2, ArrowRight, CheckCircle2, CreditCard, Leaf } from 'lucide-react';
+import  { useState, useEffect } from 'react';
+import { X, ShieldCheck, Loader2, ArrowRight, CheckCircle2,  Leaf } from 'lucide-react';
 import { CarbonCredit } from '../../lib/types';
 
 interface PaymentModalProps {

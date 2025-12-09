@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { ChevronDown, Grid3X3, List, ArrowUpDown } from 'lucide-react';
 import { CreditCard } from './CreditCard';
 import { CarbonCredit } from '../../lib/types';
