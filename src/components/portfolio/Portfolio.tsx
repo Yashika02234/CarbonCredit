@@ -25,41 +25,41 @@ import AddAssetModal from './AddAssetModal';
 // Assuming the types are defined in a separate file (e.g., ../../lib/types)
 // If you don't have this structure, define these interfaces directly above the mock data.
 interface CarbonCredit {
-    id: string;
-    projectName: string;
-    pricePerCredit: number;
-    availableCredits: number;
-    location: string;
-    country: string;
-    vintage: number;
-    registry: string;
-    trustScore: number;
-    status: string;
-    projectType: string;
-    unicId: string;
-    image: string;
+    id: string;
+    projectName: string;
+    pricePerCredit: number;
+    availableCredits: number;
+    location: string;
+    country: string;
+    vintage: number;
+    registry: string;
+    trustScore: number;
+    status: string;
+    projectType: string;
+    unicId: string;
+    image: string;
 }
 interface CertificateAsset {
-    id: string;
-    project: string;
-    amount: string;
-    date: string;
-    image: string;
-    type: string;
-    color: string;
-    status: string;
-    trustScore: number; 
-    riskFlags: string[]; 
+    id: string;
+    project: string;
+    amount: string;
+    date: string;
+    image: string;
+    type: string;
+    color: string;
+    status: string;
+    trustScore: number; 
+    riskFlags: string[]; 
 }
 interface ReportData {
-    reportDate: string;
-    company: string;
-    netOffset: string;
-    portfolioValue: string;
-    retirementRatio: string;
-    assets: { id: string, project: string, amount: string, type: string, date: string }[];
-    breakdown: { type: string, percentage: string }[];
-    sdgs: { num: string, label: string }[];
+    reportDate: string;
+    company: string;
+    netOffset: string;
+    portfolioValue: string;
+    retirementRatio: string;
+    assets: { id: string, project: string, amount: string, type: string, date: string }[];
+    breakdown: { type: string, percentage: string }[];
+    sdgs: { num: string, label: string }[];
 }
 
 // Mock Data for the Certificates (UPDATED)
@@ -77,47 +77,47 @@ const mockCertificates: CertificateAsset[] = [
 
 // Trust Score Progress Bar (PDF Layout)
 const TrustScoreBadge: React.FC<{ score: number }> = ({ score }) => {
-    const color = score >= 90 ? 'bg-emerald-500' : score >= 70 ? 'bg-amber-500' : 'bg-red-500';
+    const color = score >= 90 ? 'bg-emerald-500' : score >= 70 ? 'bg-amber-500' : 'bg-red-500';
 
-    return (
-        <div className="w-1/3 flex flex-col items-center">
-            <span className="text-xs font-mono text-gray-500 uppercase mb-2 flex items-center gap-1">
-                <Gauge className="w-3 h-3 text-emerald-600" /> Trust Score
-            </span>
-            <div className="text-3xl font-extrabold" style={{ color: color }}>
-                {score}
-                <span className="text-base font-normal align-top">%</span>
-            </div>
-            <div className="w-full h-1.5 bg-gray-200 rounded-full mt-1">
-                <div
-                    className={`h-full rounded-full ${color}`}
-                    style={{ width: `${score}%` }}
-                />
-            </div>
-        </div>
-    );
+    return (
+        <div className="w-1/3 flex flex-col items-center">
+            <span className="text-xs font-mono text-gray-500 uppercase mb-2 flex items-center gap-1">
+                <Gauge className="w-3 h-3 text-emerald-600" /> Trust Score
+            </span>
+            <div className="text-3xl font-extrabold" style={{ color: color }}>
+                {score}
+                <span className="text-base font-normal align-top">%</span>
+            </div>
+            <div className="w-full h-1.5 bg-gray-200 rounded-full mt-1">
+                <div
+                    className={`h-full rounded-full ${color}`}
+                    style={{ width: `${score}%` }}
+                />
+            </div>
+        </div>
+    );
 };
 
 // Risk Flags Display (PDF Layout)
 const RiskFlagsDisplay: React.FC<{ flags: string[] }> = ({ flags }) => {
-    if (flags.length === 0) return (
-        <div className="w-full text-center py-2 text-sm text-gray-500 border-b border-gray-200">
-            No major risk flags detected.
-        </div>
-    );
+    if (flags.length === 0) return (
+        <div className="w-full text-center py-2 text-sm text-gray-500 border-b border-gray-200">
+            No major risk flags detected.
+        </div>
+    );
 
-    return (
-        <div className="w-full mt-4 p-3 bg-red-50 border border-red-200 rounded-lg">
-            <div className="flex items-center gap-2 text-red-700 font-semibold text-sm mb-2">
-                <AlertTriangle className="w-4 h-4" /> Risk Flags ({flags.length})
-            </div>
-            <ul className="text-xs text-red-600 list-disc list-inside space-y-0.5 ml-4">
-                {flags.map((flag, index) => (
-                    <li key={index}>{flag}</li>
-                ))}
-            </ul>
-        </div>
-    );
+    return (
+        <div className="w-full mt-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+            <div className="flex items-center gap-2 text-red-700 font-semibold text-sm mb-2">
+                <AlertTriangle className="w-4 h-4" /> Risk Flags ({flags.length})
+            </div>
+            <ul className="text-xs text-red-600 list-disc list-inside space-y-0.5 ml-4">
+                {flags.map((flag, index) => (
+                    <li key={index}>{flag}</li>
+                ))}
+            </ul>
+        </div>
+    );
 };
 
 const PDFCertificateTemplate: React.FC<{ certificate: CertificateAsset }> = ({ certificate }) => (
@@ -130,7 +130,7 @@ const PDFCertificateTemplate: React.FC<{ certificate: CertificateAsset }> = ({ c
         </div>
 
         {/* Centerpiece: Amount */}
-        <div className="text-center my-10 flex flex-col items-center">
+        <div className="text-center my-10 flex flex-col items-center">
             <p className="text-xl font-medium text-gray-600 mb-2">Certificate of Permanent Retirement</p>
             <h1 className="text-6xl font-extrabold text-emerald-700 tracking-tight mb-4">
                 {certificate.amount} tCO₂e
@@ -138,10 +138,10 @@ const PDFCertificateTemplate: React.FC<{ certificate: CertificateAsset }> = ({ c
             <p className="text-lg font-semibold text-gray-700">from the {certificate.project} project</p>
         </div>
 
-        {/* TRUST SCORE DISPLAY */}
-        <div className="flex justify-center my-6">
-            <TrustScoreBadge score={certificate.trustScore} />
-        </div>
+        {/* TRUST SCORE DISPLAY */}
+        <div className="flex justify-center my-6">
+            <TrustScoreBadge score={certificate.trustScore} />
+        </div>
 
         <div className="flex justify-between border-t border-gray-200 py-4 text-sm">
             <div className="flex flex-col">
@@ -153,12 +153,12 @@ const PDFCertificateTemplate: React.FC<{ certificate: CertificateAsset }> = ({ c
                 <span className="font-semibold text-gray-900">{certificate.type}</span>
             </div>
         </div>
-        
-        {/* RISK FLAGS DISPLAY */}
-        <div className="border-b border-gray-200">
-            <RiskFlagsDisplay flags={certificate.riskFlags} />
-        </div>
-        
+        
+        {/* RISK FLAGS DISPLAY */}
+        <div className="border-b border-gray-200">
+            <RiskFlagsDisplay flags={certificate.riskFlags} />
+        </div>
+        
 
         <div className="mt-6 text-center text-xs text-gray-500">
             <p>This document verifies the permanent and irreversible retirement of the listed carbon credits on the blockchain.</p>
@@ -245,8 +245,8 @@ const PDFReportTemplate: React.FC<{ data: ReportData }> = ({ data }) => (
 // ==========================================
 
 const generateAnnualReportData = (): ReportData => {
-    // ... implementation remains unchanged
-    return {
+    // ... implementation remains unchanged
+    return {
         reportDate: new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }),
         company: "Acme Corp.",
         netOffset: "2,450 tCO2e",
@@ -270,54 +270,54 @@ const generateAnnualReportData = (): ReportData => {
  * Functional PDF generator using html2canvas and jspdf.
  */
 const generateAndDownloadPDF = (contentElement: JSX.Element, filename: string) => {
-    // 1. Create a hidden container element to render the component temporarily
-    const container = document.createElement('div');
-    // Apply styling to hide the temporary container off-screen
-    container.style.position = 'absolute';
-    container.style.left = '-9999px';
-    document.body.appendChild(container);
+    // 1. Create a hidden container element to render the component temporarily
+    const container = document.createElement('div');
+    // Apply styling to hide the temporary container off-screen
+    container.style.position = 'absolute';
+    container.style.left = '-9999px';
+    document.body.appendChild(container);
 
-    // 2. Render the React component into the hidden container using SSR utility
-    try {
-        container.innerHTML = ReactDOMServer.renderToString(contentElement);
-    } catch (e) {
-        console.error("Error rendering component to string:", e);
-        document.body.removeChild(container);
-        alert("Error during PDF rendering preparation.");
-        return;
-    }
-    const elementToCapture = container.firstChild as HTMLElement;
+    // 2. Render the React component into the hidden container using SSR utility
+    try {
+        container.innerHTML = ReactDOMServer.renderToString(contentElement);
+    } catch (e) {
+        console.error("Error rendering component to string:", e);
+        document.body.removeChild(container);
+        alert("Error during PDF rendering preparation.");
+        return;
+    }
+    const elementToCapture = container.firstChild as HTMLElement;
 
-    if (!elementToCapture) {
-        alert("Error: Could not render component for capture.");
-        document.body.removeChild(container);
-        return;
-    }
+    if (!elementToCapture) {
+        alert("Error: Could not render component for capture.");
+        document.body.removeChild(container);
+        return;
+    }
 
-    // 3. Use html2canvas to capture the rendered HTML/CSS content
-    html2canvas(elementToCapture, { 
-        scale: 2, // Use higher scale for better quality
-        logging: false 
-    }).then(canvas => {
-        const imgData = canvas.toDataURL('image/jpeg', 1.0);
-        // A5 landscape is used here to fit the certificate design
-        const pdf = new jsPDF({
-            orientation: 'landscape', 
-            unit: 'mm',
-            format: 'a5' 
-        });
-        
-        const pdfWidth = pdf.internal.pageSize.getWidth();
-        const pdfHeight = pdf.internal.pageSize.getHeight();
-        
-        pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight);
-        pdf.save(`${filename}.pdf`);
+    // 3. Use html2canvas to capture the rendered HTML/CSS content
+    html2canvas(elementToCapture, { 
+        scale: 2, // Use higher scale for better quality
+        logging: false 
+    }).then(canvas => {
+        const imgData = canvas.toDataURL('image/jpeg', 1.0);
+        // A5 landscape is used here to fit the certificate design
+        const pdf = new jsPDF({
+            orientation: 'landscape', 
+            unit: 'mm',
+            format: 'a5' 
+        });
+        
+        const pdfWidth = pdf.internal.pageSize.getWidth();
+        const pdfHeight = pdf.internal.pageSize.getHeight();
+        
+        pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight);
+        pdf.save(`${filename}.pdf`);
 
-        // 4. Clean up the temporary element
-        document.body.removeChild(container);
-        console.log(`Successfully generated and downloaded ${filename}.pdf!`);
-        alert(`Successfully generated and downloaded ${filename}.pdf!`);
-    });
+        // 4. Clean up the temporary element
+        document.body.removeChild(container);
+        console.log(`Successfully generated and downloaded ${filename}.pdf!`);
+        alert(`Successfully generated and downloaded ${filename}.pdf!`);
+    });
 };
 
 
@@ -328,7 +328,7 @@ const generateAndDownloadPDF = (contentElement: JSX.Element, filename: string) =
 // This handler is now controlled by useState in the Portfolio component
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const handleAddAssets = () => {
-    alert("Functionality triggered: Opening Add Assets Modal.");
+    alert("Functionality triggered: Opening Add Assets Modal.");
 };
 
 const handleDownloadReport = () => {
@@ -426,12 +426,12 @@ const ImpactCard: React.FC<ImpactCardProps> = ({
   </div>
 );
 
-interface CertificateCardProps extends CertificateAsset {
+interface CertificateCardProps {
     onShare: (certificate: CertificateAsset) => void;
     onDownload: (certificate: CertificateAsset) => void;
 }
 
-const CertificateCard: React.FC<CertificateCardProps> = ({
+const CertificateCard: React.FC<CertificateAsset & CertificateCardProps> = ({
   id,
   project,
   amount,
@@ -440,13 +440,13 @@ const CertificateCard: React.FC<CertificateCardProps> = ({
   type,
   color,
   status = 'Retired',
-    trustScore, 
-    riskFlags, 
+    trustScore, 
+    riskFlags, 
     onShare,
     onDownload,
 }) => {
     const certificate = { id, project, amount, date, image, type, color, status, trustScore, riskFlags };
-    const scoreColor = trustScore >= 90 ? 'text-emerald-500' : trustScore >= 70 ? 'text-amber-500' : 'text-red-500';
+    const scoreColor = trustScore >= 90 ? 'text-emerald-500' : trustScore >= 70 ? 'text-amber-500' : 'text-red-500';
 
     return (
         <div className="group relative bg-card border border-border rounded-2xl overflow-hidden hover:border-primary/40 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl cursor-pointer">
@@ -500,19 +500,19 @@ const CertificateCard: React.FC<CertificateCardProps> = ({
                 </div>
             </div>
 
-            {/* Trust Score and Risk Flag Summary UI */}
-            <div className='flex items-center justify-between mt-2 mb-3'>
-                <div className='flex items-center gap-2'>
-                    <Gauge className={`w-3.5 h-3.5 ${scoreColor}`} />
-                    <span className={`text-sm font-bold ${scoreColor}`}>Score: {trustScore}%</span>
-                </div>
-                {riskFlags.length > 0 && (
-                    <div className='flex items-center gap-1 text-xs text-red-500 bg-red-50 border border-red-100 px-2 py-0.5 rounded-full'>
-                        <AlertTriangle className='w-3 h-3' /> 
-                        {riskFlags.length} Risk{riskFlags.length > 1 ? 's' : ''}
-                    </div>
-                )}
-            </div>
+            {/* Trust Score and Risk Flag Summary UI */}
+            <div className='flex items-center justify-between mt-2 mb-3'>
+                <div className='flex items-center gap-2'>
+                    <Gauge className={`w-3.5 h-3.5 ${scoreColor}`} />
+                    <span className={`text-sm font-bold ${scoreColor}`}>Score: {trustScore}%</span>
+                </div>
+                {riskFlags.length > 0 && (
+                    <div className='flex items-center gap-1 text-xs text-red-500 bg-red-50 border border-red-100 px-2 py-0.5 rounded-full'>
+                        <AlertTriangle className='w-3 h-3' /> 
+                        {riskFlags.length} Risk{riskFlags.length > 1 ? 's' : ''}
+                    </div>
+                )}
+            </div>
 
             <h4 className="text-sm font-semibold text-foreground mb-4 line-clamp-1 group-hover:text-primary transition-colors">
                 {project}
@@ -572,18 +572,18 @@ const SDGChip: React.FC<SDGChipProps> = ({ num, color, label }) => (
 
 const Portfolio: React.FC = () => {
     const reportData = generateAnnualReportData();
-    // 1. STATE FOR MODAL VISIBILITY
-    const [isModalOpen, setIsModalOpen] = useState(false);
+    // 1. STATE FOR MODAL VISIBILITY
+    const [isModalOpen, setIsModalOpen] = useState(false);
 
-    // 2. MODAL CONTROL HANDLERS
-    const handleOpenModal = () => setIsModalOpen(true);
-    const handleCloseModal = () => setIsModalOpen(false);
+    // 2. MODAL CONTROL HANDLERS
+    const handleOpenModal = () => setIsModalOpen(true);
+    const handleCloseModal = () => setIsModalOpen(false);
 
-    // 3. MOCK HANDLER FOR ADDING ASSET
-    const handleAddNewAsset = (newAsset: CarbonCredit) => {
-        console.log("New Asset Added (Simulated):", newAsset.projectName, newAsset.availableCredits);
-        handleCloseModal();
-    };
+    // 3. MOCK HANDLER FOR ADDING ASSET
+    const handleAddNewAsset = (newAsset: CarbonCredit) => {
+        console.log("New Asset Added (Simulated):", newAsset.projectName, newAsset.availableCredits);
+        handleCloseModal();
+    };
 
   return (
     <div className="min-h-screen bg-background text-foreground pt-28 pb-20 font-sans selection:bg-emerald-500/20 overflow-x-hidden">
@@ -662,8 +662,8 @@ const Portfolio: React.FC = () => {
             icon={CheckCircle2}
             label="Retirement Ratio"
             value={reportData.retirementRatio}
-            sub="Assets permanently retired"
             color="text-orange-500"
+            sub="Assets permanently retired"
             delay="300ms"
           />
         </div>
@@ -785,13 +785,13 @@ const Portfolio: React.FC = () => {
           </div>
         </div>
       </div>
-    
-    {/* MODAL RENDERING */}
-    <AddAssetModal
-        isOpen={isModalOpen}
-        onClose={handleCloseModal}
-        onAdd={handleAddNewAsset}
-    />
+    
+    {/* MODAL RENDERING */}
+    <AddAssetModal
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+        onAdd={handleAddNewAsset}
+    />
     </div>
   );
 };
