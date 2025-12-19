@@ -159,22 +159,62 @@ export default function LandingPage({ onOpenAuth }: LandingPageProps) {
       </section>
 
       {/* ================= CALL TO ACTION ================= */}
-      <section className="relative w-full py-32 px-6 lg:px-12 bg-[#30574E]">
-        <div className="max-w-[1100px] mx-auto text-center">
-          <div className="bg-[#f3f4ff] rounded-[24px] px-14 py-16 shadow-xl">
-            <h2 className="text-4xl md:text-5xl font-medium text-gray-900 mb-8">Ready to start?</h2>
-            <p className="text-gray-700 mb-10 max-w-xl mx-auto">
-              Join hundreds of institutions using Offset to manage their carbon portfolio.
-            </p>
-            <button
-              onClick={() => onOpenAuth('signup')}
-              className="bg-black text-white px-10 py-4 rounded-md font-medium hover:bg-gray-800 transition"
-            >
-              Get Started Now
-            </button>
-          </div>
-        </div>
-      </section>
+     {/* ================= DISCOVER CARBON ================= */}
+<section className="relative w-full py-32 px-6 lg:px-12 overflow-hidden">
+
+  {/* Background Image */}
+  <div
+    className="absolute inset-0 bg-cover bg-center"
+    style={{
+      backgroundImage:
+        "url('https://images.unsplash.com/photo-1521737604893-d14cc237f11d?q=80&w=2000')",
+    }}
+  />
+
+  {/* Soft Overlay */}
+  <div className="absolute inset-0  " />
+
+  {/* Content */}
+  <div className="relative z-10 max-w-[1100px] mx-auto flex justify-center">
+
+    <div
+      className="
+        bg-[#f3f4ff]
+        rounded-[24px]
+        px-14 py-16
+        text-center
+        max-w-[720px]
+        shadow-[0_40px_120px_rgba(0,0,0,0.12)]
+        transition-transform
+        hover:-translate-y-1
+      "
+    >
+      <h2 className="text-4xl md:text-5xl font-medium tracking-tight text-gray-900 mb-8">
+        Discover Carbon
+      </h2>
+
+      <p className="text-gray-700 text-base leading-relaxed mb-10 max-w-xl mx-auto">
+        Explore the world of carbon trading with Offset. Learn about carbon
+        credits, CCUs, and the Paris Agreement. Stay informed with market
+        updates and compliance links.
+      </p>
+
+      <button
+        className="
+          bg-black text-white
+          px-8 py-4
+          text-sm font-medium
+          rounded-md
+          hover:bg-gray-900
+          transition
+        "
+      >
+        Learn More
+      </button>
+    </div>
+
+  </div>
+</section>
 
       {/* ================= FOOTER / CONTACT ================= */}
       <footer className="bg-[#3F5D50] text-white py-20 px-6 lg:px-12">
