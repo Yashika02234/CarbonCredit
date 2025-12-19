@@ -1,4 +1,4 @@
-import { useState, useEffect, Suspense, lazy } from 'react';
+import { useState, Suspense, lazy } from 'react';
 import { Loader2 } from 'lucide-react';
 import { CarbonCredit } from './lib/types';
 
@@ -13,11 +13,8 @@ const Explorer = lazy(() => import('./components/explorer/Explorer'));
 const Portfolio = lazy(() => import('./components/portfolio/Portfolio'));
 const AboutPage = lazy(() => import('./components/about/AboutPage'));
 const ContactPage = lazy(() => import('./components/contact/ContactPage'));
-const ProjectDetail = lazy(
-  () => import('./components/explorer/ProjectDetail')
-);
+const ProjectDetail = lazy(() => import('./components/explorer/ProjectDetail'));
 
-// ✅ ADD contact here
 export type ViewState =
   | 'landing'
   | 'home'
@@ -26,7 +23,6 @@ export type ViewState =
   | 'about'
   | 'contact';
 
-// --- LOADING SPINNER ---
 const PageLoader = () => (
   <div className="h-screen w-full flex items-center justify-center bg-background">
     <Loader2 className="w-10 h-10 text-primary animate-spin" />
@@ -36,45 +32,25 @@ const PageLoader = () => (
 function App() {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [authMode, setAuthMode] = useState<'login' | 'signup'>('signup');
-
   const [showContact, setShowContact] = useState(false);
-
-  const [theme, setTheme] = useState<'dark' | 'light'>(() => {
-    const stored = localStorage.getItem('offset_theme');
-    return stored === 'dark' ? 'dark' : 'light';
-  });
 
   const [currentView, setCurrentView] = useState<ViewState>(() => {
     const savedAuth = localStorage.getItem('offset_isLoggedIn');
     return savedAuth === 'true' ? 'home' : 'landing';
   });
 
-  const [selectedProject, setSelectedProject] =
-    useState<CarbonCredit | null>(null);
+  const [selectedProject, setSelectedProject] = useState<CarbonCredit | null>(null);
 
   const [isLoggedIn, setIsLoggedIn] = useState(
     () => localStorage.getItem('offset_isLoggedIn') === 'true'
   );
 
-  // Apply Theme
-  useEffect(() => {
-    const root = document.documentElement;
-    theme === 'dark'
-      ? root.classList.add('dark')
-      : root.classList.remove('dark');
-    localStorage.setItem('offset_theme', theme);
-  }, [theme]);
-
-  const toggleTheme = () =>
-    setTheme((prev) => (prev === 'dark' ? 'light' : 'dark'));
-
-  // ✅ UPDATED NAVIGATION HANDLER
+  // --- ACTIONS ---
   const handleNavigate = (view: ViewState) => {
     if (view === 'contact') {
       setShowContact(true);
       return;
     }
-
     setCurrentView(view);
     setSelectedProject(null);
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -99,16 +75,14 @@ function App() {
   };
 
   return (
-    <div className="min-h-screen bg-background text-foreground font-sans">
+    <div className="min-h-screen bg-background text-foreground font-sans selection:bg-[#30574E]/30">
       <Header
-        showContent
+        showContent={true}
         isLoggedIn={isLoggedIn}
         currentView={currentView}
         onNavigate={handleNavigate}
         onOpenAuth={handleOpenAuth}
         onLogout={handleLogout}
-        theme={theme}
-        onToggleTheme={toggleTheme}
       />
 
       {/* AUTH MODAL */}
@@ -130,7 +104,6 @@ function App() {
         </Suspense>
       )}
 
-      {/* MAIN CONTENT */}
       <main>
         <Suspense fallback={<PageLoader />}>
           {isLoggedIn ? (
@@ -141,9 +114,7 @@ function App() {
               />
             ) : (
               <>
-                {currentView === 'home' && (
-                  <HomePage onNavigate={handleNavigate} />
-                )}
+                {currentView === 'home' && <HomePage onNavigate={handleNavigate} />}
                 {currentView === 'marketplace' && (
                   <Explorer
                     onSelectProject={(p: CarbonCredit) => {
@@ -154,9 +125,8 @@ function App() {
                 )}
                 {currentView === 'portfolio' && <Portfolio />}
                 {currentView === 'about' && <AboutPage />}
-                {currentView === 'landing' && (
-                  <HomePage onNavigate={handleNavigate} />
-                )}
+                {/* Fallback for landing view when logged in */}
+                {currentView === 'landing' && <HomePage onNavigate={handleNavigate} />}
               </>
             )
           ) : currentView === 'about' ? (
