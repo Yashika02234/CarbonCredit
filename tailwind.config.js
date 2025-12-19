@@ -27,6 +27,14 @@ export default {
       colors: {
         background: 'hsl(var(--background))',
         foreground: 'hsl(var(--foreground))',
+        'bgLight': '#D9E4E1',    // Light Sea Green
+        'bgDark': '#1F4A42',     // Deep Teal/Forest Green
+        'textDark': '#1A202C',   // Dark Charcoal (Main text color)
+        'accent': '#4CA18D',     // Medium Teal (Primary buttons, icons)
+        // Mapping generic Tailwind names to custom ones for consistency
+        'background': '#D9E4E1', 
+        'foreground': '#1A202C',
+        'primary': '#4CA18D',   // Muted olive green for buttons/primary focus
         card: {
           DEFAULT: 'hsl(var(--card))',
           foreground: 'hsl(var(--card-foreground))',
@@ -65,6 +73,11 @@ export default {
           4: 'hsl(var(--chart-4))',
           5: 'hsl(var(--chart-5))',
         },
+      },
+      fontFamily: {
+        // Using a clean, professional font stack if you don't have a custom one
+        display: ['Poppins', 'Arial', 'sans-serif'],
+        body: ['Inter', 'Helvetica', 'sans-serif'],
       },
       keyframes: {
         float: {

@@ -223,3 +223,10 @@ export const mockCredits: CarbonCredit[] = Array.from(
     };
   },
 );
+export const REGISTRIES = [
+  'Verra (VCS)',
+  'Gold Standard',
+  'Climate Action Reserve',
+  'American Carbon Registry',
+  'Puro.earth',
+] as const;

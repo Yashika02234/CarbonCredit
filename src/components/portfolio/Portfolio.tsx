@@ -595,38 +595,104 @@ const Portfolio: React.FC = () => {
       <div className="max-w-[1600px] mx-auto px-6 relative z-10">
         
         {/* 1. HEADER */}
-        <div className="flex flex-col md:flex-row justify-between items-end gap-8 mb-16 animate-in slide-in-from-bottom-4 duration-700">
-          <div>
-            <div className="flex items-center gap-3 mb-4">
-              <div className="p-2 bg-emerald-50 rounded-lg border border-emerald-100">
-                <Wallet className="w-5 h-5 text-emerald-600" />
-              </div>
-              <span className="text-sm font-mono text-emerald-700 uppercase tracking-widest">
-                Asset Vault
-              </span>
-            </div>
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-semibold text-foreground tracking-tight leading-tight">
-              Climate{' '}
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500">
-                Portfolio.
-              </span>
-              </h1>
-              </div>
-            <div className="flex gap-3">
-              <button 
-                    onClick={handleDownloadReport} 
-                    className="flex items-center gap-2 px-6 py-3 rounded-xl bg-card border border-border hover:bg-muted transition-all text-xs font-bold uppercase tracking-wider"
-                >
-                <Download className="w-4 h-4" /> Annual Report
-              </button>
-              <button 
-                    onClick={handleOpenModal} 
-                    className="flex items-center gap-2 px-6 py-3 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg transition-all text-xs font-bold uppercase tracking-wider"
-                >
-                Add Assets <ArrowRight className="w-4 h-4" />
-              </button>
-            </div>
-        </div>
+       <div className="relative mb-16 overflow-hidden border-y border-emerald-400/30">
+
+  {/* ===== EMERALD CINEMATIC BACKGROUND ===== */}
+  <div className="absolute inset-0 -z-10">
+
+    {/* Base gradient */}
+    <div className="absolute inset-0 bg-gradient-to-br from-emerald-900 via-emerald-800 to-teal-900" />
+
+    {/* Large cinematic glows */}
+    <div className="absolute -top-52 -left-52 w-[700px] h-[700px] bg-emerald-500/25 blur-[200px]" />
+    <div className="absolute -bottom-52 -right-52 w-[700px] h-[700px] bg-teal-400/20 blur-[200px]" />
+
+    {/* Subtle grid */}
+    <div
+      className="absolute inset-0 opacity-[0.06]
+      bg-[linear-gradient(rgba(255,255,255,0.25)_1px,transparent_1px),
+      linear-gradient(90deg,rgba(255,255,255,0.25)_1px,transparent_1px)]
+      bg-[size:140px_140px]"
+    />
+
+    {/* Animated contour line */}
+    <svg
+      className="absolute inset-0 w-full h-full opacity-[0.28]"
+      viewBox="0 0 1200 240"
+      preserveAspectRatio="none"
+    >
+      <path
+        d="M0 140 C300 80 900 200 1200 140"
+        stroke="rgba(255,255,255,0.45)"
+        strokeWidth="1.4"
+        fill="none"
+      >
+        <animate
+          attributeName="d"
+          dur="20s"
+          repeatCount="indefinite"
+          values="
+            M0 140 C300 80 900 200 1200 140;
+            M0 180 C300 220 900 100 1200 180;
+            M0 140 C300 80 900 200 1200 140
+          "
+        />
+      </path>
+    </svg>
+  </div>
+
+  {/* ===== ORIGINAL CONTENT (UNCHANGED) ===== */}
+  <div className="flex flex-col md:flex-row justify-between items-end gap-8 py-14 px-8 md:px-12">
+    {/* ⬇️ KEEP YOUR EXISTING CONTENT EXACTLY HERE ⬇️ */}
+
+    {/* LEFT */}
+    <div>
+      <div className="flex items-center gap-3 mb-4">
+        <div className="p-2 bg-emerald-500/20 border border-emerald-400/30">
+          <Wallet className="w-5 h-5 text-emerald-300" />
+        </div>
+        <span className="text-sm font-mono text-emerald-200 uppercase tracking-widest">
+          Asset Vault
+        </span>
+      </div>
+
+      <h1 className="text-4xl md:text-5xl lg:text-6xl font-semibold text-white tracking-tight leading-tight">
+        Climate{' '}
+        <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-300 via-teal-300 to-cyan-300">
+          Portfolio.
+        </span>
+      </h1>
+    </div>
+
+    {/* RIGHT */}
+    <div className="flex gap-3">
+      <button
+        onClick={handleDownloadReport}
+        className="flex items-center gap-2 px-6 py-3
+          bg-white/10 border border-white/20
+          text-white backdrop-blur-md
+          hover:bg-white/20 transition-all
+          text-xs font-bold uppercase tracking-wider"
+      >
+        <Download className="w-4 h-4" />
+        Annual Report
+      </button>
+
+      <button
+        onClick={handleOpenModal}
+        className="flex items-center gap-2 px-6 py-3
+          bg-emerald-500 hover:bg-emerald-400
+          text-emerald-950
+          shadow-[0_20px_60px_rgba(16,185,129,0.45)]
+          transition-all hover:scale-105
+          text-xs font-bold uppercase tracking-wider"
+      >
+        Add Assets
+        <ArrowRight className="w-4 h-4" />
+      </button>
+    </div>
+  </div>
+</div>
 
         {/* 2. IMPACT OVERVIEW */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
@@ -686,7 +752,7 @@ const Portfolio: React.FC = () => {
               <img
                 src="https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=2000&auto=format&fit=crop"
                 alt="World map"
-                className="w-full h-full object-cover opacity-70 group-hover:scale-105 transition-transform duration-&lsqb;10s&rsqb;"
+                className="w-full h-full object-cover  group-hover:scale-105 transition-transform duration-&lsqb;10s&rsqb;"
               />
               <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0)_0%,rgba(15,23,42,0.3)_100%)]" />
 

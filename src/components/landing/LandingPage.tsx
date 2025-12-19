@@ -1,438 +1,659 @@
-import  { useState, useEffect } from 'react';
+/* eslint-disable no-irregular-whitespace */
 import {
-  ArrowRight,
-  ArrowUpRight,
-  Globe,
-  ShieldCheck,
-  Cpu,
-  Mail,
-  MapPin,
-  Layers,
-  Activity,
-  Zap,
-  BarChart3,
-  Wifi,
+  ChevronLeft, 
+  ChevronRight,
 } from 'lucide-react';
+import StickyHome from "./StickyHome";
 
-// --- SUB-COMPONENTS ---
 
-// 1. Data Console (HUD Element)
-const DataConsole = () => (
-  <div className="relative z-10 hidden lg:block animate-fade-in-right">
-    <div className="bg-card/90 backdrop-blur-md border border-border rounded-2xl p-6 shadow-xl w-full max-w-sm ml-auto relative overflow-hidden group hover:border-primary/50 transition-colors">
-      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-primary/5 to-transparent h-[200%] w-full animate-scan pointer-events-none" />
+type Testimonial = {
+  quote: string;
+  author: string;
+  role?: string;
+  rating?: number;
+};
+const testimonials: Testimonial[] = [
+  {
+    quote:
+      'Partnering with Offset has revolutionized our approach to carbon trading. Their innovative solutions have significantly enhanced our trading activities and contributed to our environmental goals.',
+    author: 'John Doe',
+    role: 'Sustainability Lead',
+    rating: 5,
+  },
+  {
+    quote:
+      'Offset provides a level of transparency and trust that we have not seen before in carbon markets. Their platform has become a critical part of our ESG strategy.',
+    author: 'Sarah Williams',
+    role: 'Head of ESG, FinCorp',
+    rating: 5,
+  },
+  {
+    quote:
+      'The geospatial verification and trust scoring mechanisms offered by Offset have given our institution confidence in every credit we retire.',
+    author: 'Michael Chen',
+    role: 'Director of Climate Finance',
+    rating: 5,
+  },
+];
 
-      <div className="flex items-center justify-between mb-6 border-b border-border/50 pb-4">
-        <div className="flex items-center gap-3">
-          <div className="relative">
-            <div className="w-2.5 h-2.5 rounded-full bg-primary animate-pulse" />
-            <div className="absolute inset-0 w-2.5 h-2.5 rounded-full bg-primary animate-ping opacity-75" />
+import landingheroimage from '../../assets/images/landingheroimage.jpg';
+import landingv from '../../assets/images/landingv.mp4';
+/* ================= SCROLL REVEAL ================= */
+
+import { useScrollReveal } from '../../hooks/useScrollReveal';
+import { useState } from 'react';
+
+/* ================= STAT BUBBLE ================= */
+
+
+
+
+/* ================= MAIN PAGE ================= */
+export default function LandingPage() {
+const [testimonialIndex, setTestimonialIndex] = useState(0);
+
+useScrollReveal();
+  return (
+    <div className="bg-white text-gray-900 font-sans selection:bg-primary/20">
+
+      {/* ================= HERO ================= */}
+      {/* ================= HERO SECTION ================= */}
+<section className="relative h-[380vh] w-full">
+  <StickyHome />
+</section>
+
+
+      {/* ================= STATS ================= */}
+     {/* ================= WHAT WE DO ================= */}
+ <section
+      id="what-we-do"
+      className="relative bg-[#f3f4ff] px-6 lg:px-12 py-42"
+    >
+      <div className="max-w-[1600px] mx-auto flex gap-20">
+
+        {/* ================= LEFT: STICKY IMAGE ================= */}
+        <div className="w-[45%] hidden lg:block">
+              <div className="relative h-full">
+          <div className="sticky top-32">
+            <div className="rounded-[28px] overflow-hidden h-[860px] bg-gray-200">
+              <img
+                src={landingheroimage}
+                alt="What we do"
+                className="w-full h-full object-cover"
+              />
+            </div>
           </div>
-          <span className="text-xs font-mono text-primary uppercase tracking-widest font-bold">
-            Live Telemetry
-          </span>
         </div>
-        <Wifi className="w-4 h-4 text-muted-foreground" />
-      </div>
+        </div>
 
-      <div className="space-y-4 font-mono text-xs relative z-10">
-        <div className="flex items-center justify-between p-2 rounded hover:bg-muted/20 transition-colors">
-          <span className="text-muted-foreground flex items-center gap-2">
-            🛰️ Sat-Link A4
-          </span>
-          <span className="text-primary font-bold">CONNECTED</span>
-        </div>
-        <div className="flex items-center justify-between p-2 rounded hover:bg-muted/20 transition-colors">
-          <span className="text-muted-foreground flex items-center gap-2">
-            🌳 Bio-Density
-          </span>
-          <span className="text-foreground">
-            94% <span className="text-muted-foreground">|</span> High
-          </span>
-        </div>
-        <div className="flex items-center justify-between p-2 rounded hover:bg-muted/20 transition-colors">
-          <span className="text-muted-foreground flex items-center gap-2">
-            💧 Blue Carbon
-          </span>
-          <span className="text-cyan-500">VERIFIED</span>
-        </div>
+        {/* ================= RIGHT: SCROLL CONTENT ================= */}
+        <div className="w-full lg:w-[55%] py-32 space-y-72">
+
+  {/* BLOCK 1 */}
+  <div
+    data-reveal
+    className="
+      reveal max-w-xl
+      p-8 rounded-2xl
+      transition-all duration-300
+      hover:bg-[#30574E]
+      hover:-translate-y-1
+      group
+    "
+  >
+    <h2
+      className="
+        text-3xl md:text-4xl font-medium tracking-tight mb-6
+        text-gray-900
+        transition-colors duration-300
+        group-hover:text-white
+      "
+    >
+      What We Do
+    </h2>
+
+    <p
+      className="
+        text-gray-600 leading-relaxed
+        transition-colors duration-300
+        group-hover:text-white/90 text-lg 
+      "
+    >
+      We bridge the gap between environmental impact and financial
+      markets by providing a high-fidelity infrastructure for carbon
+      credit trading. Our platform utilizes geospatial data and
+      real-time tracking to ensure every credit traded is
+      additionality-verified, transparently priced, and permanently
+      retired.
+    </p>
+  </div>
+
+  {/* BLOCK 2 */}
+  <div
+    data-reveal
+    className="
+      reveal max-w-xl
+      p-8 rounded-2xl
+      transition-all duration-300
+      hover:bg-[#30574E]
+      hover:-translate-y-1
+      group
+    "
+  >
+    <h3
+      className="
+        text-xl font-medium mb-4
+        text-gray-900
+        transition-colors duration-300
+        group-hover:text-white 
+      "
+    >
+      Geospatial Project Discovery
+    </h3>
+
+    <p
+      className="
+        text-gray-600 leading-relaxed
+        transition-colors duration-300
+        group-hover:text-white/90 text-lg
+      "
+    >
+      Visualize the impact. We utilize satellite-integrated mapping to
+      provide a digital twin of every carbon project. Users can explore
+      global initiatives through an interactive interface that displays
+      real-time site data, boundary polygons, and local environmental
+      metrics.
+    </p>
+  </div>
+
+  {/* BLOCK 3 */}
+  <div
+    data-reveal
+    className="
+      reveal max-w-xl
+      p-8 rounded-2xl
+      transition-all duration-300
+      hover:bg-[#30574E]
+      hover:-translate-y-1
+      group
+    "
+  >
+    <h3
+      className="
+        text-xl font-medium mb-4
+        text-gray-900
+        transition-colors duration-300
+        group-hover:text-white
+      "
+    >
+      Algorithmic Trust Scoring
+    </h3>
+
+    <p
+      className="
+        text-gray-600 leading-relaxed
+        transition-colors duration-300
+        group-hover:text-white/90 text-lg
+      "
+    >
+      Quantify your integrity. Every credit is passed through our
+      proprietary verification engine to generate a dynamic Trust
+      Score. We analyze project vintage, methodology, and third-party
+      registry data to provide a clear risk-assessment metric for
+      institutional buyers.
+    </p>
+  </div>
+
+  {/* BLOCK 4 */}
+  <div
+    data-reveal
+    className="
+      reveal max-w-xl
+      p-8 rounded-2xl
+      transition-all duration-300
+      hover:bg-[#30574E]
+      hover:-translate-y-1
+      group
+    "
+  >
+    <h3
+      className="
+        text-xl font-medium mb-4
+        text-gray-900
+        transition-colors duration-300
+        group-hover:text-white 
+      "
+    >
+      Immutable Lifecycle Tracking
+    </h3>
+
+    <p
+      className="
+        text-gray-600 leading-relaxed
+        transition-colors duration-300
+        group-hover:text-white/90 text-lg
+      "
+    >
+      Ensure permanent retirement. From listing to final retirement,
+      every transaction is recorded on a transparent events timeline.
+      Our automated system generates verifiable retirement
+      certificates, preventing double-counting and providing
+      audit-ready documentation for ESG reporting.
+    </p>
+  </div>
+
+  {/* BLOCK 5 */}
+  <div
+    data-reveal
+    className="
+      reveal max-w-xl
+      p-8 rounded-2xl
+      transition-all duration-300
+      hover:bg-[#30574E]
+      hover:-translate-y-1
+      group
+    "
+  >
+    <h3
+      className="
+        text-xl font-medium mb-4
+        text-gray-900
+        transition-colors duration-300
+        group-hover:text-white
+      "
+    >
+      Real-Time Market Liquidity
+    </h3>
+
+    <p
+      className="
+        text-gray-600 leading-relaxed
+        transition-colors duration-300
+        group-hover:text-white/90 text-lg
+      "
+    >
+      Trade with Precision. Our live API-driven exchange provides
+      up-to-the-minute pricing and market depth for global carbon assets.
+      We eliminate the friction of OTC trading, allowing for instant
+      execution and transparent price discovery across diverse credit
+      categories.
+    </p>
+  </div>
+
+</div>
+
+      </div>
+    </section>
+
+    {/* ================= BRAND STATEMENT SECTION ================= */}
+<section className="relative w-full px-6 lg:px-12 py-28">
+  <div className="max-w-[1600px] mx-auto">
+
+    <div className="relative rounded-[28px] overflow-hidden h-[580px]">
+
+      {/* Background Video */}
+      <video
+        autoPlay
+        muted
+        loop
+        playsInline
+        className="absolute inset-0 w-full h-full object-cover"
+      >
+        <source src={landingv} />
+      </video>
+
+      {/* Soft Overlay (very important) */}
+      <div className="absolute inset-0 bg-[#30574E]/60" />
+
+      {/* Centered Content */}
+      <div className="relative z-10 h-full flex flex-col items-center justify-center text-center px-6">
+
+        {/* Logo */}
+        <img
+          src="logo"
+          alt="Offset"
+          className="h-14 mb-6 opacity-90"
+        />
+
+        {/* Caption */}
+        <p className="text-sm md:text-base text-white/85 tracking-wide">
+          A Global Leader in Carbon Trading
+        </p>
+
       </div>
     </div>
-  </div>
-);
 
-// 2. News/Feature Overlay Card
-const NewsCard = () => (
-  <div className="absolute bottom-8 right-8 z-20 max-w-sm w-full hidden lg:block animate-slide-in-up">
-    <div className="bg-card/90 backdrop-blur-xl border border-border p-5 rounded-2xl shadow-xl flex gap-5 items-center group cursor-pointer hover:border-primary/30 transition-all hover:-translate-y-1">
-      <div className="w-20 h-20 rounded-lg overflow-hidden shrink-0 border border-border relative">
-        <div className="absolute inset-0 bg-primary/10 mix-blend-overlay z-10" />
-        <img
-          src="https://images.unsplash.com/photo-1516214104703-d870798883c5?q=80&w=1000&auto=format&fit=crop"
-          alt="Project"
-          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-        />
-      </div>
-      <div className="flex-1">
-        <div className="flex justify-between items-center mb-1.5">
-          <span className="text-[10px] font-bold font-mono text-primary uppercase tracking-widest">
-            New Listing
-          </span>
-          <ArrowUpRight className="w-3 h-3 text-muted-foreground group-hover:text-foreground transition-colors" />
+  </div>
+</section>
+{/* ================= TESTIMONIALS ================= */}
+<section className="relative bg-white py-40 px-6 lg:px-12 overflow-hidden">
+
+  {/* ===== Ambient Background Accents ===== */}
+  <div className="absolute -top-40 -left-40 w-[600px] h-[600px] bg-[#30574E]/10 blur-[140px] rounded-full animate-[pulse_18s_ease-in-out_infinite]" />
+  <div className="absolute -bottom-40 -right-40 w-[500px] h-[500px] bg-[#30574E]/10 blur-[140px] rounded-full animate-[pulse_22s_ease-in-out_infinite]" />
+
+  {/* Subtle orbital line */}
+  <svg
+    className="absolute inset-0 w-full h-full opacity-[0.06]"
+    viewBox="0 0 1200 600"
+    fill="none"
+  >
+    <path
+      d="M100 300 C400 150 800 450 1100 300"
+      stroke="#30574E"
+      strokeWidth="1"
+      strokeDasharray="6 10"
+    />
+  </svg>
+
+  <div className="relative max-w-[1200px] mx-auto text-center">
+
+    {/* Heading */}
+    <p className="text-sm uppercase tracking-widest text-gray-500 mb-4">
+      Client Testimonials
+    </p>
+
+    <h2 className="text-4xl md:text-5xl font-medium tracking-tight text-[#30574E] mb-28">
+      Success Stories
+    </h2>
+
+    {/* Slider */}
+    <div className="relative flex items-center justify-center">
+
+      {/* Left Arrow */}
+      <button
+        onClick={() =>
+          setTestimonialIndex(
+            testimonialIndex === 0
+              ? testimonials.length - 1
+              : testimonialIndex - 1
+          )
+        }
+        className="absolute left-0 md:-left-20 p-4 rounded-full border border-gray-300 
+                   hover:border-[#30574E] hover:scale-105 transition-all"
+        aria-label="Previous testimonial"
+      >
+        <ChevronLeft className="w-6 h-6 text-gray-600" />
+      </button>
+
+      {/* Testimonial Card */}
+      <div
+        key={testimonialIndex}
+        className="
+          max-w-3xl px-6
+          animate-[fadeUp_0.7s_ease-out]
+        "
+      >
+        {/* Stars */}
+        <div className="flex justify-center mb-10">
+          {[...Array(testimonials[testimonialIndex].rating || 5)].map((_, i) => (
+            <span key={i} className="text-[#30574E] text-lg">★</span>
+          ))}
         </div>
-        <h3 className="text-base font-medium text-foreground leading-tight mb-1 group-hover:text-primary transition-colors">
-          Rimba Raya Reserve
-        </h3>
-        <p className="text-xs text-muted-foreground line-clamp-1">
-          Borneo, Indonesia • Peat Swamp
+
+        {/* Quote */}
+        <p className="text-2xl md:text-3xl leading-relaxed text-[#30574E] mb-12 font-light">
+          “{testimonials[testimonialIndex].quote}”
+        </p>
+
+        {/* Author */}
+        <div className="text-sm text-gray-700">
+          <p className="font-medium">
+            {testimonials[testimonialIndex].author}
+          </p>
+          <p className="text-gray-500 mt-1">
+            {testimonials[testimonialIndex].role}
+          </p>
+        </div>
+      </div>
+
+      {/* Right Arrow */}
+      <button
+        onClick={() =>
+          setTestimonialIndex(
+            testimonialIndex === testimonials.length - 1
+              ? 0
+              : testimonialIndex + 1
+          )
+        }
+        className="absolute right-0 md:-right-20 p-4 rounded-full border border-gray-300 
+                   hover:border-[#30574E] hover:scale-105 transition-all"
+        aria-label="Next testimonial"
+      >
+        <ChevronRight className="w-6 h-6 text-gray-600" />
+      </button>
+
+    </div>
+  </div>
+</section>
+
+{/* ================= DISCOVER CARBON ================= */}
+<section className="relative w-full py-32 px-6 lg:px-12 overflow-hidden">
+
+  {/* Background Image */}
+  <div
+    className="absolute inset-0 bg-cover bg-center"
+    style={{
+      backgroundImage:
+        "url('https://images.unsplash.com/photo-1521737604893-d14cc237f11d?q=80&w=2000')",
+    }}
+  />
+
+  {/* Soft Overlay */}
+  <div className="absolute inset-0  " />
+
+  {/* Content */}
+  <div className="relative z-10 max-w-[1100px] mx-auto flex justify-center">
+
+    <div
+      className="
+        bg-[#f3f4ff]
+        rounded-[24px]
+        px-14 py-16
+        text-center
+        max-w-[720px]
+        shadow-[0_40px_120px_rgba(0,0,0,0.12)]
+        transition-transform
+        hover:-translate-y-1
+      "
+    >
+      <h2 className="text-4xl md:text-5xl font-medium tracking-tight text-gray-900 mb-8">
+        Discover Carbon
+      </h2>
+
+      <p className="text-gray-700 text-base leading-relaxed mb-10 max-w-xl mx-auto">
+        Explore the world of carbon trading with Offset. Learn about carbon
+        credits, CCUs, and the Paris Agreement. Stay informed with market
+        updates and compliance links.
+      </p>
+
+      <button
+        className="
+          bg-black text-white
+          px-8 py-4
+          text-sm font-medium
+          rounded-md
+          hover:bg-gray-900
+          transition
+        "
+      >
+        Learn More
+      </button>
+    </div>
+
+  </div>
+</section>
+
+      {/* ================= CONTACT / GET IN TOUCH ================= */}
+<section className="relative bg-[#3F5D50] px-6 lg:px-12 py-32">
+  <div className="max-w-[1600px] mx-auto grid lg:grid-cols-2 gap-24 items-center">
+
+
+{/* ================= LEFT ================= */}
+<div className="text-white grid grid-cols-2 gap-20">
+
+  {/* ===== LEFT-LEFT: OFFSET INFO ===== */}
+  <div className="flex flex-col justify-between">
+
+    {/* Brand */}
+    <div>
+      <h2 className="text-4xl font-medium tracking-tight mb-6">
+        Offset
+      </h2>
+
+      {/* Brand description */}
+      <p className="text-sm text-white/85 leading-relaxed max-w-xs mb-14">
+        Building transparent, data-backed infrastructure for global carbon
+        markets — designed for institutions, regulators, and climate leaders.
+      </p>
+
+      {/* Contact Info */}
+      <div className="space-y-3 text-sm text-white/90">
+        <p>123-456-7890</p>
+        <p>info@offset.com</p>
+        <p>
+          500 Terry Francine St.<br />
+          San Francisco, CA 94158
         </p>
       </div>
     </div>
+
+    {/* Subtle divider */}
+    <div className="mt-16 w-16 h-px bg-white/30" />
   </div>
-);
 
-// 3. Feature Card (Grid Items)
-const FeatureCard = ({
-  icon: Icon,
-  title,
-  desc,
-  delay,
-}: {
-  icon: any;
-  title: string;
-  desc: string;
-  delay: string;
-}) => (
-  <div
-    className="group p-8 rounded-3xl bg-card border border-border hover:border-primary/30 transition-all duration-300 hover:-translate-y-1"
-    style={{ animationDelay: delay }}
-  >
-    <div className="h-12 w-12 rounded-2xl bg-muted/50 border border-border flex items-center justify-center mb-6 text-primary group-hover:scale-110 group-hover:bg-primary/10 transition-all">
-      <Icon className="h-6 w-6" />
+  {/* ===== LEFT-RIGHT: SOCIAL + VALUE POINTS ===== */}
+  <div className="flex flex-col justify-center">
+
+    {/* Why reach out */}
+    <div className="mb-12">
+      <p className="text-xs uppercase tracking-widest text-white/70 mb-6">
+        Why contact us
+      </p>
+
+      <ul className="space-y-5 text-sm text-white/90">
+        <li>• Institutional onboarding & partnerships</li>
+        <li>• API & data integrations</li>
+        <li>• Compliance & reporting support</li>
+        <li>• Climate strategy advisory</li>
+      </ul>
     </div>
-    <h3 className="text-xl font-medium text-foreground mb-3">{title}</h3>
-    <p className="text-muted-foreground leading-relaxed text-sm font-light">
-      {desc}
-    </p>
+
+    {/* Social Icons */}
+    <div className="flex items-center gap-6 mb-10">
+      {['f', 'in', 'ig', 'x'].map((icon, i) => (
+        <div
+          key={i}
+          className="
+            w-11 h-11 rounded-full
+            border border-white/40
+            flex items-center justify-center
+            text-white/90
+            hover:bg-white hover:text-[#3F5D50]
+            transition
+          "
+        >
+          {icon}
+        </div>
+      ))}
+    </div>
+
+    {/* Policies */}
+    <div className="text-sm text-white/90 space-y-3">
+      <p className="hover:underline cursor-pointer">
+        Privacy Policy
+      </p>
+      <p className="hover:underline cursor-pointer">
+        Accessibility Statement
+      </p>
+    </div>
+
   </div>
-);
+</div>
 
-// 4. Stat Item
-const StatItem = ({
-  label,
-  value,
-  index,
-  icon: Icon,
-  color = 'text-foreground',
-}: {
-  label: string;
-  value: string;
-  index: number;
-  icon: any;
-  color?: string;
-}) => (
-  <div
-    className="py-10 px-6 group hover:bg-muted/20 transition-colors border-r border-border last:border-r-0"
-    style={{ animationDelay: `${index * 150}ms` }}
-  >
-    <div className="flex items-center gap-2 mb-3 opacity-60 group-hover:opacity-100 transition-opacity">
-      <Icon className={`w-5 h-5 ${color}`} />
-    </div>
-    <div
-      className={`text-4xl md:text-5xl font-bold mb-2 ${color} tracking-tighter`}
-    >
-      {value}
-    </div>
-    <div className="text-[10px] font-mono text-muted-foreground uppercase tracking-widest">
-      {label}
-    </div>
-  </div>
-);
 
-export default function LandingPage({
-  onOpenAuth,
-}: {
-  onOpenAuth: (mode: 'login' | 'signup') => void;
-}) {
-  const [scrolled, setScrolled] = useState(0);
+    {/* ================= RIGHT (FORM CARD) ================= */}
+    <div className="bg-[#FFF1E6] rounded-[32px] p-14 shadow-[0_40px_120px_rgba(0,0,0,0.2)]">
 
-  useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY);
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+      <h3 className="text-3xl font-serif text-[#3F5D50] mb-12">
+        Get in touch
+      </h3>
 
-  return (
-    // Base uses semantic colors
-    <div className="bg-background text-foreground font-sans selection:bg-primary/30">
-      {/* --- HERO SECTION --- */}
-      <div
-        id="home"
-        className="relative h-screen w-full overflow-hidden flex flex-col justify-center border-b border-border"
-      >
-        {/* 1. Immersive Background (Adaptive Opacity/Saturation) */}
-        <div className="absolute inset-0 z-0">
-          <img
-            src="https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=2072&auto=format&fit=crop"
-            alt="Satellite Map"
-            className="w-full h-full object-cover scale-110 opacity-70 saturate-100 dark:opacity-40"
-            style={{
-              transform: `translateY(${scrolled * 0.2}px) scale(1.1)`,
-              animationDuration: '120s',
-            }}
-          />
+      <form className="space-y-8">
 
-          {/* Soft color overlays for light theme */}
-          <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-background/40 to-accent/10" />
-          <div className="absolute inset-0 bg-gradient-to-r from-background/90 via-background/60 to-transparent" />
-          <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent" />
-
-          {/* Subtle grid using slate-like tone */}
-          <div className="absolute inset-0 bg-[linear-gradient(rgba(15,23,42,0.04)_1px,transparent_1px),linear-gradient(90deg,rgba(15,23,42,0.04)_1px,transparent_1px)] bg-[size:100px_100px] opacity-30 dark:opacity-40" />
-        </div>
-
-        {/* 2. Hero Content */}
-        <div className="relative z-20 container mx-auto px-6 lg:px-12 pt-20">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            {/* Left: Text Content */}
-            <div className="max-w-3xl">
-              <div className="inline-flex items-center gap-3 px-3 py-1.5 rounded-full border border-primary/20 bg-primary/10 backdrop-blur-md text-sm mb-8 animate-fade-in uppercase tracking-widest text-primary shadow-sm">
-                <Activity className="w-3 h-3 animate-pulse" />
-                Global Network Active
-              </div>
-
-              <h1 className="text-6xl md:text-7xl lg:text-8xl font-medium text-foreground leading-[0.95] tracking-tight mb-8 animate-in slide-in-from-bottom-6 duration-1000">
-                Digitizing <br />
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-teal-400 to-cyan-500 animate-gradient-x">
-                  Nature&apos;s Value.
-                </span>
-              </h1>
-
-              <p className="text-lg md:text-xl text-muted-foreground max-w-xl leading-relaxed mb-10 font-light animate-in slide-in-from-bottom-8 duration-1000 delay-100 border-l-2 border-border pl-6">
-                AI-driven verification. Satellite precision.
-                <span className="text-foreground font-medium">
-                  {' '}
-                  The new standard for carbon trading.
-                </span>
-              </p>
-
-              {/* Buttons */}
-              <div className="flex flex-wrap gap-4 animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-200">
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    onOpenAuth('signup');
-                  }}
-                  className="h-14 px-8 rounded-full bg-primary text-primary-foreground font-bold text-sm uppercase tracking-widest hover:opacity-90 transition-all hover:scale-105 flex items-center gap-2 shadow-lg"
-                >
-                  Start Offsetting
-                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                </button>
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    document
-                      .getElementById('mission')
-                      ?.scrollIntoView({ behavior: 'smooth' });
-                  }}
-                  className="h-14 px-8 rounded-full border border-input bg-background/50 backdrop-blur-md text-foreground font-medium hover:bg-background/80 transition-all hover:border-primary/30"
-                >
-                  Explore Technology
-                </button>
-              </div>
-            </div>
-
-            {/* Right: Data Console */}
-            <div className="flex justify-end">
-              <DataConsole />
-            </div>
-          </div>
-        </div>
-
-        {/* 3. Floating News Card */}
-        <NewsCard />
-      </div>
-
-      {/* --- DATA STRIP --- */}
-      <div className="border-y border-border bg-card/70 backdrop-blur-sm relative z-20">
-        <div className="container mx-auto px-6 lg:px-12 grid grid-cols-2 md:grid-cols-4 divide-x divide-border">
-          <StatItem
-            label="CO2 Removed"
-            value="2.5M t"
-            index={0}
-            color="text-foreground"
-            icon={Layers}
-          />
-          <StatItem
-            label="Active Projects"
-            value="142"
-            index={1}
-            color="text-primary"
-            icon={Globe}
-          />
-          <StatItem
-            label="Market Cap"
-            value="$84M"
-            index={2}
-            color="text-blue-500"
-            icon={BarChart3}
-          />
-          <StatItem
-            label="Partners"
-            value="500+"
-            index={3}
-            color="text-pink-500"
-            icon={ShieldCheck}
-          />
-        </div>
-      </div>
-
-      {/* --- MISSION / TECH --- */}
-      <div id="mission" className="py-32 px-6 bg-background relative overflow-hidden">
-        {/* Background blobs for color */}
-        <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-primary/5 blur-[120px] rounded-full pointer-events-none" />
-
-        <div className="container mx-auto px-6 lg:px-12 relative z-10">
-          <div className="mb-24 max-w-3xl">
-            <div className="flex items-center gap-2 text-primary font-mono text-xs mb-6 uppercase tracking-widest">
-              <Layers className="w-4 h-4" /> Intelligent Verification
-            </div>
-            <h2 className="text-4xl md:text-6xl font-medium text-foreground mb-8 leading-tight tracking-tight">
-              Data-Driven <br /> Climate Action.
-            </h2>
-            <p className="text-lg text-muted-foreground leading-relaxed font-light">
-              We verify projects using{' '}
-              <span className="text-primary font-medium">
-                satellite telemetry
-              </span>{' '}
-              and on-chain ledger technology. Ensure your impact is real,
-              measurable, and permanent.
-            </p>
-          </div>
-
-          <div className="grid md:grid-cols-3 gap-6">
-            <FeatureCard
-              icon={ShieldCheck}
-              title="Verified Quality"
-              desc="Every credit is verified by independent bodies like Verra and Gold Standard. Zero double counting."
-              delay="0ms"
+        {/* Name */}
+        <div className="grid grid-cols-2 gap-6">
+          <div>
+            <label className="block text-sm text-[#3F5D50] mb-2">
+              First name *
+            </label>
+            <input
+              className="w-full h-12 rounded-md bg-[#E6DDD3] px-4 focus:outline-none"
             />
-            <FeatureCard
-              icon={Globe}
-              title="Global Scale"
-              desc="From the Amazon rainforest to renewable energy in India, our portfolio spans 40+ countries."
-              delay="150ms"
-            />
-            <FeatureCard
-              icon={Cpu}
-              title="API First"
-              desc="Integrate carbon offsetting directly into your checkout flow with our developer-friendly API."
-              delay="300ms"
+          </div>
+          <div>
+            <label className="block text-sm text-[#3F5D50] mb-2">
+              Last name
+            </label>
+            <input
+              className="w-full h-12 rounded-md bg-[#E6DDD3] px-4 focus:outline-none"
             />
           </div>
         </div>
-      </div>
 
-      {/* --- CONTACT SECTION --- */}
-      <div id="about" className="py-32 border-t border-border bg-card">
-        <div className="container mx-auto px-6 lg:px-12">
-          <div className="grid lg:grid-cols-2 gap-20">
-            <div>
-              <h2 className="text-4xl md:text-6xl font-medium text-foreground mb-8 tracking-tight">
-                Partner with us.
-              </h2>
-              <p className="text-lg text-muted-foreground font-light mb-12">
-                Ready to institutionalize your climate strategy? We help large
-                enterprises measure and neutralize their footprint.
-              </p>
-
-              <div className="space-y-6">
-                <div className="flex items-center gap-6 p-6 rounded-xl bg-card/60 border border-border hover:border-primary/50 transition-colors cursor-pointer group">
-                  <div className="h-12 w-12 rounded-full bg-background flex items-center justify-center text-foreground group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
-                    <Mail className="h-5 w-5" />
-                  </div>
-                  <div>
-                    <p className="text-[10px] text-muted-foreground uppercase tracking-wider mb-1 font-bold">
-                      General Inquiries
-                    </p>
-                    <p className="text-foreground text-lg group-hover:text-primary transition-colors">
-                      hello@offset.io
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-6 p-6 rounded-xl bg-card/60 border border-border hover:border-primary/50 transition-colors cursor-pointer group">
-                  <div className="h-12 w-12 rounded-full bg-background flex items-center justify-center text-foreground group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
-                    <MapPin className="h-5 w-5" />
-                  </div>
-                  <div>
-                    <p className="text-[10px] text-muted-foreground uppercase tracking-wider mb-1 font-bold">
-                      Headquarters
-                    </p>
-                    <p className="text-foreground text-lg">
-                      123 Innovation Dr, Tech City
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-card border border-border p-10 rounded-3xl relative overflow-hidden">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-primary/20 rounded-full blur-3xl pointer-events-none" />
-
-              <h3 className="text-2xl font-medium text-foreground mb-8 flex items-center gap-3">
-                <Zap className="w-5 h-5 text-primary" /> Initialize Request
-              </h3>
-
-              <form
-                className="space-y-6"
-                onSubmit={(e) => e.preventDefault()}
-              >
-                <div className="grid grid-cols-2 gap-6">
-                  <div className="space-y-2">
-                    <label className="text-xs font-mono text-muted-foreground uppercase tracking-wider">
-                      First Name
-                    </label>
-                    <input
-                      type="text"
-                      className="w-full bg-background/50 border border-input rounded-lg px-4 py-3 text-foreground focus:border-primary/50 focus:outline-none transition-colors placeholder:text-muted-foreground font-mono text-sm"
-                      placeholder="Jane"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-xs font-mono text-muted-foreground uppercase tracking-wider">
-                      Last Name
-                    </label>
-                    <input
-                      type="text"
-                      className="w-full bg-background/50 border border-input rounded-lg px-4 py-3 text-foreground focus:border-primary/50 focus:outline-none transition-colors placeholder:text-muted-foreground font-mono text-sm"
-                      placeholder="Doe"
-                    />
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <label className="text-xs font-mono text-muted-foreground uppercase tracking-wider">
-                    Work Email
-                  </label>
-                  <input
-                    type="email"
-                    className="w-full bg-background/50 border border-input rounded-lg px-4 py-3 text-foreground focus:border-primary/50 focus:outline-none transition-colors placeholder:text-muted-foreground font-mono text-sm"
-                    placeholder="jane@company.com"
-                  />
-                </div>
-                <button
-                  type="submit"
-                  className="w-full bg-primary text-primary-foreground font-bold py-4 rounded-lg hover:opacity-90 transition-colors mt-4 uppercase tracking-widest text-sm shadow-xl"
-                >
-                  Submit Request
-                </button>
-              </form>
-            </div>
+        {/* Email + Phone */}
+        <div className="grid grid-cols-2 gap-6">
+          <div>
+            <label className="block text-sm text-[#3F5D50] mb-2">
+              Email *
+            </label>
+            <input
+              type="email"
+              className="w-full h-12 rounded-md bg-[#E6DDD3] px-4 focus:outline-none"
+            />
+          </div>
+          <div>
+            <label className="block text-sm text-[#3F5D50] mb-2">
+              Phone
+            </label>
+            <input
+              className="w-full h-12 rounded-md bg-[#E6DDD3] px-4 focus:outline-none"
+            />
           </div>
         </div>
-      </div>
+
+        {/* Message */}
+        <div>
+          <label className="block text-sm text-[#3F5D50] mb-2">
+            Write a message
+          </label>
+          <textarea
+            rows={4}
+            className="w-full rounded-md bg-[#E6DDD3] px-4 py-3 focus:outline-none"
+          />
+        </div>
+
+        {/* Submit */}
+        <button
+          type="submit"
+          className="
+            w-full h-14 rounded-md
+            bg-[#3F5D50] text-white
+            font-medium
+            hover:bg-[#2F4A40]
+            transition
+          "
+        >
+          Submit
+        </button>
+      </form>
+    </div>
+  </div>
+</section>
+
+
+      
+
     </div>
   );
 }

@@ -366,7 +366,7 @@ export default function ProjectDetail({ project, onBack }: ProjectDetailProps) {
 
         <div className="absolute inset-0 z-0">
            <img src={project.image} alt={project.projectName} className={`w-full h-full object-cover transition-transform duration-[30s] ease-out ${mounted ? 'scale-105' : 'scale-100'}`} />
-           <div className="absolute inset-0 bg-gradient-to-t from-white/10 via-white/70 to-transparent" />
+           <div className="absolute inset-0 bg-gradient-to-t from-white/0" />
            <div className="absolute inset-0 bg-[linear-gradient(rgba(0,0,0,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(0,0,0,0.02)_1px,transparent_1px)] bg-[size:100px_100px] opacity-30" />
         </div>
 
@@ -386,13 +386,13 @@ export default function ProjectDetail({ project, onBack }: ProjectDetailProps) {
                         ID: {project.unicId}
                       </span>
                    </div>
-                   <h1 className="text-5xl md:text-7xl font-bold text-foreground leading-[0.9] animate-in slide-in-from-bottom-6 duration-700">{project.projectName}</h1>
+                   <h1 className="text-5xl md:text-7xl font-bold text-white leading-[0.9] animate-in slide-in-from-bottom-6 duration-700">{project.projectName}</h1>
                    <div className="flex items-center gap-6 text-sm text-muted-foreground font-mono animate-in slide-in-from-bottom-8 duration-700">
-                      <span className="flex items-center gap-2"><MapPin className="w-4 h-4 text-emerald-500" /> {project.location}</span>
-                      <span className="text-muted-foreground">|</span>
-                      <span className="flex items-center gap-2"><Calendar className="w-4 h-4 text-emerald-500" /> Vintage: {project.vintage}</span>
-                      <span className="text-muted-foreground">|</span>
-                      <span className="flex items-center gap-2"><Shield className="w-4 h-4 text-emerald-500" /> {project.registry} Verified</span>
+                      <span className="flex items-center gap-2  text-white"><MapPin className="w-4 h-4 text-emerald-500" /> {project.location}</span>
+                      <span className="text-muted-foreground  text-white">|</span>
+                      <span className="flex items-center gap-2  text-white"><Calendar className="w-4 h-4 text-emerald-500" /> Vintage: {project.vintage}</span>
+                      <span className="text-muted-foreground  text-white">|</span>
+                      <span className="flex items-center gap-2 text-white"><Shield className="w-4 h-4 text-emerald-500" /> {project.registry} Verified</span>
                    </div>
                 </div>
                 
@@ -403,8 +403,8 @@ export default function ProjectDetail({ project, onBack }: ProjectDetailProps) {
                          <circle cx="64" cy="64" r="60" stroke="#10b981" strokeWidth="6" fill="transparent" strokeDasharray="377" strokeDashoffset={377 - (377 * cappedTrust) / 100} className="transition-all duration-[2s] ease-out" />
                       </svg>
                       <div className="absolute inset-0 flex flex-col items-center justify-center">
-                         <span className="text-4xl font-bold text-foreground">{cappedTrust}</span>
-                         <span className="text-[9px] uppercase tracking-widest text-muted-foreground font-bold">Trust Score</span>
+                         <span className="text-4xl font-bold text-white">{cappedTrust}</span>
+                         <span className="text-[9px] uppercase tracking-widest text-muted-foreground font-bold text-white">Trust Score</span>
                       </div>
                    </div>
                 </div>
@@ -453,7 +453,7 @@ export default function ProjectDetail({ project, onBack }: ProjectDetailProps) {
                     </div>
 
                     {/* Active Scan Region */}
-                    <div className="absolute top-1/3 left-1/3 w-64 h-48 border-2 border-emerald-200 bg-emerald-50 rounded-lg flex items-center justify-center">
+                    <div className="absolute top-1/3 left-1/3 w-64 h-48 border-2 border-emerald-200 rounded-lg flex items-center justify-center">
                         <div className="text-emerald-600 font-mono text-xs font-bold bg-white/70 px-2 py-1">ZONE A4: VERIFIED</div>
                     </div>
                  </div>

@@ -12,13 +12,21 @@ const HomePage = lazy(() => import('./components/home/HomePage'));
 const Explorer = lazy(() => import('./components/explorer/Explorer'));
 const Portfolio = lazy(() => import('./components/portfolio/Portfolio'));
 const AboutPage = lazy(() => import('./components/about/AboutPage'));
+const ContactPage = lazy(() => import('./components/contact/ContactPage'));
 const ProjectDetail = lazy(
   () => import('./components/explorer/ProjectDetail')
 );
 
-export type ViewState = 'landing' | 'home' | 'marketplace' | 'portfolio' | 'about';
+// ✅ ADD contact here
+export type ViewState =
+  | 'landing'
+  | 'home'
+  | 'marketplace'
+  | 'portfolio'
+  | 'about'
+  | 'contact';
 
-// --- LOADING SPINNER (Adaptive) ---
+// --- LOADING SPINNER ---
 const PageLoader = () => (
   <div className="h-screen w-full flex items-center justify-center bg-background">
     <Loader2 className="w-10 h-10 text-primary animate-spin" />
@@ -26,49 +34,47 @@ const PageLoader = () => (
 );
 
 function App() {
-  
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [authMode, setAuthMode] = useState<'login' | 'signup'>('signup');
 
-  // THEME: default to light, read from localStorage if present
+  const [showContact, setShowContact] = useState(false);
+
   const [theme, setTheme] = useState<'dark' | 'light'>(() => {
-    if (typeof window === 'undefined') return 'light';
     const stored = localStorage.getItem('offset_theme');
-    if (stored === 'dark' || stored === 'light') return stored;
-    return 'light';
+    return stored === 'dark' ? 'dark' : 'light';
   });
 
   const [currentView, setCurrentView] = useState<ViewState>(() => {
     const savedAuth = localStorage.getItem('offset_isLoggedIn');
     return savedAuth === 'true' ? 'home' : 'landing';
   });
-  const [selectedProject, setSelectedProject] = useState<CarbonCredit | null>(
-    null
-  );
+
+  const [selectedProject, setSelectedProject] =
+    useState<CarbonCredit | null>(null);
 
   const [isLoggedIn, setIsLoggedIn] = useState(
     () => localStorage.getItem('offset_isLoggedIn') === 'true'
   );
 
-  // Apply Theme Class to HTML Tag + persist theme
+  // Apply Theme
   useEffect(() => {
-    const root = window.document.documentElement;
-
-    if (theme === 'dark') {
-      root.classList.add('dark');
-    } else {
-      root.classList.remove('dark');
-    }
-
+    const root = document.documentElement;
+    theme === 'dark'
+      ? root.classList.add('dark')
+      : root.classList.remove('dark');
     localStorage.setItem('offset_theme', theme);
   }, [theme]);
 
-  // Actions
-  const toggleTheme = () => {
+  const toggleTheme = () =>
     setTheme((prev) => (prev === 'dark' ? 'light' : 'dark'));
-  };
 
+  // ✅ UPDATED NAVIGATION HANDLER
   const handleNavigate = (view: ViewState) => {
+    if (view === 'contact') {
+      setShowContact(true);
+      return;
+    }
+
     setCurrentView(view);
     setSelectedProject(null);
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -93,9 +99,9 @@ function App() {
   };
 
   return (
-    <div className="min-h-screen bg-background text-foreground transition-colors duration-300 font-sans selection:bg-primary/30">
+    <div className="min-h-screen bg-background text-foreground font-sans">
       <Header
-        showContent={true}
+        showContent
         isLoggedIn={isLoggedIn}
         currentView={currentView}
         onNavigate={handleNavigate}
@@ -105,6 +111,7 @@ function App() {
         onToggleTheme={toggleTheme}
       />
 
+      {/* AUTH MODAL */}
       {isAuthModalOpen && (
         <Suspense fallback={null}>
           <AuthModal
@@ -116,36 +123,42 @@ function App() {
         </Suspense>
       )}
 
-      <main className="transition-opacity duration-700">
+      {/* CONTACT MODAL */}
+      {showContact && (
+        <Suspense fallback={null}>
+          <ContactPage onClose={() => setShowContact(false)} />
+        </Suspense>
+      )}
+
+      {/* MAIN CONTENT */}
+      <main>
         <Suspense fallback={<PageLoader />}>
           {isLoggedIn ? (
-            <>
-              {selectedProject ? (
-                <ProjectDetail
-                  project={selectedProject}
-                  onBack={() => handleNavigate('marketplace')}
-                />
-              ) : (
-                <>
-                  {currentView === 'home' && (
-                    <HomePage onNavigate={handleNavigate} />
-                  )}
-                  {currentView === 'marketplace' && (
-                    <Explorer
-                      onSelectProject={(p: CarbonCredit) => {
-                        setSelectedProject(p);
-                        window.scrollTo(0, 0);
-                      }}
-                    />
-                  )}
-                  {currentView === 'portfolio' && <Portfolio />}
-                  {currentView === 'about' && <AboutPage />}
-                  {currentView === 'landing' && (
-                    <HomePage onNavigate={handleNavigate} />
-                  )}
-                </>
-              )}
-            </>
+            selectedProject ? (
+              <ProjectDetail
+                project={selectedProject}
+                onBack={() => handleNavigate('marketplace')}
+              />
+            ) : (
+              <>
+                {currentView === 'home' && (
+                  <HomePage onNavigate={handleNavigate} />
+                )}
+                {currentView === 'marketplace' && (
+                  <Explorer
+                    onSelectProject={(p: CarbonCredit) => {
+                      setSelectedProject(p);
+                      window.scrollTo(0, 0);
+                    }}
+                  />
+                )}
+                {currentView === 'portfolio' && <Portfolio />}
+                {currentView === 'about' && <AboutPage />}
+                {currentView === 'landing' && (
+                  <HomePage onNavigate={handleNavigate} />
+                )}
+              </>
+            )
           ) : currentView === 'about' ? (
             <AboutPage />
           ) : (
