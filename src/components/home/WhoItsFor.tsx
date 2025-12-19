@@ -4,23 +4,25 @@ import { mockCredits } from '@/lib/mock-data';
 
 const VISIBLE_CARDS = 3;
 
-export default function WhoItsFor() {
+import { ViewState } from '@/lib/types';
+
+export default function WhoItsFor({ onNavigate }: { onNavigate?: (view: ViewState) => void }) {
   const [index, setIndex] = useState(0);
 
   const cards = mockCredits.slice(0, 6); // add more if needed
   const maxIndex = cards.length - VISIBLE_CARDS;
 
-  const next = () => {
+    const next = () => {
     setIndex(prev => Math.min(prev + 1, maxIndex));
   };
 
   const prev = () => {
     setIndex(prev => Math.max(prev - 1, 0));
   };
-
-    function onNavigate(arg0: string): void {
-        throw new Error('Function not implemented.');
-    }
+  const navigate = (view: ViewState): void => {
+    if (onNavigate) onNavigate(view);
+    else console.log('navigate to', view);
+  };
 
   return (
     <section className="relative bg-[#d6ccb8] py-32 overflow-hidden">
@@ -58,8 +60,8 @@ export default function WhoItsFor() {
   </div>
 
   {/* EXPLORE MARKET */}
-  <button
-    onClick={() => onNavigate('marketplace')}
+    <button
+    onClick={() => navigate('marketplace')}
     className="
       px-10 py-4
       rounded-full

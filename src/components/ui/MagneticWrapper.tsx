@@ -1,9 +1,15 @@
 import { useRef } from "react";
 
-export default function MagneticWrapper({ children, strength = 40 }) {
+export default function MagneticWrapper({
+  children,
+  strength = 40,
+}: {
+  children: React.ReactNode;
+  strength?: number;
+}) {
   const ref = useRef<HTMLDivElement>(null);
 
-  const handleMouseMove = (e: any) => {
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     const el = ref.current;
     if (!el) return;
 

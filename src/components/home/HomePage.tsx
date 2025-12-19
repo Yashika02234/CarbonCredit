@@ -35,8 +35,10 @@ function useScrollReveal() {
   }, []);
 }
 
+import { ViewState } from '@/lib/types';
+
 interface HomePageProps {
-  onNavigate: (view: 'marketplace' | 'portfolio' | 'home' | 'about') => void;
+  onNavigate?: (view: ViewState) => void;
 }
 
 /* ======================================================
@@ -146,7 +148,7 @@ export default function HomePage({ onNavigate }: HomePageProps) {
 
         {/* ================= MARKETPLACE PREVIEW ================= */}
         
-<WhoItsFor />
+      <WhoItsFor onNavigate={onNavigate} />
       </main>
 
       <Footer />

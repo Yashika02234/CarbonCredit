@@ -2,9 +2,11 @@ import { useEffect, useRef } from "react";
 
 export default function ScrollReveal({
   children,
-  animation = "fade-up",
   delay = 0,
-}: any) {
+}: {
+  children: React.ReactNode;
+  delay?: number;
+}) {
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {

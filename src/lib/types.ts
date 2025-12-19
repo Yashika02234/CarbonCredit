@@ -46,3 +46,11 @@ export interface ReportData {
     breakdown: { type: string, percentage: string }[];
     sdgs: { num: string, label: string }[];
 }
+
+export type ViewState =
+  | 'landing'
+  | 'home'
+  | 'marketplace'
+  | 'portfolio'
+  | 'about'
+  | 'contact';

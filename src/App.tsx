@@ -1,6 +1,6 @@
 import { useState, Suspense, lazy } from 'react';
 import { Loader2 } from 'lucide-react';
-import { CarbonCredit } from './lib/types';
+import { CarbonCredit, ViewState } from './lib/types';
 
 // --- IMPORTS ---
 import Header from './components/layout/Header';
@@ -15,13 +15,7 @@ const AboutPage = lazy(() => import('./components/about/AboutPage'));
 const ContactPage = lazy(() => import('./components/contact/ContactPage'));
 const ProjectDetail = lazy(() => import('./components/explorer/ProjectDetail'));
 
-export type ViewState =
-  | 'landing'
-  | 'home'
-  | 'marketplace'
-  | 'portfolio'
-  | 'about'
-  | 'contact';
+// ViewState is imported from ./lib/types
 
 const PageLoader = () => (
   <div className="h-screen w-full flex items-center justify-center bg-background">
