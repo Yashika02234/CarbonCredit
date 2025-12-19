@@ -1,7 +1,6 @@
 /* eslint-disable no-irregular-whitespace */
 import { useState } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-
 import StickyHome from "./StickyHome";
 
 // Assets
@@ -39,7 +38,6 @@ const testimonials: Testimonial[] = [
   },
 ];
 
-// ✅ DEFINE THE PROPS INTERFACE
 interface LandingPageProps {
   onOpenAuth: (mode: 'login' | 'signup') => void;
 }
@@ -60,7 +58,6 @@ export default function LandingPage({ onOpenAuth }: LandingPageProps) {
       {/* ================= WHAT WE DO ================= */}
       <section id="what-we-do" className="relative bg-[#f3f4ff] px-6 lg:px-12 py-42">
         <div className="max-w-[1600px] mx-auto flex gap-20">
-          {/* LEFT: STICKY IMAGE */}
           <div className="w-[45%] hidden lg:block">
             <div className="relative h-full">
               <div className="sticky top-32">
@@ -75,7 +72,6 @@ export default function LandingPage({ onOpenAuth }: LandingPageProps) {
             </div>
           </div>
 
-          {/* RIGHT: SCROLL CONTENT */}
           <div className="w-full lg:w-[55%] py-32 space-y-72">
             {[
               {
@@ -137,10 +133,15 @@ export default function LandingPage({ onOpenAuth }: LandingPageProps) {
               onClick={() => setTestimonialIndex(prev => (prev === 0 ? testimonials.length - 1 : prev - 1))}
               className="absolute left-0 md:-left-20 p-4 rounded-full border border-gray-300 hover:border-[#30574E] transition-all"
             >
-              <ChevronLeft className="w-6 h-6" />
+              <ChevronLeft className="w-6 h-6 text-gray-600" />
             </button>
 
             <div key={testimonialIndex} className="max-w-3xl px-6">
+              <div className="flex justify-center mb-10">
+                {[...Array(5)].map((_, i) => (
+                  <span key={i} className="text-[#30574E] text-lg">★</span>
+                ))}
+              </div>
               <p className="text-2xl md:text-3xl leading-relaxed text-[#30574E] mb-12 font-light italic">
                 “{testimonials[testimonialIndex].quote}”
               </p>
@@ -152,89 +153,90 @@ export default function LandingPage({ onOpenAuth }: LandingPageProps) {
               onClick={() => setTestimonialIndex(prev => (prev === testimonials.length - 1 ? 0 : prev + 1))}
               className="absolute right-0 md:-right-20 p-4 rounded-full border border-gray-300 hover:border-[#30574E] transition-all"
             >
-              <ChevronRight className="w-6 h-6" />
+              <ChevronRight className="w-6 h-6 text-gray-600" />
             </button>
           </div>
         </div>
       </section>
 
-      {/* ================= CALL TO ACTION ================= */}
-     {/* ================= DISCOVER CARBON ================= */}
-<section className="relative w-full py-32 px-6 lg:px-12 overflow-hidden">
-
-  {/* Background Image */}
-  <div
-    className="absolute inset-0 bg-cover bg-center"
-    style={{
-      backgroundImage:
-        "url('https://images.unsplash.com/photo-1521737604893-d14cc237f11d?q=80&w=2000')",
-    }}
-  />
-
-  {/* Soft Overlay */}
-  <div className="absolute inset-0  " />
-
-  {/* Content */}
-  <div className="relative z-10 max-w-[1100px] mx-auto flex justify-center">
-
-    <div
-      className="
-        bg-[#f3f4ff]
-        rounded-[24px]
-        px-14 py-16
-        text-center
-        max-w-[720px]
-        shadow-[0_40px_120px_rgba(0,0,0,0.12)]
-        transition-transform
-        hover:-translate-y-1
-      "
-    >
-      <h2 className="text-4xl md:text-5xl font-medium tracking-tight text-gray-900 mb-8">
-        Discover Carbon
-      </h2>
-
-      <p className="text-gray-700 text-base leading-relaxed mb-10 max-w-xl mx-auto">
-        Explore the world of carbon trading with Offset. Learn about carbon
-        credits, CCUs, and the Paris Agreement. Stay informed with market
-        updates and compliance links.
-      </p>
-
-      <button
-        className="
-          bg-black text-white
-          px-8 py-4
-          text-sm font-medium
-          rounded-md
-          hover:bg-gray-900
-          transition
-        "
-      >
-        Learn More
-      </button>
-    </div>
-
-  </div>
-</section>
-
-      {/* ================= FOOTER / CONTACT ================= */}
-      <footer className="bg-[#3F5D50] text-white py-20 px-6 lg:px-12">
-        <div className="max-w-[1600px] mx-auto grid md:grid-cols-2 gap-20">
-          <div>
-            <h2 className="text-4xl font-medium mb-6">Offset</h2>
-            <p className="text-white/80 max-w-sm mb-10">Building transparent, data-backed infrastructure for global carbon markets.</p>
-            <button 
-              onClick={() => onOpenAuth('login')}
-              className="border border-white/40 px-6 py-2 rounded-full hover:bg-white hover:text-[#3F5D50] transition"
+      {/* ================= DISCOVER CARBON ================= */}
+      <section className="relative w-full py-32 px-6 lg:px-12 overflow-hidden">
+        <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: "url('https://images.unsplash.com/photo-1521737604893-d14cc237f11d?q=80&w=2000')" }} />
+        <div className="relative z-10 max-w-[1100px] mx-auto flex justify-center">
+          <div className="bg-[#f3f4ff] rounded-[24px] px-14 py-16 text-center max-w-[720px] shadow-[0_40px_120px_rgba(0,0,0,0.12)] transition-transform hover:-translate-y-1">
+            <h2 className="text-4xl md:text-5xl font-medium tracking-tight text-gray-900 mb-8">Discover Carbon</h2>
+            <p className="text-gray-700 text-base leading-relaxed mb-10 max-w-xl mx-auto">
+              Explore the world of carbon trading with Offset. Learn about carbon credits, CCUs, and the Paris Agreement.
+            </p>
+            <button
+              onClick={() => onOpenAuth('signup')} // ✅ USE HERE
+              className="bg-black text-white px-8 py-4 text-sm font-medium rounded-md hover:bg-gray-900 transition"
             >
-              Partner Login
+              Get Started
             </button>
           </div>
-          <div className="bg-[#FFF1E6] text-[#3F5D50] p-10 rounded-[32px]">
-             <h3 className="text-2xl mb-6">Stay Updated</h3>
-             <p className="mb-6">Join our newsletter for the latest in carbon market insights.</p>
-             <button onClick={() => onOpenAuth('signup')} className="w-full bg-[#3F5D50] text-white py-4 rounded-xl">Join the Platform</button>
-          </div>
         </div>
+      </section>
+
+      {/* ================= FOOTER ================= */}
+      <footer className="bg-[#3F5D50] text-white">
+        <section className="relative px-6 lg:px-12 py-32">
+          <div className="max-w-[1600px] mx-auto grid lg:grid-cols-2 gap-24 items-center">
+            <div className="text-white grid grid-cols-2 gap-20">
+              <div className="flex flex-col justify-between">
+                <div>
+                  <h2 className="text-4xl font-medium tracking-tight mb-6">Offset</h2>
+                  <p className="text-sm text-white/85 leading-relaxed max-w-xs mb-14">
+                    Building transparent, data-backed infrastructure for global carbon markets.
+                  </p>
+                  <div className="space-y-3 text-sm text-white/90">
+                    <p>123-456-7890</p>
+                    <p>info@offset.com</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex flex-col justify-center">
+                <div className="mb-12">
+                  <p className="text-xs uppercase tracking-widest text-white/70 mb-6">Why contact us</p>
+                  <ul className="space-y-5 text-sm text-white/90">
+                    <li>• Institutional onboarding</li>
+                    <li>• API & data integrations</li>
+                  </ul>
+                </div>
+                {/* Social Login triggers */}
+                <div className="flex items-center gap-6">
+                  {['Login', 'Signup'].map((mode) => (
+                    <button
+                      key={mode}
+                      onClick={() => onOpenAuth(mode.toLowerCase() as 'login' | 'signup')} // ✅ USE HERE
+                      className="text-xs uppercase tracking-widest border border-white/40 px-4 py-2 rounded-full hover:bg-white hover:text-[#3F5D50] transition"
+                    >
+                      {mode}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-[#FFF1E6] rounded-[32px] p-14 shadow-[0_40px_120px_rgba(0,0,0,0.2)]">
+              <h3 className="text-3xl font-serif text-[#3F5D50] mb-12">Ready to contribute?</h3>
+              <form className="space-y-8" onSubmit={(e) => { e.preventDefault(); onOpenAuth('signup'); }}>
+                <div className="grid grid-cols-2 gap-6">
+                  <input placeholder="First name" className="w-full h-12 rounded-md bg-[#E6DDD3] px-4 focus:outline-none placeholder:text-[#3F5D50]/60" />
+                  <input placeholder="Last name" className="w-full h-12 rounded-md bg-[#E6DDD3] px-4 focus:outline-none placeholder:text-[#3F5D50]/60" />
+                </div>
+                <input placeholder="Email" className="w-full h-12 rounded-md bg-[#E6DDD3] px-4 focus:outline-none placeholder:text-[#3F5D50]/60" />
+                <button
+                  type="submit"
+                  className="w-full h-14 rounded-md bg-[#3F5D50] text-white font-medium hover:bg-[#2F4A40] transition"
+                >
+                  Join Now
+                </button>
+              </form>
+            </div>
+          </div>
+        </section>
       </footer>
     </div>
   );
