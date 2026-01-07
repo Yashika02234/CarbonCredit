@@ -52,7 +52,7 @@ export default function LandingPage({ onOpenAuth }: LandingPageProps) {
 
       {/* ================= HERO ================= */}
       <section className="relative h-[380vh] w-full">
-        <StickyHome />
+        <StickyHome onOpenAuth={onOpenAuth} />
       </section>
 
       {/* ================= WHAT WE DO ================= */}
@@ -72,7 +72,7 @@ export default function LandingPage({ onOpenAuth }: LandingPageProps) {
             </div>
           </div>
 
-          <div className="w-full lg:w-[55%] py-32 space-y-72">
+          <div className="w-full lg:w-[55%] py-30 space-y-62">
             {[
               {
                 title: "What We Do",
@@ -114,7 +114,7 @@ export default function LandingPage({ onOpenAuth }: LandingPageProps) {
             <div className="absolute inset-0 bg-[#30574E]/60" />
             <div className="relative z-10 h-full flex flex-col items-center justify-center text-center px-6">
               <h2 className="text-white text-3xl font-bold mb-4">Offset</h2>
-              <p className="text-sm md:text-base text-white/85 tracking-wide">
+              <p className="text-sm md:text-base text-white/85 tracking-wide ">
                 A Global Leader in Carbon Trading
               </p>
             </div>

@@ -1,7 +1,7 @@
 import { useState, useEffect, ButtonHTMLAttributes } from 'react';
 import { Menu, X, User, LogOut, ChevronRight } from 'lucide-react';
 
-type ViewState = 'landing' | 'home' | 'marketplace' | 'portfolio' | 'about' | 'contact';
+import type { ViewState } from '../../lib/types';
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: 'primary' | 'ghost' | 'icon';
@@ -140,7 +140,7 @@ export default function Header({
 
                 <div
                   className="h-8 w-8 rounded-full bg-white/20 flex items-center justify-center cursor-pointer"
-                  onClick={() => handleNav('portfolio')}
+                  onClick={() => handleNav('dashboard')}
                 >
                   <User className="w-4 h-4 text-white" />
                 </div>

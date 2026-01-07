@@ -14,6 +14,8 @@ const Portfolio = lazy(() => import('./components/portfolio/Portfolio'));
 const AboutPage = lazy(() => import('./components/about/AboutPage'));
 const ContactPage = lazy(() => import('./components/contact/ContactPage'));
 const ProjectDetail = lazy(() => import('./components/explorer/ProjectDetail'));
+const Dashboard = lazy(() => import('./components/dashboard/Dashboard'));
+
 
 // ViewState is imported from ./lib/types
 
@@ -108,20 +110,24 @@ function App() {
               />
             ) : (
               <>
-                {currentView === 'home' && <HomePage onNavigate={handleNavigate} />}
-                {currentView === 'marketplace' && (
-                  <Explorer
-                    onSelectProject={(p: CarbonCredit) => {
-                      setSelectedProject(p);
-                      window.scrollTo(0, 0);
-                    }}
-                  />
-                )}
-                {currentView === 'portfolio' && <Portfolio />}
-                {currentView === 'about' && <AboutPage />}
-                {/* Fallback for landing view when logged in */}
-                {currentView === 'landing' && <HomePage onNavigate={handleNavigate} />}
-              </>
+  {currentView === 'home' && <HomePage onNavigate={handleNavigate} />}
+
+  {currentView === 'marketplace' && (
+    <Explorer
+      onSelectProject={(p: CarbonCredit) => {
+        setSelectedProject(p);
+        window.scrollTo(0, 0);
+      }}
+    />
+  )}
+
+  {currentView === 'portfolio' && <Portfolio />}
+  {currentView === 'dashboard' && <Dashboard />}   {/* 👤 FIX */}
+  {currentView === 'about' && <AboutPage />}
+
+  {currentView === 'landing' && <HomePage onNavigate={handleNavigate} />}
+</>
+
             )
           ) : currentView === 'about' ? (
             <AboutPage />

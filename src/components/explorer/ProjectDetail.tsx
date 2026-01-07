@@ -1,27 +1,26 @@
 // src/components/explorer/ProjectDetail.tsx
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import html2canvas from 'html2canvas';
+import jsPDF from 'jspdf';
 import { 
   ArrowLeft, 
-  MapPin, 
-  Shield, 
-  Calendar, 
   Leaf, 
-  Activity, 
-  CheckCircle2, 
   Globe2, 
-  BarChart3, 
-  Layers,
-  FileText,
-  Satellite,
-  Maximize2,
+  CheckCircle2, 
   X,
   CreditCard as CreditCardIcon, 
   Loader2,
   ArrowRight,
+  Smartphone,
+  ChevronDown,
+  Trees,
+  Wind,
+  Search,
+  Download,
+  Calendar,
+  Lock,
   ShieldCheck,
-  Wallet,
-  Flame,
-  Smartphone
+  FileText
 } from 'lucide-react';
 import { CarbonCredit } from '../../lib/types';
 
@@ -30,523 +29,559 @@ interface ProjectDetailProps {
   onBack: () => void;
 }
 
-// --- SUB-COMPONENTS ---
+// --- THEME CONSTANTS ---
+const THEME = {
+  bg: "bg-[#FDFBF7]",
+  card: "bg-[#F4F1E8]",
+  textMain: "text-[#2F3E33]",
+  textSub: "text-[#5C6F66]",
+  greenDark: "bg-[#4F6F52]",
+  greenLight: "bg-[#9CCBA0]",
+  greenSoft: "bg-[#E8EFE8]",
+  border: "border-[#EBE8E0]"
+};
 
-// 1. Metric Tile (Light)
-const MetricCard = ({ label, value, sub, icon: Icon, delay }: any) => (
-  <div 
-    className="bg-card/90 backdrop-blur-sm border border-border p-6 rounded-2xl relative overflow-hidden group hover:border-primary/40 transition-all duration-500 animate-in fade-in slide-in-from-bottom-4"
-    style={{ animationDelay: delay }}
-  >
-    {/* Hover Scan Effect */}
-    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-primary/5 to-transparent -translate-x-[200%] group-hover:translate-x-[200%] transition-transform duration-1000 ease-in-out" />
+// --- HELPER: GENERATE PROPER PDF REPORT ---
+const generateProjectReport = async (project: CarbonCredit) => {
+  // We target the HIDDEN report template, not the main screen
+  const element = document.getElementById('official-report-template');
+  if (!element) {
+    alert("Error finding report template.");
+    return;
+  }
+
+  // Temporarily make it visible/positioned for capture (if needed by some browsers)
+  // but usually absolute positioning off-screen works fine with html2canvas.
+  
+  try {
+    const canvas = await html2canvas(element, { 
+        scale: 2, // High resolution
+        useCORS: true, // Allow images to load
+        logging: false
+    });
     
-    <div className="absolute top-0 right-0 p-4 opacity-20 group-hover:opacity-100 group-hover:text-primary transition-all">
-      <Icon className="w-6 h-6" />
-    </div>
-    <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-2">{label}</p>
-    <p className="text-3xl font-mono font-bold text-foreground mb-1 tracking-tight">{value}</p>
-    {sub && <p className="text-xs text-primary font-mono border-t border-border pt-2 mt-2 inline-block">{sub}</p>}
+    const imgData = canvas.toDataURL('image/jpeg', 1.0);
+    const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+    
+    const pdfWidth = pdf.internal.pageSize.getWidth();
+    const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+    
+    pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight);
+    pdf.save(`${project.projectName.replace(/\s+/g, '_')}_Verified_Report.pdf`);
+  } catch (err) {
+    console.error("PDF Generation failed", err);
+    alert("Could not generate report. Please try again.");
+  }
+};
+
+// --- HIDDEN REPORT COMPONENT (A4 STYLED) ---
+const ReportTemplate = ({ project }: { project: CarbonCredit }) => (
+  <div 
+    id="official-report-template" 
+    className="absolute -left-[9999px] top-0 w-[794px] min-h-[1123px] bg-white text-slate-800 p-12 font-serif"
+    style={{ fontFamily: 'Georgia, serif' }} // Enforce serif for formal look
+  >
+      {/* Header */}
+      <div className="flex justify-between items-start border-b-2 border-slate-800 pb-6 mb-8">
+          <div>
+              <h1 className="text-3xl font-bold text-slate-900 uppercase tracking-wide">Verification Report</h1>
+              <p className="text-sm text-slate-500 mt-1">Carbon Offset Issuance & Project Audit</p>
+          </div>
+          <div className="text-right">
+              <div className="flex items-center justify-end gap-2 text-emerald-700 font-bold mb-1">
+                  <Leaf className="w-5 h-5" /> Offset Platform
+              </div>
+              <p className="text-xs text-slate-400 font-sans">Report ID: OF-{Math.floor(Math.random()*100000)}</p>
+              <p className="text-xs text-slate-400 font-sans">Date: {new Date().toLocaleDateString()}</p>
+          </div>
+      </div>
+
+      {/* Main Project Info */}
+      <div className="mb-10">
+          <h2 className="text-xl font-bold text-slate-800 mb-4 border-l-4 border-emerald-600 pl-3">1. Project Summary</h2>
+          <div className="grid grid-cols-2 gap-8">
+              <div className="space-y-4">
+                  <div>
+                      <p className="text-xs uppercase font-sans font-bold text-slate-400">Project Name</p>
+                      <p className="text-lg font-bold">{project.projectName}</p>
+                  </div>
+                  <div>
+                      <p className="text-xs uppercase font-sans font-bold text-slate-400">Location</p>
+                      <p className="text-base">{project.location}, {project.country}</p>
+                  </div>
+              </div>
+              <div className="space-y-4">
+                  <div className="flex justify-between border-b border-slate-100 pb-2">
+                      <span className="text-sm text-slate-500">Project Type</span>
+                      <span className="font-bold text-slate-800">{project.projectType}</span>
+                  </div>
+                  <div className="flex justify-between border-b border-slate-100 pb-2">
+                      <span className="text-sm text-slate-500">Registry Standard</span>
+                      <span className="font-bold text-slate-800">{project.registry}</span>
+                  </div>
+                  <div className="flex justify-between border-b border-slate-100 pb-2">
+                      <span className="text-sm text-slate-500">Vintage Year</span>
+                      <span className="font-bold text-slate-800">{project.vintage}</span>
+                  </div>
+                  <div className="flex justify-between border-b border-slate-100 pb-2">
+                      <span className="text-sm text-slate-500">Unique Identifier</span>
+                      <span className="font-mono text-xs font-bold text-slate-600">{project.unicId}</span>
+                  </div>
+              </div>
+          </div>
+      </div>
+
+      {/* Impact Data */}
+      <div className="mb-10 bg-slate-50 p-6 rounded-xl border border-slate-200">
+          <h2 className="text-xl font-bold text-slate-800 mb-6 border-l-4 border-emerald-600 pl-3">2. Impact Metrics</h2>
+          
+          <div className="grid grid-cols-3 gap-6 text-center mb-8">
+              <div className="p-4 bg-white rounded shadow-sm">
+                  <p className="text-3xl font-bold text-emerald-700">{project.availableCredits.toLocaleString()}</p>
+                  <p className="text-xs uppercase font-sans font-bold text-slate-400 mt-1">tCO₂ Sequestered</p>
+              </div>
+              <div className="p-4 bg-white rounded shadow-sm">
+                  <p className="text-3xl font-bold text-emerald-700">{project.trustScore || 92}/100</p>
+                  <p className="text-xs uppercase font-sans font-bold text-slate-400 mt-1">Audit Trust Score</p>
+              </div>
+              <div className="p-4 bg-white rounded shadow-sm">
+                  <p className="text-3xl font-bold text-emerald-700">210k</p>
+                  <p className="text-xs uppercase font-sans font-bold text-slate-400 mt-1">Trees Equivalent</p>
+              </div>
+          </div>
+
+          <div className="text-sm text-slate-600 leading-relaxed text-justify">
+              This project has been rigorously audited against the {project.registry} methodology. 
+              Remote sensing data combined with on-ground verification confirms that the carbon 
+              sequestration targets for the vintage year {project.vintage} have been met or exceeded. 
+              The project contributes directly to UN Sustainable Development Goals (SDGs) #13 (Climate Action) 
+              and #15 (Life on Land).
+          </div>
+      </div>
+
+      {/* Verification Stamp Area */}
+      <div className="mt-12 flex justify-between items-end border-t-2 border-slate-800 pt-8">
+          <div>
+              <p className="text-xs font-sans text-slate-400 mb-4">Digitally Signed by:</p>
+              <div className="h-12 w-48 border-b border-dashed border-slate-400 mb-2 relative">
+                  <span className="absolute bottom-2 left-0 font-script text-2xl text-slate-800 italic">Offset Verification Team</span>
+              </div>
+              <p className="text-xs font-bold text-slate-800">Authorized Auditor</p>
+          </div>
+
+          {/* STAMP */}
+          <div className="border-4 border-emerald-600 text-emerald-600 rounded p-2 px-4 transform -rotate-12 opacity-80 select-none">
+              <p className="text-xl font-black uppercase tracking-widest text-center">VERIFIED</p>
+              <p className="text-[10px] font-bold text-center uppercase">Offset Ledger</p>
+          </div>
+      </div>
+
+      {/* Footer */}
+      <div className="mt-auto pt-12 text-center">
+          <p className="text-[10px] text-slate-400 font-sans">
+              This document is a formal record of the project's status at the time of generation. 
+              It does not constitute a financial receipt for a specific transaction unless accompanied by a Transaction Hash.
+          </p>
+      </div>
   </div>
 );
 
-// 2. Timeline Event (Light)
-const TimelineItem = ({ date, title, status }: any) => (
-  <div className="relative pl-8 pb-8 border-l border-border last:pb-0 group">
-    <div className={`absolute -left-[5px] top-0 w-2.5 h-2.5 rounded-full border-2 border-white transition-colors duration-300 ${status === 'complete' ? 'bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.2)]' : 'bg-slate-300'}`} />
-    <div className="flex flex-col gap-1 -mt-1.5">
-      <span className="text-[10px] font-mono text-muted-foreground uppercase tracking-wide">{date}</span>
-      <h4 className="text-sm font-bold text-foreground group-hover:text-primary transition-colors">{title}</h4>
-      <span className="text-[10px] uppercase tracking-wider text-muted-foreground bg-muted w-fit px-2 py-0.5 rounded border border-border mt-1">{status === 'complete' ? 'Verified' : 'Pending Audit'}</span>
+// --- SUB-COMPONENT: AREA CHART (UI ONLY) ---
+const ImpactAreaChart = () => (
+  <div className="relative h-64 w-full">
+    <div className="absolute inset-0 flex flex-col justify-between text-[10px] text-[#8C9E96] font-medium pointer-events-none z-0 py-2">
+       {[600, 500, 400, 250].map((val, i) => (
+         <div key={i} className="flex items-center w-full">
+            <span className="w-8 text-right mr-2 opacity-50">{val}k</span>
+            <div className="h-[1px] w-full bg-[#D6D3C9]/40"></div>
+         </div>
+       ))}
+    </div>
+    <svg viewBox="0 0 100 50" preserveAspectRatio="none" className="absolute inset-0 w-full h-full z-10 pl-10 pb-6 pt-4">
+      <defs>
+        <linearGradient id="chartFill" x1="0" x2="0" y1="0" y2="1">
+          <stop offset="0%" stopColor="#9CCBA0" stopOpacity="0.8" />
+          <stop offset="100%" stopColor="#9CCBA0" stopOpacity="0.1" />
+        </linearGradient>
+      </defs>
+      <path d="M0,50 L10,48 L20,45 L30,40 L40,35 L50,30 L60,25 L70,18 L80,12 L90,8 L100,5 V50 H0 Z" fill="url(#chartFill)" stroke="none" />
+      <path d="M0,50 L10,48 L20,45 L30,40 L40,35 L50,30 L60,25 L70,18 L80,12 L90,8 L100,5" fill="none" stroke="#4F6F52" strokeWidth="0.5" />
+      {[ {x: 20, y: 45}, {x: 40, y: 35}, {x: 60, y: 25}, {x: 80, y: 12} ].map((p, i) => (
+        <circle key={i} cx={p.x} cy={p.y} r="1" fill="#2F3E33" stroke="#FDFBF7" strokeWidth="0.5" />
+      ))}
+    </svg>
+    <div className="absolute bottom-0 left-10 right-0 flex justify-between text-[10px] text-[#8C9E96] font-medium">
+       {['2019', '2020', '2021', '2022', '2023', '2024', '2025'].map(y => <span key={y}>{y}</span>)}
+    </div>
+    <div className="absolute top-4 right-4 bg-white shadow-sm border border-[#EBE8E0] px-3 py-1.5 rounded-lg text-center">
+       <p className="text-xs font-bold text-[#2F3E33]">616,000</p>
+       <p className="text-[9px] text-[#5C6F66] uppercase">Offset</p>
     </div>
   </div>
 );
 
-// --- PAYMENT MODAL (Light) ---
+// --- SUB-COMPONENT: IMPACT STATS ---
+const ImpactStats = () => (
+  <div className="flex flex-col md:flex-row items-center gap-12 h-full w-full">
+     <div className="flex-shrink-0">
+        <div className="relative w-32 h-32">
+           <svg viewBox="0 0 36 36" className="w-full h-full rotate-[-90deg]">
+              <path className="text-[#E8EFE8]" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" strokeWidth="4" />
+              <path className="text-[#4F6F52]" strokeDasharray="75, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round" />
+           </svg>
+           <div className="absolute inset-0 flex flex-col items-center justify-center text-[#2F3E33]">
+              <span className="text-3xl font-serif font-bold">350</span>
+              <span className="text-[9px] uppercase font-bold tracking-widest text-[#5C6F66]">Species</span>
+           </div>
+        </div>
+     </div>
+     <div className="flex-1 w-full h-32 flex items-end justify-between gap-4">
+        {[30, 45, 60, 80, 55, 75, 90].map((h, i) => (
+           <div key={i} className="flex-1 h-full flex flex-col justify-end gap-2 group">
+              <div className={`w-full rounded-t-sm transition-all duration-500 group-hover:opacity-80 ${i % 2 === 0 ? 'bg-[#4F6F52]' : 'bg-[#9CCBA0]'}`} style={{ height: `${h}%` }} />
+              <span className="text-[10px] text-center font-bold text-[#8C9E96]">20{18+i}</span>
+           </div>
+        ))}
+     </div>
+  </div>
+);
 
-interface PaymentModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  project: CarbonCredit;
-  quantity: number;
-  action: 'buy' | 'retire';
-}
-
-function PaymentModal({ isOpen, onClose, project, quantity, action }: PaymentModalProps) {
-  const [step, setStep] = useState<'review' | 'processing' | 'success'>('review');
-  const [paymentMethod, setPaymentMethod] = useState<'card' | 'upi'>('card');
+// --- PAYMENT MODAL ---
+function PaymentModal({ isOpen, onClose, project, quantity }: any) {
+  const [step, setStep] = useState('review');
+  const [paymentMethod, setPaymentMethod] = useState('card');
+  const [cardName, setCardName] = useState('');
+  const [cardNumber, setCardNumber] = useState('');
+  const [expiry, setExpiry] = useState('');
+  const [cvc, setCvc] = useState('');
 
   useEffect(() => {
     if (isOpen) {
       setStep('review');
       setPaymentMethod('card');
+      setCardName('');
+      setCardNumber('');
+      setExpiry('');
+      setCvc('');
     }
   }, [isOpen]);
 
   if (!isOpen) return null;
-
-  const totalCost = project.pricePerCredit * quantity;
-  const fees = totalCost * 0.01; 
-  const finalTotal = totalCost + fees;
   
-  // Theme based on action
-  const themeColor = action === 'retire' ? 'text-emerald-600' : 'text-sky-600';
-  const themeBg = action === 'retire' ? 'bg-emerald-600' : 'bg-sky-600';
-  const themeHover = action === 'retire' ? 'hover:bg-emerald-500' : 'hover:bg-sky-500';
-
-  const handlePurchase = async () => {
+  const handleProcess = async (e: React.FormEvent) => {
+    e.preventDefault();
     setStep('processing');
-    // Simulate transaction time
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    await new Promise(resolve => setTimeout(resolve, 3000));
     setStep('success');
-  };
+  }
+
+  const total = (project.pricePerCredit * quantity).toFixed(2);
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+      <div className="absolute inset-0 bg-[#2F3E33]/40 backdrop-blur-sm transition-opacity" onClick={onClose} />
       
-      {/* 1. Light Backdrop */}
-      <div 
-        className="absolute inset-0 bg-white/60 backdrop-blur-md transition-opacity animate-in fade-in duration-200" 
-        onClick={onClose}
-      />
-
-      {/* 2. The "Transaction Window" */}
-      <div className="relative w-full max-w-lg bg-card border border-border rounded-3xl shadow-xl overflow-hidden animate-in zoom-in-95 duration-300 flex flex-col max-h-[90vh]">
-        
-        {/* Header Bar */}
-        <div className="flex items-center justify-between p-6 border-b border-border bg-white/50">
-          <div className="flex items-center gap-3">
-            <div className={`w-2.5 h-2.5 rounded-full ${step === 'processing' ? 'bg-yellow-400 animate-pulse' : step === 'success' ? themeBg : 'bg-slate-400'}`} />
-            <span className="text-xs font-mono font-bold text-muted-foreground uppercase tracking-widest">
-              {step === 'review' && (action === 'retire' ? 'Confirm Retirement' : 'Confirm Trade')}
-              {step === 'processing' && 'Processing Chain'}
-              {step === 'success' && (action === 'retire' ? 'Asset Retired' : 'Asset Acquired')}
-            </span>
-          </div>
-          <button onClick={onClose} className="text-muted-foreground hover:text-foreground transition-colors">
-            <X className="w-5 h-5" />
-          </button>
+      <div className="relative w-full max-w-md bg-[#FDFBF7] rounded-[2rem] shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+        <div className="flex items-center justify-between p-6 border-b border-[#EBE8E0]">
+           <h3 className="font-serif text-xl text-[#2F3E33]">
+             {step === 'review' ? 'Checkout' : step === 'processing' ? 'Processing' : 'Completed'}
+           </h3>
+           <button onClick={onClose} className="text-[#5C6F66] hover:text-[#2F3E33]"><X className="w-5 h-5"/></button>
         </div>
 
-        {/* Content Body */}
-        <div className="p-8 overflow-y-auto custom-scrollbar">
-          
-          {/* STEP 1: REVIEW */}
+        <div className="p-6 overflow-y-auto">
           {step === 'review' && (
-            <div className="space-y-8 animate-in slide-in-from-right-4 duration-300">
-              
-              {/* Asset Ticket */}
-              <div className="bg-white/5 rounded-2xl p-5 border border-border relative overflow-hidden group">
-                <div className={`absolute top-0 left-0 w-1 h-full ${action === 'retire' ? 'bg-emerald-600' : 'bg-sky-600'}`} />
-                <div className="flex justify-between items-start mb-4">
-                   <div>
-                      <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-bold mb-1">Asset ID</p>
-                      <p className={`text-xs font-mono ${themeColor}`}>{project.unicId}</p>
-                   </div>
-                   <div className="text-right">
-                      <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-bold mb-1">Action</p>
-                      <div className="flex items-center gap-1 text-xs font-bold text-foreground">
-                        {action === 'retire' ? <Flame className="w-3 h-3 text-emerald-500" /> : <Wallet className="w-3 h-3 text-sky-500" />}
-                        {action === 'retire' ? 'Offset (Burn)' : 'Buy (Hold)'}
-                      </div>
-                   </div>
-                </div>
-                <h3 className="text-lg font-bold text-foreground mb-4">{project.projectName}</h3>
-                <div className="flex justify-between items-end border-t border-border pt-4">
-                   <div>
-                      <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-bold mb-1">Quantity</p>
-                      <p className="text-xl font-mono text-foreground">{quantity} t</p>
-                   </div>
-                   <div className="text-right">
-                      <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-bold mb-1">Unit Price</p>
-                      <p className="text-sm font-mono text-muted-foreground">${project.pricePerCredit.toFixed(2)}</p>
-                   </div>
-                </div>
-              </div>
+            <div className="space-y-6">
+               <div className="bg-[#F4F1E8] p-4 rounded-xl flex gap-4">
+                  <img src={project.image} className="w-16 h-16 rounded-lg object-cover" alt="" />
+                  <div>
+                     <p className="font-bold text-[#2F3E33]">{project.projectName}</p>
+                     <p className="text-xs text-[#5C6F66]">{quantity} Tonnes • {project.vintage}</p>
+                     <p className="font-mono text-emerald-700 mt-1">${total}</p>
+                  </div>
+               </div>
+               
+               <div className="grid grid-cols-2 gap-3">
+                  {['card', 'upi'].map(m => (
+                    <button 
+                      key={m}
+                      onClick={() => setPaymentMethod(m)}
+                      className={`flex flex-col items-center justify-center p-4 rounded-xl border-2 transition-all ${paymentMethod === m ? 'border-[#4F6F52] bg-[#E8EFE8]' : 'border-transparent bg-[#F4F1E8]'}`}
+                    >
+                       {m === 'card' ? <CreditCardIcon className="w-5 h-5 mb-1" /> : <Smartphone className="w-5 h-5 mb-1"/>}
+                       <span className="text-xs font-bold uppercase">{m}</span>
+                    </button>
+                  ))}
+               </div>
 
-              {/* Financials */}
-              <div className="space-y-3">
-                <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground font-medium">Subtotal</span>
-                  <span className="text-foreground font-mono">${totalCost.toFixed(2)}</span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground font-medium">Network Fee (1%)</span>
-                  <span className="text-foreground font-mono">${fees.toFixed(2)}</span>
-                </div>
-                <div className="h-px bg-border my-2" />
-                <div className="flex justify-between text-lg">
-                  <span className="text-foreground font-bold">Total</span>
-                  <span className={`font-mono font-bold ${themeColor}`}>${finalTotal.toFixed(2)}</span>
-                </div>
-              </div>
-
-              {/* Payment Method Selection */}
-              <div className="space-y-4">
-                <p className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest">Select Payment Method</p>
-                <div className="grid grid-cols-2 gap-4">
-                  <button 
-                    onClick={() => setPaymentMethod('card')}
-                    className={`flex items-center justify-center gap-2 p-4 rounded-xl border transition-all ${paymentMethod === 'card' ? 'bg-white text-foreground border-border' : 'bg-white/10 border-border text-muted-foreground hover:text-foreground hover:border-border'}`}
-                  >
-                    <CreditCardIcon className="w-4 h-4" />
-                    <span className="text-sm font-bold">Card</span>
-                  </button>
-                  <button 
-                    onClick={() => setPaymentMethod('upi')}
-                    className={`flex items-center justify-center gap-2 p-4 rounded-xl border transition-all ${paymentMethod === 'upi' ? 'bg-white text-foreground border-border' : 'bg-white/10 border-border text-muted-foreground hover:text-foreground hover:border-border'}`}
-                  >
-                    <Smartphone className="w-4 h-4" />
-                    <span className="text-sm font-bold">UPI</span>
-                  </button>
-                </div>
-
-                {/* Dynamic Input Fields */}
-                <div className="p-4 rounded-xl border border-border bg-white/5 animate-in fade-in">
-                  {paymentMethod === 'card' ? (
-                    <div className="space-y-5">
-                      <div className="space-y-2">
-                        <label className="text-[10px] uppercase text-muted-foreground font-bold tracking-widest">Card Number</label>
-                        <div className="flex items-center gap-3 border-b border-border pb-2 focus-within:border-primary transition-colors">
-                           <CreditCardIcon className="w-5 h-5 text-primary/80" />
-                           <input 
-                             type="text" 
-                             placeholder="0000 0000 0000 0000" 
-                             maxLength={19}
-                             className="w-full bg-transparent text-base text-foreground placeholder:text-muted-foreground focus:outline-none font-mono tracking-wider" 
-                           />
+               {paymentMethod === 'card' && (
+                 <form onSubmit={handleProcess} className="space-y-4 animate-in fade-in slide-in-from-top-2">
+                    <div className="space-y-2">
+                        <label className="text-[10px] font-bold uppercase text-[#5C6F66] tracking-wider">Cardholder Name</label>
+                        <input required type="text" placeholder="John Doe" className="w-full bg-white border border-[#EBE8E0] p-3 rounded-xl text-sm outline-none focus:border-[#4F6F52] transition-colors" value={cardName} onChange={e => setCardName(e.target.value)} />
+                    </div>
+                    <div className="space-y-2">
+                        <label className="text-[10px] font-bold uppercase text-[#5C6F66] tracking-wider">Card Number</label>
+                        <div className="relative">
+                            <CreditCardIcon className="absolute left-3 top-3 w-4 h-4 text-[#8C9E96]" />
+                            <input required type="text" maxLength={19} placeholder="0000 0000 0000 0000" className="w-full bg-white border border-[#EBE8E0] p-3 pl-10 rounded-xl text-sm outline-none focus:border-[#4F6F52] transition-colors font-mono" value={cardNumber} onChange={e => setCardNumber(e.target.value)} />
                         </div>
-                      </div>
-                      <div className="grid grid-cols-2 gap-6">
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-2">
-                          <label className="text-[10px] uppercase text-muted-foreground font-bold tracking-widest">Expiry</label>
-                          <input 
-                            type="text" 
-                            placeholder="MM/YY" 
-                            maxLength={5}
-                            className="w-full bg-transparent border-b border-border pb-2 text-base text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary transition-colors font-mono tracking-widest" 
-                          />
+                            <label className="text-[10px] font-bold uppercase text-[#5C6F66] tracking-wider">Expiry</label>
+                            <div className="relative">
+                                <Calendar className="absolute left-3 top-3 w-4 h-4 text-[#8C9E96]" />
+                                <input required type="text" maxLength={5} placeholder="MM/YY" className="w-full bg-white border border-[#EBE8E0] p-3 pl-10 rounded-xl text-sm outline-none focus:border-[#4F6F52] transition-colors font-mono" value={expiry} onChange={e => setExpiry(e.target.value)} />
+                            </div>
                         </div>
                         <div className="space-y-2">
-                          <label className="text-[10px] uppercase text-muted-foreground font-bold tracking-widest">CVC</label>
-                          <input 
-                             type="text" 
-                             placeholder="123" 
-                             maxLength={4}
-                             className="w-full bg-transparent border-b border-border pb-2 text-base text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary transition-colors font-mono tracking-widest" 
-                           />
+                            <label className="text-[10px] font-bold uppercase text-[#5C6F66] tracking-wider">CVC</label>
+                            <div className="relative">
+                                <Lock className="absolute left-3 top-3 w-4 h-4 text-[#8C9E96]" />
+                                <input required type="text" maxLength={3} placeholder="123" className="w-full bg-white border border-[#EBE8E0] p-3 pl-10 rounded-xl text-sm outline-none focus:border-[#4F6F52] transition-colors font-mono" value={cvc} onChange={e => setCvc(e.target.value)} />
+                            </div>
                         </div>
-                      </div>
                     </div>
-                  ) : (
-                    <div className="space-y-4">
-                      <div className="space-y-2">
-                         <label className="text-[10px] uppercase text-muted-foreground font-bold tracking-widest">UPI ID</label>
-                         <input 
-                           type="text" 
-                           placeholder="username@bank" 
-                           className="w-full bg-transparent border-b border-border pb-2 text-base text-foreground placeholder:text-muted-foreground focus:outline-none font-mono tracking-wide" 
-                         />
-                      </div>
-                      <p className="text-xs text-muted-foreground">A payment request will be sent to your UPI app.</p>
-                    </div>
-                  )}
-                </div>
-              </div>
+                    <button type="submit" className="w-full py-4 bg-[#4F6F52] text-white font-bold rounded-xl hover:bg-[#3E5842] transition-colors flex items-center justify-center gap-2 mt-4">
+                      Pay ${total} <ArrowRight className="w-4 h-4" />
+                    </button>
+                 </form>
+               )}
 
-              <button
-                onClick={handlePurchase}
-                className={`w-full py-4 ${themeBg} ${themeHover} text-white font-bold text-sm uppercase tracking-widest rounded-xl shadow transition-all hover:scale-[1.01] flex items-center justify-center gap-2`}
-              >
-                {action === 'retire' ? 'Confirm Retirement' : 'Confirm Purchase'} <ArrowRight className="w-4 h-4" />
-              </button>
-              
-              <p className="text-[10px] text-muted-foreground text-center flex items-center justify-center gap-1.5">
-                 <ShieldCheck className="w-3 h-3" /> Secure Payment Processing
-              </p>
+               {paymentMethod === 'upi' && (
+                 <div className="bg-white border border-[#EBE8E0] p-6 rounded-2xl flex flex-col items-center text-center animate-in fade-in slide-in-from-top-2">
+                    <p className="text-xs font-bold text-[#5C6F66] mb-4 uppercase tracking-wider">Scan to Pay ${total}</p>
+                    <div className="p-2 bg-white rounded-xl shadow-sm border border-gray-100 mb-4">
+                        <img src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=upi://pay?pa=offset@bank&pn=OffsetPlatform&am=${total}&cu=USD`} alt="UPI QR Code" className="w-32 h-32" />
+                    </div>
+                    <p className="text-[10px] text-[#8C9E96] mb-6">Supported by GPay, PhonePe, Paytm</p>
+                    <button onClick={handleProcess} className="w-full py-4 bg-[#4F6F52] text-white font-bold rounded-xl hover:bg-[#3E5842] transition-colors flex items-center justify-center gap-2">
+                      I Have Scanned & Paid <ArrowRight className="w-4 h-4" />
+                    </button>
+                 </div>
+               )}
             </div>
           )}
 
-          {/* STEP 2: PROCESSING */}
           {step === 'processing' && (
-            <div className="py-12 flex flex-col items-center justify-center text-center animate-in fade-in zoom-in-95">
-              <div className="relative mb-8">
-                <div className={`absolute inset-0 rounded-full border-2 ${action === 'retire' ? 'border-emerald-200' : 'border-sky-200'} animate-pulse`} />
-                <div className={`w-20 h-20 rounded-full border-2 ${action === 'retire' ? 'border-t-emerald-500 border-r-emerald-400/50' : 'border-t-sky-500 border-r-sky-400/50'} border-b-transparent border-l-transparent animate-spin flex items-center justify-center bg-white/5`}>
-                   <Loader2 className={`w-8 h-8 ${action === 'retire' ? 'text-emerald-500' : 'text-sky-500'} animate-pulse`} />
-                </div>
-              </div>
-              <h3 className="text-xl font-bold text-foreground mb-2 tracking-tight">Securing Assets</h3>
-              <div className="space-y-1">
-                 <p className={`text-[10px] font-mono ${action === 'retire' ? 'text-emerald-600' : 'text-sky-600'} uppercase tracking-widest animate-pulse`}>Writing to Ledger...</p>
-                 <p className="text-[10px] font-mono text-muted-foreground uppercase tracking-widest">Block #1928374</p>
-              </div>
-            </div>
+             <div className="py-10 text-center space-y-4">
+                <Loader2 className="w-10 h-10 text-[#4F6F52] animate-spin mx-auto" />
+                <p className="text-[#5C6F66]">Verifying credentials...</p>
+                <p className="text-xs text-[#8C9E96]">Please do not close this window</p>
+             </div>
           )}
 
-          {/* STEP 3: SUCCESS */}
           {step === 'success' && (
-            <div className="py-4 flex flex-col items-center text-center animate-in zoom-in-95 duration-500">
-              <div className={`w-24 h-24 ${action === 'retire' ? 'bg-emerald-50 border-emerald-200' : 'bg-sky-50 border-sky-200'} rounded-full flex items-center justify-center mb-6 border shadow-sm`}>
-                <CheckCircle2 className={`w-12 h-12 ${action === 'retire' ? 'text-emerald-500' : 'text-sky-500'}`} />
-              </div>
-              <h3 className="text-3xl font-bold text-foreground mb-2">{action === 'retire' ? 'Retired.' : 'Acquired.'}</h3>
-              <p className="text-muted-foreground max-w-xs mx-auto mb-8 text-sm leading-relaxed">
-                {action === 'retire' 
-                  ? <span>You have successfully retired <span className="text-foreground font-bold">{quantity} tonnes</span>. This impact is now permanent.</span>
-                  : <span>You have added <span className="text-foreground font-bold">{quantity} tonnes</span> to your portfolio. You can retire them later.</span>
-                }
-              </p>
-              
-              <div className="w-full bg-white/5 border border-border rounded-xl p-4 mb-8 flex items-center gap-4 text-left">
-                 <div className="w-10 h-10 bg-muted rounded flex items-center justify-center text-primary">
-                    {action === 'retire' ? <Leaf className="w-5 h-5" /> : <Wallet className="w-5 h-5 text-sky-500" />}
-                 </div>
-                 <div>
-                    <p className="text-xs font-bold text-foreground">{action === 'retire' ? 'Retirement Certificate' : 'Asset Ownership Token'}</p>
-                    <p className="text-[10px] font-mono text-muted-foreground">ID: {action === 'retire' ? 'CERT' : 'OWN'}-{Math.floor(Math.random() * 999999)}</p>
-                 </div>
-                 <button className={`ml-auto text-xs font-bold ${themeColor} hover:text-foreground`}>
-                    View
-                 </button>
-              </div>
-
-              <button onClick={onClose} className="w-full py-4 bg-foreground text-white font-bold text-sm uppercase tracking-widest rounded-xl hover:opacity-95 transition-colors">Return to Dashboard</button>
-            </div>
+             <div className="py-6 text-center space-y-4 animate-in zoom-in-95 duration-300">
+                <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto text-emerald-600">
+                   <CheckCircle2 className="w-8 h-8" />
+                </div>
+                <div>
+                   <h4 className="text-xl font-serif text-[#2F3E33]">Payment Successful!</h4>
+                   <p className="text-sm text-[#5C6F66] mt-2">You have successfully offset {quantity} tonnes.</p>
+                </div>
+                <button onClick={onClose} className="w-full py-3 bg-[#E8EFE8] text-[#2F3E33] font-bold rounded-xl">Close</button>
+             </div>
           )}
-        </div>
-        
-        <div className="bg-white/5 p-4 text-center border-t border-border">
-          <p className="text-[9px] text-muted-foreground flex items-center justify-center gap-1.5 uppercase tracking-widest font-bold">
-            <ShieldCheck className="w-3 h-3" /> End-to-End Encryption
-          </p>
         </div>
       </div>
     </div>
-  );
+  )
 }
 
 // --- MAIN PAGE ---
 
 export default function ProjectDetail({ project, onBack }: ProjectDetailProps) {
-  const [quantity, setQuantity] = useState<number>(10);
+  const [quantity, setQuantity] = useState<number>(12);
   const [isPaymentOpen, setIsPaymentOpen] = useState(false);
-  const [mounted, setMounted] = useState(false);
-  const [tradeAction, setTradeAction] = useState<'buy' | 'retire'>('retire'); 
 
-  useEffect(() => {
-    setMounted(true);
-    // Ensure scroll resets when mounting
-    window.scrollTo(0,0);
-  }, []);
+  // Refs for Scrolling
+  const overviewRef = useRef<HTMLDivElement>(null);
+  const impactRef = useRef<HTMLDivElement>(null);
+  const detailsRef = useRef<HTMLDivElement>(null);
 
-  const totalCost = (quantity * project.pricePerCredit);
+  const trustScore = project.trustScore || 92;
 
-  // Cap trust score to a maximum of 99 (two digits)
-  const cappedTrust = Math.max(0, Math.min(99, Math.round(project.trustScore || 0)));
+  const scrollToSection = (ref: any) => {
+    ref.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+
+  const handleBuyClick = () => {
+    setIsPaymentOpen(true);
+  };
 
   return (
-    <div className="min-h-screen bg-background text-foreground font-sans selection:bg-primary/30 animate-in fade-in duration-500">
+    <div id="project-report-content" className={`min-h-screen ${THEME.bg} text-[#2F3E33] font-sans selection:bg-[#9CCBA0]/30`}>
       
+      {/* Invisible Report Template for PDF Generation */}
+      <ReportTemplate project={project} />
+
       <PaymentModal 
         isOpen={isPaymentOpen} 
         onClose={() => setIsPaymentOpen(false)} 
         project={project}
         quantity={quantity}
-        action={tradeAction}
+        action="buy"
       />
 
-      {/* --- 1. CINEMATIC HERO (60vh) --- */}
-      <div className="relative h-[65vh] w-full overflow-hidden border-b border-border group bg-card">
-        <div className="absolute top-24 left-6 z-30">
-          <button onClick={onBack} className="flex items-center gap-2 px-3 py-3  rounded-full bg-emerald-500 backdrop-blur border border-border text-foreground text-xs font-bold uppercase tracking-widest hover:bg-primary hover:text-white transition-all hover:-translate-x-1 ">
-            <ArrowLeft className="w-4 h-4 " /> Market Index
-          </button>
-        </div>
+      <header className="relative pt-24 pb-8 px-6 md:px-12 max-w-7xl mx-auto" ref={overviewRef}>
+         <button onClick={onBack} className="absolute top-8 left-6 md:left-12 flex items-center gap-2 text-[#5C6F66] hover:text-[#2F3E33] transition-colors text-sm font-bold uppercase tracking-wider">
+            <ArrowLeft className="w-4 h-4" /> Back
+         </button>
 
-        <div className="absolute inset-0 z-0">
-           <img src={project.image} alt={project.projectName} className={`w-full h-full object-cover transition-transform duration-[30s] ease-out ${mounted ? 'scale-105' : 'scale-100'}`} />
-           <div className="absolute inset-0 bg-gradient-to-t from-white/0" />
-           <div className="absolute inset-0 bg-[linear-gradient(rgba(0,0,0,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(0,0,0,0.02)_1px,transparent_1px)] bg-[size:100px_100px] opacity-30" />
-        </div>
+         <div className="mb-6">
+            <h1 className="text-4xl md:text-5xl font-serif text-[#1A2F23] mb-2">{project.projectName}</h1>
+            <div className="flex flex-wrap items-center gap-4 text-sm text-[#5C6F66]">
+               <span className="font-medium">{project.country} – {project.location.split(',')[0]}</span>
+               <span className="w-1 h-1 bg-[#D6D3C9] rounded-full" />
+               <span className="bg-[#E8EFE8] px-2 py-0.5 rounded text-[#2F3E33] text-xs font-bold uppercase">{project.projectType}</span>
+               <span className="bg-[#F4F1E8] px-2 py-0.5 rounded text-[#5C6F66] text-xs font-bold uppercase">Conservation</span>
+            </div>
+         </div>
 
-        <div className="absolute bottom-0 left-0 w-full p-6 md:p-12 z-20">
-          <div className="max-w-[1600px] mx-auto">
-             <div className="flex flex-col md:flex-row md:items-end justify-between gap-8">
-                <div className="max-w-4xl space-y-6">
-                   <div className="flex flex-wrap items-center gap-3 animate-in slide-in-from-bottom-4 duration-500">
-                      <span className="px-3 py-1 bg-emerald-50 text-emerald-600 border border-emerald-100 text-[10px] font-bold uppercase tracking-wider rounded backdrop-blur-md flex items-center gap-2">
-                         <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                         {project.projectType}
-                      </span>
-                      <span className="px-3 py-1 bg-white text-foreground border border-border text-[10px] font-bold uppercase tracking-wider rounded backdrop-blur-md flex items-center gap-1">
-                        <Globe2 className="w-3 h-3" /> {project.country}
-                      </span>
-                      <span className="px-3 py-1 bg-white/90 text-muted-foreground border border-border text-[10px] font-bold uppercase tracking-wider rounded backdrop-blur-md font-mono">
-                        ID: {project.unicId}
-                      </span>
-                   </div>
-                   <h1 className="text-5xl md:text-7xl font-bold text-white leading-[0.9] animate-in slide-in-from-bottom-6 duration-700">{project.projectName}</h1>
-                   <div className="flex items-center gap-6 text-sm text-muted-foreground font-mono animate-in slide-in-from-bottom-8 duration-700">
-                      <span className="flex items-center gap-2  text-white"><MapPin className="w-4 h-4 text-emerald-500" /> {project.location}</span>
-                      <span className="text-muted-foreground  text-white">|</span>
-                      <span className="flex items-center gap-2  text-white"><Calendar className="w-4 h-4 text-emerald-500" /> Vintage: {project.vintage}</span>
-                      <span className="text-muted-foreground  text-white">|</span>
-                      <span className="flex items-center gap-2 text-white"><Shield className="w-4 h-4 text-emerald-500" /> {project.registry} Verified</span>
-                   </div>
-                </div>
-                
-                <div className="hidden xl:block text-right animate-in fade-in zoom-in duration-1000 delay-200">
-                   <div className="relative inline-block">
-                      <svg className="w-32 h-32 transform -rotate-90">
-                         <circle cx="64" cy="64" r="60" stroke="#E6EEF3" strokeWidth="6" fill="transparent" />
-                         <circle cx="64" cy="64" r="60" stroke="#10b981" strokeWidth="6" fill="transparent" strokeDasharray="377" strokeDashoffset={377 - (377 * cappedTrust) / 100} className="transition-all duration-[2s] ease-out" />
-                      </svg>
-                      <div className="absolute inset-0 flex flex-col items-center justify-center">
-                         <span className="text-4xl font-bold text-white">{cappedTrust}</span>
-                         <span className="text-[9px] uppercase tracking-widest text-muted-foreground font-bold text-white">Trust Score</span>
-                      </div>
-                   </div>
-                </div>
-             </div>
-          </div>
-        </div>
-      </div>
+         <div className="w-full h-[400px] rounded-[2rem] overflow-hidden relative shadow-sm border border-[#EBE8E0]">
+            <img src={project.image} alt={project.projectName} className="w-full h-full object-cover" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent pointer-events-none" />
+            
+            <div className="absolute bottom-6 left-6 bg-white/90 backdrop-blur-sm px-4 py-2 rounded-xl flex items-center gap-3 shadow-sm">
+               <div className="relative w-10 h-10 flex items-center justify-center">
+                  <svg className="w-full h-full rotate-[-90deg]">
+                     <circle cx="20" cy="20" r="18" stroke="#E6EEF3" strokeWidth="3" fill="none" />
+                     <circle cx="20" cy="20" r="18" stroke="#10b981" strokeWidth="3" fill="none" strokeDasharray="113" strokeDashoffset={113 - (113 * trustScore) / 100} />
+                  </svg>
+                  <span className="absolute text-[10px] font-bold">{trustScore}</span>
+               </div>
+               <div>
+                  <p className="text-[10px] uppercase font-bold text-[#8C9E96] tracking-wider">Trust Score</p>
+                  <p className="text-xs font-bold text-[#2F3E33]">Excellent</p>
+               </div>
+            </div>
+         </div>
+      </header>
 
-      {/* --- 2. MAIN LAYOUT (Split Intelligence) --- */}
-      <div className="max-w-[1600px] mx-auto px-6 py-12">
-        <div className="grid lg:grid-cols-12 gap-12">
-           
-           {/* LEFT COLUMN: INTEL (8 cols) */}
-           <div className="lg:col-span-8 space-y-12">
-              
-              {/* Mission Statement */}
-              <section className="bg-card/80 border border-border p-8 rounded-2xl">
-                 <h3 className="text-sm font-bold text-muted-foreground uppercase tracking-widest mb-4 flex items-center gap-2"><Leaf className="w-4 h-4 text-emerald-500" /> Executive Summary</h3>
-                 <p className="text-xl md:text-2xl text-foreground leading-relaxed font-light">This project protects critical biodiversity hotspots by engaging local communities in sustainable land management. It prevents deforestation across <span className="text-foreground font-medium border-b border-emerald-500">120,000 hectares</span> of primary rainforest.</p>
-              </section>
+      <section className="bg-[#F4F1E8] border-y border-[#EBE8E0]">
+         <div className="max-w-7xl mx-auto px-6 md:px-12 py-6">
+            <div className="flex flex-wrap md:flex-nowrap items-center justify-between gap-8">
+               <div className="flex-1">
+                  <p className="text-3xl font-serif text-[#2F3E33] mb-1">{project.availableCredits.toLocaleString()}</p>
+                  <p className="text-xs font-bold text-[#5C6F66] uppercase tracking-wider">tCO₂ Offset</p>
+               </div>
+               <div className="w-px h-12 bg-[#D6D3C9] hidden md:block" />
+               <div className="flex-1">
+                  <p className="text-3xl font-serif text-[#2F3E33] mb-1">${project.pricePerCredit.toFixed(2)}</p>
+                  <p className="text-xs font-bold text-[#5C6F66] uppercase tracking-wider">per ton</p>
+               </div>
+               <div className="w-px h-12 bg-[#D6D3C9] hidden md:block" />
+               <div className="flex-1">
+                  <p className="text-3xl font-serif text-[#2F3E33] mb-1">{(project.availableCredits * 1.5).toLocaleString()}</p>
+                  <p className="text-xs font-bold text-[#5C6F66] uppercase tracking-wider">Credits Available</p>
+               </div>
+            </div>
+         </div>
+      </section>
 
-              {/* Data Grid */}
-              <section>
-                 <div className="flex items-center justify-between mb-6"><h3 className="text-sm font-bold text-foreground uppercase tracking-widest flex items-center gap-2"><BarChart3 className="w-4 h-4 text-emerald-500" /> Key Metrics</h3></div>
-                 <div className="grid sm:grid-cols-3 gap-4">
-                    <MetricCard label="Total Volume" value={project.availableCredits.toLocaleString()} sub="Available Tonnes" icon={Layers} delay="0ms" />
-                    <MetricCard label="Protection Area" value="125k" sub="Hectares" icon={MapPin} delay="100ms" />
-                    <MetricCard label="Bio-Density" value="98.4" sub="Percentile Rank" icon={Activity} delay="200ms" />
-                 </div>
-              </section>
+      <section className="sticky top-0 z-40 bg-[#FDFBF7]/90 backdrop-blur-md border-b border-[#EBE8E0]">
+         <div className="max-w-7xl mx-auto px-6 md:px-12 py-3 flex items-center justify-between">
+            <div className="flex items-center gap-1 md:gap-2">
+               <button onClick={() => scrollToSection(overviewRef)} className="px-4 py-2 bg-[#F4F1E8] hover:bg-[#E8EFE8] rounded-lg text-sm font-bold text-[#2F3E33] flex items-center gap-2 transition-colors">
+                 <Search className="w-4 h-4" /> Overview
+               </button>
+               <button onClick={() => scrollToSection(impactRef)} className="px-4 py-2 hover:bg-[#F4F1E8] rounded-lg text-sm font-medium text-[#5C6F66] transition-colors">Impact</button>
+               <button onClick={() => scrollToSection(detailsRef)} className="px-4 py-2 hover:bg-[#F4F1E8] rounded-lg text-sm font-medium text-[#5C6F66] transition-colors flex items-center gap-1">
+                  Details <ChevronDown className="w-3 h-3" />
+               </button>
+            </div>
 
-              {/* Geospatial Map (Interactive Look) */}
-              <section>
-                 <div className="flex items-center justify-between mb-6">
-                    <h3 className="text-sm font-bold text-foreground uppercase tracking-widest flex items-center gap-2"><Satellite className="w-4 h-4 text-emerald-500" /> Geospatial Verification</h3>
-                    <button className="text-[10px] text-primary uppercase tracking-widest font-bold hover:text-primary-foreground border border-border px-3 py-1 rounded bg-white/50 transition-all flex items-center gap-2"><Maximize2 className="w-3 h-3" /> Expand Map</button>
-                 </div>
-                 <div className="h-[400px] w-full bg-card rounded-2xl border border-border relative overflow-hidden group">
-                    <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1524661135-423995f22d0b?auto=format&fit=crop&q=80&w=2000')] bg-cover bg-center opacity-40 group-hover:scale-105 transition-transform duration-[2s]" />
-                    <div className="absolute inset-0 bg-[linear-gradient(rgba(16,185,129,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(16,185,129,0.03)_1px,transparent_1px)] bg-[size:40px_40px]" />
-                    
-                    {/* Map UI Elements */}
-                    <div className="absolute top-6 left-6 bg-white/90 backdrop-blur border border-border p-3 rounded-xl shadow">
-                       <p className="text-[9px] text-muted-foreground uppercase font-bold tracking-widest mb-1">Target Coordinates</p>
-                       <p className="text-sm font-mono text-emerald-600">03°08'12"S, 60°01'15"W</p>
-                    </div>
+            <button 
+              onClick={handleBuyClick}
+              className="bg-[#4F6F52] hover:bg-[#3E5842] text-white px-6 py-2.5 rounded-lg text-sm font-bold uppercase tracking-wider flex items-center gap-2 transition-all shadow-sm active:scale-95"
+            >
+               Buy Credits <ArrowRight className="w-4 h-4" />
+            </button>
+         </div>
+      </section>
 
-                    {/* Active Scan Region */}
-                    <div className="absolute top-1/3 left-1/3 w-64 h-48 border-2 border-emerald-200 rounded-lg flex items-center justify-center">
-                        <div className="text-emerald-600 font-mono text-xs font-bold bg-white/70 px-2 py-1">ZONE A4: VERIFIED</div>
-                    </div>
-                 </div>
-              </section>
+      <main className="max-w-7xl mx-auto px-6 md:px-12 py-10 grid lg:grid-cols-3 gap-10">
+         
+         <div className="lg:col-span-2 space-y-10" ref={impactRef}>
+            
+            <section>
+               <div className="bg-[#F4F1E8] rounded-[2rem] p-6 md:p-8 border border-[#EBE8E0] shadow-sm">
+                  <div className="flex justify-between items-center mb-6">
+                     <h3 className="text-lg font-serif text-[#2F3E33]">Projected Impact</h3>
+                     <span className="bg-white px-3 py-1 rounded-full text-xs font-bold text-[#5C6F66] border border-[#EBE8E0]">2019 - 2024</span>
+                  </div>
+                  <ImpactAreaChart />
+               </div>
+            </section>
 
-              {/* Verification Log */}
-              <section>
-                 <h3 className="text-sm font-bold text-foreground uppercase tracking-widest mb-6 flex items-center gap-2"><FileText className="w-4 h-4 text-emerald-500" /> Audit Log</h3>
-                 <div className="bg-card rounded-2xl p-8 border border-border">
-                    <TimelineItem date="OCT 12, 2023" title="Q3 Monitoring Report Verified" status="complete" />
-                    <TimelineItem date="AUG 01, 2023" title="Satellite Biomass Scan" status="complete" />
-                    <TimelineItem date="JUN 15, 2023" title="Community Benefit Audit" status="complete" />
-                    <TimelineItem date="PENDING" title="2024 Annual Issuance" status="pending" />
-                 </div>
-              </section>
-           </div>
+            <section>
+               <h3 className="text-lg font-serif text-[#2F3E33] mb-4">Carbon Reduction Over Time</h3>
+               <div className="grid md:grid-cols-2 gap-6">
+                  <div className="bg-[#FDFBF7] border border-[#EBE8E0] rounded-[1.5rem] p-6 shadow-sm flex items-center gap-4">
+                     <div className="w-12 h-12 bg-[#E8EFE8] rounded-full flex items-center justify-center text-[#4F6F52]"><CheckCircle2 className="w-6 h-6" /></div>
+                     <div>
+                        <p className="text-xs font-bold text-[#5C6F66] uppercase tracking-wide">CO₂ Sequestered</p>
+                        <p className="text-2xl font-serif text-[#2F3E33]">{project.availableCredits.toLocaleString()} <span className="text-sm font-sans text-[#5C6F66]">tons</span></p>
+                     </div>
+                  </div>
+                  <div className="bg-[#FDFBF7] border border-[#EBE8E0] rounded-[1.5rem] p-6 shadow-sm flex items-center gap-4">
+                     <div className="w-12 h-12 bg-[#E8EFE8] rounded-full flex items-center justify-center text-[#4F6F52]"><Trees className="w-6 h-6" /></div>
+                     <div>
+                        <p className="text-xs font-bold text-[#5C6F66] uppercase tracking-wide">Equivalency</p>
+                        <p className="text-2xl font-serif text-[#2F3E33]">210,000 <span className="text-sm font-sans text-[#5C6F66]">Trees</span></p>
+                     </div>
+                  </div>
+               </div>
+            </section>
 
-           {/* RIGHT COLUMN: TRADE TERMINAL (Sticky) */}
-           <div className="lg:col-span-4">
-              <div className="sticky top-28">
-                 
-                 {/* Order Ticket */}
-                 <div className="bg-card border border-border rounded-2xl p-6 shadow relative overflow-hidden group">
-                    <div className={`absolute top-0 left-0 w-full h-1 bg-gradient-to-r ${tradeAction === 'retire' ? 'from-emerald-500 to-cyan-500' : 'from-sky-500 to-indigo-500'}`} />
-                    
-                    {/* Action Toggle */}
-                    <div className="flex bg-white/5 p-1 rounded-xl mb-6">
-                       <button onClick={() => setTradeAction('buy')} className={`flex-1 py-2 text-xs font-bold uppercase tracking-wider rounded-lg transition-all ${tradeAction === 'buy' ? 'bg-sky-600 text-white shadow' : 'text-muted-foreground hover:text-foreground'}`}>Trade (Hold)</button>
-                       <button onClick={() => setTradeAction('retire')} className={`flex-1 py-2 text-xs font-bold uppercase tracking-wider rounded-lg transition-all ${tradeAction === 'retire' ? 'bg-emerald-600 text-white shadow' : 'text-muted-foreground hover:text-foreground'}`}>Offset (Retire)</button>
-                    </div>
-                    
-                    <div className="mb-8">
-                       <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-2">Market Price</p>
-                       <div className="flex items-end gap-3">
-                          <span className="text-5xl font-mono font-bold text-foreground tracking-tighter">${project.pricePerCredit.toFixed(2)}</span>
-                          <span className={`text-sm mb-2 font-mono ${tradeAction === 'retire' ? 'text-emerald-600' : 'text-sky-600'}`}>USD / t</span>
-                       </div>
-                    </div>
+            <section className="bg-[#F4F1E8] rounded-[2rem] p-8 border border-[#EBE8E0] shadow-sm">
+               <div className="flex justify-between items-center mb-6">
+                   <h3 className="text-lg font-serif text-[#2F3E33]">Impact Statistics</h3>
+                   <Leaf className="w-5 h-5 text-[#9CCBA0]" />
+               </div>
+               <ImpactStats />
+            </section>
+         </div>
 
-                    <div className="space-y-6">
-                       {/* Quantity Input */}
-                       <div className={`bg-white/5 border border-border rounded-xl p-4 transition-colors focus-within:border-opacity-50 ${tradeAction === 'retire' ? 'focus-within:border-emerald-500' : 'focus-within:border-sky-500'}`}>
-                          <div className="flex justify-between mb-2">
-                             <label className="text-[9px] uppercase font-bold text-muted-foreground tracking-widest">Quantity (Tonnes)</label>
-                             <span className="text-[9px] text-emerald-600 font-mono tracking-widest">MAX: {project.availableCredits}</span>
-                          </div>
-                          <div className="flex items-center justify-between">
-                             <input 
-                                type="number" 
-                                min="1"
-                                value={quantity}
-                                onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value) || 0))}
-                                className="w-full bg-transparent text-2xl font-mono font-bold text-foreground outline-none placeholder:text-muted-foreground"
-                             />
-                             <span className="text-xs text-muted-foreground font-bold uppercase">tCO₂e</span>
-                          </div>
-                       </div>
+         <div className="space-y-8" ref={detailsRef}>
+            
+            <div className="bg-white rounded-[2rem] p-8 border border-[#EBE8E0] shadow-sm">
+               <h3 className="text-lg font-serif text-[#2F3E33] mb-4">About Project</h3>
+               <p className="text-[#5C6F66] leading-relaxed text-sm mb-6">
+                 This project focuses on protecting specific areas of the Amazon Rainforest from deforestation. By engaging local communities in sustainable land management, it ensures the longevity of critical biodiversity hotspots.
+               </p>
+               
+               <div className="space-y-4">
+                  <div className="flex items-center gap-3">
+                     <div className="w-8 h-8 rounded-full bg-[#E8EFE8] flex items-center justify-center"><Globe2 className="w-4 h-4 text-[#4F6F52]" /></div>
+                     <span className="text-sm font-medium text-[#2F3E33]">{project.registry} Registry</span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                     <div className="w-8 h-8 rounded-full bg-[#E8EFE8] flex items-center justify-center"><Wind className="w-4 h-4 text-[#4F6F52]" /></div>
+                     <span className="text-sm font-medium text-[#2F3E33]">{project.vintage} Vintage</span>
+                  </div>
+               </div>
 
-                       {/* Summary */}
-                       <div className="space-y-3 py-4 border-t border-dashed border-border">
-                          <div className="flex justify-between text-xs font-mono"><span className="text-muted-foreground">Subtotal</span><span className="text-foreground">${totalCost.toFixed(2)}</span></div>
-                          <div className="flex justify-between text-xs font-mono"><span className="text-muted-foreground">Fees (1%)</span><span className="text-foreground">${(totalCost * 0.01).toFixed(2)}</span></div>
-                          <div className="flex justify-between text-base pt-3 border-t border-border"><span className="text-foreground font-bold text-sm uppercase tracking-wide">Total Allocation</span><span className={`font-mono font-bold ${tradeAction === 'retire' ? 'text-emerald-600' : 'text-sky-600'}`}>${(totalCost * 1.01).toFixed(2)}</span></div>
-                       </div>
+               <button 
+                 onClick={() => generateProjectReport(project)}
+                 className="w-full mt-8 py-3 rounded-xl border border-[#EBE8E0] text-sm font-bold text-[#5C6F66] hover:bg-[#F4F1E8] transition-colors flex items-center justify-center gap-2 group"
+               >
+                  <Download className="w-4 h-4 group-hover:text-[#4F6F52]" /> Download Verified Report
+               </button>
+            </div>
 
-                       {/* Action Button */}
-                       <button 
-                          onClick={() => setIsPaymentOpen(true)}
-                          className={`w-full py-4 text-white font-bold text-sm uppercase tracking-widest rounded-xl transition-all hover:scale-[1.02] shadow flex items-center justify-center gap-2 ${tradeAction === 'retire' ? 'bg-emerald-600 hover:bg-emerald-500' : 'bg-sky-600 hover:bg-sky-500'}`}
-                       >
-                          {tradeAction === 'retire' ? 'Initialize Retirement' : 'Add to Portfolio'} <ArrowRight className="w-4 h-4" />
-                       </button>
-
-                       <p className="text-[10px] text-muted-foreground text-center leading-relaxed px-4">
-                          Assets are retired immediately upon settlement. <br/> Secured by <span className="text-muted-foreground">Offset Ledger™</span>.
-                       </p>
-                    </div>
-                 </div>
-
-                 {/* Verification Badge */}
-                 <div className="mt-4 flex items-center gap-3 p-4 rounded-xl bg-emerald-50/40 border border-emerald-100 backdrop-blur-sm">
-                    <CheckCircle2 className="w-5 h-5 text-emerald-500" />
-                    <div>
-                       <p className="text-xs font-bold text-emerald-600 uppercase tracking-wide">Verified Asset</p>
-                       <p className="text-[10px] text-muted-foreground">Double-spend protection active.</p>
-                    </div>
-                 </div>
-
-              </div>
-           </div>
-
-        </div>
-      </div>
+            <div className="h-64 rounded-[2rem] overflow-hidden relative group">
+               <img src="https://images.unsplash.com/photo-1524661135-423995f22d0b?auto=format&fit=crop&q=80&w=800" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" alt="Map" />
+               <div className="absolute inset-0 bg-[#2F3E33]/20 group-hover:bg-[#2F3E33]/10 transition-colors" />
+               <div className="absolute bottom-4 left-4 bg-white px-3 py-1.5 rounded-lg shadow-sm">
+                  <p className="text-[10px] uppercase font-bold text-[#8C9E96]">Location</p>
+                  <p className="text-xs font-bold text-[#2F3E33]">{project.location}</p>
+               </div>
+            </div>
+         </div>
+      </main>
     </div>
   );
 }

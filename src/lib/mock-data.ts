@@ -1,7 +1,11 @@
 // src/lib/mock-data.ts
 import { CarbonCredit } from './types';
+import { Leaf, Wind, Droplets, TrendingUp } from "lucide-react";
 
-// --- Categories for filters (same as before) ---
+// ==================================================================
+// 1. FILTERS & OPTIONS
+// ==================================================================
+
 export const projectTypes = [
   'all',
   'Forestry (REDD+)',
@@ -21,9 +25,18 @@ export const sortOptions: { [key: string]: string } = {
   pricePerCredit: 'Price (Low)',
 };
 
-// ------------------------------------------------------------------
-// 1. BASE MOCK PROJECTS (your original 9)
-// ------------------------------------------------------------------
+export const REGISTRIES = [
+  'Verra (VCS)',
+  'Gold Standard',
+  'Climate Action Reserve',
+  'American Carbon Registry',
+  'Puro.earth',
+] as const;
+
+// ==================================================================
+// 2. MARKETPLACE MOCK PROJECTS
+// ==================================================================
+
 const baseMockCredits: CarbonCredit[] = [
   {
     id: '1',
@@ -165,16 +178,12 @@ const baseMockCredits: CarbonCredit[] = [
 // statuses aligned with Explorer filters (lowercase)
 const STATUSES = ['active', 'retired', 'pending'] as const;
 
-// ------------------------------------------------------------------
-// 2. EXPANDED MOCK DATASET – 10,000 PROJECTS
-// ------------------------------------------------------------------
-
 // tweak helper (keeps values in a nice range)
 const clamp = (value: number, min: number, max: number) =>
   Math.max(min, Math.min(max, value));
 
 export const mockCredits: CarbonCredit[] = Array.from(
-  { length: 10000 }, // 👉 change this number if you want more/less
+  { length: 10000 }, 
   (_, idx) => {
     const base = baseMockCredits[idx % baseMockCredits.length];
 
@@ -223,10 +232,79 @@ export const mockCredits: CarbonCredit[] = Array.from(
     };
   },
 );
-export const REGISTRIES = [
-  'Verra (VCS)',
-  'Gold Standard',
-  'Climate Action Reserve',
-  'American Carbon Registry',
-  'Puro.earth',
-] as const;
+
+// ==================================================================
+// 3. DASHBOARD ACTIVITY DATA (THIS IS WHAT WAS MISSING)
+// ==================================================================
+
+export const ACTIVITY_DATA = [
+  { 
+    id: "CRT-01", 
+    project: "Forest Conservation", 
+    amount: 1650, 
+    type: "Forestry", 
+    icon: Leaf, 
+    bg: "bg-[#749A74]" 
+  },
+  { 
+    id: "CRT-02", 
+    project: "Wind Farm", 
+    amount: 12000, 
+    type: "Renewable", 
+    icon: Wind, 
+    bg: "bg-[#8FA3AD]" 
+  },
+  { 
+    id: "CRT-03", 
+    project: "Mangrove Restoration", 
+    amount: 80000, 
+    type: "Blue Carbon", 
+    icon: Droplets, 
+    bg: "bg-[#7FA3C4]" 
+  },
+  { 
+    id: "CRT-04", 
+    project: "Clean Cookstoves", 
+    amount: 400, 
+    type: "Community", 
+    icon: TrendingUp, 
+    bg: "bg-orange-400" 
+  },
+];
+
+// ==================================================================
+// 4. CHART LOGIC HELPER
+// ==================================================================
+
+export const getChartData = (viewMode: string, currentMonthLabel: string) => {
+  switch (viewMode) {
+    case "Month to View":
+      return [
+        { label: "Week 1", h: "40%" },
+        { label: "Week 2", h: "60%" },
+        { label: "Week 3", h: "30%" },
+        { label: "Week 4", h: "85%" },
+      ];
+    case "Week to View":
+      return [
+        { label: "Mon", h: "20%" },
+        { label: "Tue", h: "45%" },
+        { label: "Wed", h: "30%" },
+        { label: "Thu", h: "70%" },
+        { label: "Fri", h: "55%" },
+        { label: "Sat", h: "90%" },
+        { label: "Sun", h: "40%" },
+      ];
+    case "Year to View":
+    default:
+      return [
+        { label: "Jan", h: "20%" },
+        { label: "Feb", h: "30%" },
+        { label: "Mar", h: "50%" },
+        { label: "Apr", h: "75%" },
+        { label: "May", h: "70%" },
+        { label: "Jun", h: "65%" },
+        { label: currentMonthLabel, h: "90%" }, 
+      ];
+  }
+};

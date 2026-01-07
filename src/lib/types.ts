@@ -53,4 +53,5 @@ export type ViewState =
   | 'marketplace'
   | 'portfolio'
   | 'about'
-  | 'contact';
+  | 'contact'
+  | 'dashboard';

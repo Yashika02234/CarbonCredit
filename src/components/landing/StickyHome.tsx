@@ -1,12 +1,17 @@
 import { useEffect, useState } from "react";
 import landinghero from "../../assets/images/landinghero.mp4";
 
-export default function StickyHome() {
+export default function StickyHome({
+  onOpenAuth,
+}: {
+  onOpenAuth: (mode: "login" | "signup") => void;
+}) {
   const [step, setStep] = useState(0);
   const [scrollProgress, setScrollProgress] = useState(0);
 
   // Assuming your header is 80px high. Adjust this variable to match your actual header height.
   const headerHeight = "80px"; 
+  
 
   useEffect(() => {
     const onScroll = () => {
@@ -33,7 +38,7 @@ export default function StickyHome() {
         className="sticky w-full overflow-hidden flex items-center justify-center"
         style={{ 
           top: headerHeight, 
-          height: `calc(100vh - ${headerHeight})` 
+          height: `calc(100vh - ${headerHeight} + 260px)` 
         }}
       >
         
@@ -61,10 +66,10 @@ export default function StickyHome() {
         </div>
 
         {/* CONTENT WRAPPER: Removed max-width restrictions for eye-catchy width */}
-        <div className="relative z-10 w-full px-6 md:px-16 lg:px-24">
-          <div className="flex flex-col items-start">
+        <div className="relative z-10 w-full px-8 md:px-16 lg:px-24 ">
+          <div className="flex flex-col items-start ">
             
-            <h1 className="text-5xl md:text-7xl lg:text-[6.5rem] font-serif text-white leading-[1.1] tracking-tighter">
+            <h1 className=" text-5xl md:text-7xl lg:text-[6.5rem] font-serif text-white leading-[1.1] tracking-tighter">
               <span className={`transition-all duration-1000 block ${step >= 0 ? "opacity-100" : "opacity-0 translate-y-4"}`}>
                 A Global Marketplace
               </span>
@@ -90,7 +95,10 @@ export default function StickyHome() {
             <div className={`mt-10 flex flex-wrap items-center gap-10 transition-all duration-1000 ${
                 step >= 3 ? "opacity-100 scale-100" : "opacity-0 scale-95"
               }`}>
-              <button className="bg-emerald-500 hover:bg-emerald-400 text-[#0a1210] px-10 py-4 rounded-full text-lg font-bold transition-all shadow-lg shadow-emerald-500/20">
+              <button 
+               onClick={() => onOpenAuth("login")}
+                className="bg-emerald-500 hover:bg-emerald-400 text-[#0a1210] px-10 py-4 rounded-full text-lg font-bold transition-all shadow-lg shadow-emerald-500/20">
+              
                 Explore Marketplace
               </button>
 
