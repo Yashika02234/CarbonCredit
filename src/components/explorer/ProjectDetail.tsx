@@ -18,9 +18,7 @@ import {
   Search,
   Download,
   Calendar,
-  Lock,
- 
-} from 'lucide-react';
+  Lock} from 'lucide-react';
 import { CarbonCredit } from '../../lib/types';
 
 interface ProjectDetailProps {
@@ -424,12 +422,21 @@ export default function ProjectDetail({ project, onBack }: ProjectDetailProps) {
         action="buy"
       />
 
-      <header className="relative pt-24 pb-8 px-6 md:px-12 max-w-7xl mx-auto" ref={overviewRef}>
-         <button onClick={onBack} className="absolute top-8 left-6 md:left-12 flex items-center gap-2 text-[#5C6F66] hover:text-[#2F3E33] transition-colors text-sm font-bold uppercase tracking-wider">
-            <ArrowLeft className="w-4 h-4" /> Back
-         </button>
+      <header className="relative pt-32 pb-8 px-6 md:px-12 max-w-7xl mx-auto" ref={overviewRef}>
+         <button
+  onClick={onBack}
+  className="flex items-center gap-2
+              
+             px-3 py-2 rounded-lg shadow-sm
+             text-[#5C6F66] hover:text-[#2F3E33]
+             transition text-sm font-bold uppercase tracking-wider"
+>
+  <ArrowLeft className="w-4 h-4" />
+  Back
+</button>
 
-         <div className="mb-6">
+
+         <div className="mb-6 pt-5">
             <h1 className="text-4xl md:text-5xl font-serif text-[#1A2F23] mb-2">{project.projectName}</h1>
             <div className="flex flex-wrap items-center gap-4 text-sm text-[#5C6F66]">
                <span className="font-medium">{project.country} – {project.location.split(',')[0]}</span>
@@ -439,7 +446,7 @@ export default function ProjectDetail({ project, onBack }: ProjectDetailProps) {
             </div>
          </div>
 
-         <div className="w-full h-[400px] rounded-[2rem] overflow-hidden relative shadow-sm border border-[#EBE8E0]">
+         <div className="w-full h-[400px] rounded-[2rem]  overflow-hidden relative shadow-sm border border-[#EBE8E0]">
             <img src={project.image} alt={project.projectName} className="w-full h-full object-cover" />
             <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent pointer-events-none" />
             
