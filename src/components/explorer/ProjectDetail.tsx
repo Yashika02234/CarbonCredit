@@ -19,8 +19,7 @@ import {
   Download,
   Calendar,
   Lock,
-  ShieldCheck,
-  FileText
+ 
 } from 'lucide-react';
 import { CarbonCredit } from '../../lib/types';
 
@@ -393,7 +392,7 @@ function PaymentModal({ isOpen, onClose, project, quantity }: any) {
 // --- MAIN PAGE ---
 
 export default function ProjectDetail({ project, onBack }: ProjectDetailProps) {
-  const [quantity, setQuantity] = useState<number>(12);
+  const [quantity] = useState<number>(12);
   const [isPaymentOpen, setIsPaymentOpen] = useState(false);
 
   // Refs for Scrolling
