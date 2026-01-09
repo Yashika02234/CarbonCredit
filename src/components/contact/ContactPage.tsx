@@ -90,7 +90,7 @@ export default function ContactPage({
                       For all inquiries
                     </p>
                     <p className="text-lg font-medium text-[#30574E]">
-                      saapro.ae@gmail.com
+                      offset@tryoffset.com
                     </p>
                   </div>
 

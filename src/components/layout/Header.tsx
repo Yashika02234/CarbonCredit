@@ -165,36 +165,64 @@ export default function Header({
       </div>
 
       {/* MOBILE MENU */}
-      <div
-        className={`fixed inset-0 z-40 bg-[#30574E] transition-all duration-500 flex flex-col justify-center items-center gap-8 ${
-          isMenuOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
-        }`}
-      >
-        <div className="flex flex-col gap-6 text-center">
-          <button onClick={() => handleNav('home')} className="text-2xl font-semibold text-white">
-            Home
-          </button>
-          <button onClick={() => handleNav('about')} className="text-2xl font-semibold text-white">
-            About
-          </button>
-          <button onClick={() => handleNav('contact')} className="text-2xl font-semibold text-white">
-            Contact
-          </button>
-          <button onClick={() => onOpenAuth('login')} className="text-2xl font-semibold text-white">
-            Log In
-          </button>
-          <button onClick={() => onOpenAuth('signup')} className="text-2xl font-semibold text-white">
-            Get Started
-          </button>
-        </div>
-
-        <button
-          onClick={() => setIsMenuOpen(false)}
-          className="absolute bottom-10 p-4 rounded-full bg-white/20 text-white"
-        >
-          <X className="w-6 h-6" />
+      {/* MOBILE MENU */}
+<div
+  className={`fixed inset-0 z-40 bg-[#30574E] transition-all duration-500 flex flex-col justify-center items-center gap-8 ${
+    isMenuOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
+  }`}
+>
+  <div className="flex flex-col gap-6 text-center">
+    {!isLoggedIn && (
+      <>
+        <button onClick={() => handleNav('home')} className="text-2xl font-semibold text-white">
+          Home
         </button>
-      </div>
+        <button onClick={() => handleNav('about')} className="text-2xl font-semibold text-white">
+          About
+        </button>
+        <button onClick={() => handleNav('contact')} className="text-2xl font-semibold text-white">
+          Contact
+        </button>
+        <button onClick={() => onOpenAuth('login')} className="text-2xl font-semibold text-white">
+          Log In
+        </button>
+        <button onClick={() => onOpenAuth('signup')} className="text-2xl font-semibold text-white">
+          Get Started
+        </button>
+      </>
+    )}
+
+    {isLoggedIn && (
+      <>
+        <button onClick={() => handleNav('home')} className="text-2xl font-semibold text-white">
+          Home
+        </button>
+        <button onClick={() => handleNav('marketplace')} className="text-2xl font-semibold text-white">
+          Marketplace
+        </button>
+        <button onClick={() => handleNav('portfolio')} className="text-2xl font-semibold text-white">
+          Portfolio
+        </button>
+        <button onClick={() => handleNav('dashboard')} className="text-2xl font-semibold text-white">
+          Dashboard
+        </button>
+        {onLogout && (
+          <button onClick={onLogout} className="text-2xl font-semibold text-white">
+            Logout
+          </button>
+        )}
+      </>
+    )}
+  </div>
+
+  <button
+    onClick={() => setIsMenuOpen(false)}
+    className="absolute bottom-10 p-4 rounded-full bg-white/20 text-white"
+  >
+    <X className="w-6 h-6" />
+  </button>
+</div>
+
     </>
   );
 }
