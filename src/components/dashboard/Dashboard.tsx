@@ -12,6 +12,8 @@ export default function Dashboard() {
   const [selectedView, setSelectedView] = useState("Year to View");
   const [selectedMetric, setSelectedMetric] = useState("CO₂e");
   const [activityFilter, setActivityFilter] = useState("View All");
+  const [userName, setUserName] = useState("User");
+
 
   // --- GET DYNAMIC GRAPH DATA ---
   // We pass the selected view and month to our helper function
@@ -27,6 +29,16 @@ export default function Dashboard() {
     if (activityFilter === "View All") return ACTIVITY_DATA;
     return ACTIVITY_DATA.filter(item => item.type === activityFilter);
   }, [activityFilter]);
+useEffect(() => {
+  const storedName = localStorage.getItem("offset_user_name");
+
+  if (storedName && storedName.trim().length > 0) {
+    setUserName(storedName);
+  } else {
+    setUserName("User");
+  }
+}, []);
+
 
   // --- CLICK OUTSIDE HANDLER ---
   useEffect(() => {
@@ -62,7 +74,10 @@ export default function Dashboard() {
         {/* HEADER */}
         <section className="flex justify-between items-end">
           <div>
-            <h1 className="text-5xl font-serif text-[#1A2F23] mb-3">Welcome, Alex!</h1>
+           <h1 className="text-5xl font-serif text-[#1A2F23] mb-3">
+  Welcome, {userName}!
+</h1>
+
             <p className="text-xl text-[#5C6F66]">Track Your Impact</p>
           </div>
           
