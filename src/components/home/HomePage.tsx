@@ -38,7 +38,7 @@ function useScrollReveal() {
 import { ViewState } from '@/lib/types';
 
 interface HomePageProps {
-  onNavigate?: (view: ViewState) => void;
+  onNavigate: (view: ViewState) => void;
 }
 
 /* ======================================================
@@ -137,7 +137,9 @@ export default function HomePage({ onNavigate }: HomePageProps) {
         live verification, and trusted market data.
       </p>
 
-      <button className="inline-flex items-center justify-center px-8 py-3 text-sm font-medium rounded-md bg-black text-white hover:bg-black/90 transition">
+      <button 
+      onClick={() => onNavigate('portfolio')}
+      className="inline-flex items-center justify-center px-8 py-3 text-sm font-medium rounded-md bg-black text-white hover:bg-black/90 transition">
         View Portfolio
       </button>
 
