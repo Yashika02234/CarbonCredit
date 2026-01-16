@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import landinghero from "../../assets/images/landinghero.mp4";
+import landinghero from "../../assets/images/landingherov.mp4";
 
 export default function StickyHome({
   onOpenAuth,

@@ -76,11 +76,11 @@ export default function LandingPage({ onOpenAuth }: LandingPageProps) {
             {[
               {
                 title: "What We Do",
-                text: "We bridge the gap between environmental impact and financial markets by providing a high-fidelity infrastructure for carbon credit trading. Our platform utilizes geospatial data and real-time tracking to ensure every credit traded is additionality-verified, transparently priced, and permanently retired."
+                text: "We’re building a platform to make carbon markets more transparent, approachable, and trustworthy. OffSet is focused on simplifying how climate projects are explored, evaluated, and understood — helping teams move toward more informed and responsible climate decisions."
               },
               {
                 title: "Geospatial Project Discovery",
-                text: "Visualize the impact. We utilize satellite-integrated mapping to provide a digital twin of every carbon project. Users can explore global initiatives through an interactive interface that displays real-time site data, boundary polygons, and local environmental metrics."
+                text: "OffSet aims to make climate projects easier to explore and understand. Through clear visual presentation and project-level context, we help users navigate global initiatives and better interpret environmental impact as carbon markets continue to mature."
               },
               {
                 title: "Algorithmic Trust Scoring",

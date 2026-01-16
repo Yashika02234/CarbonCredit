@@ -8,8 +8,9 @@ import {
 
 import WhoItsFor from '@/components/home/WhoItsFor';
 
-import homeVideo from '../../assets/images/homeVideo.mp4';
 
+import placeholder from '../../assets/images/placeholder-2.jpg';
+import place from '../../assets/images/placeholder-1.jpg';
 
 /* ======================================================
    SCROLL REVEAL
@@ -34,6 +35,43 @@ function useScrollReveal() {
     return () => observer.disconnect();
   }, []);
 }
+function useScrollZoom() {
+  useEffect(() => {
+    const elements = document.querySelectorAll('[data-zoom]');
+
+    const onScroll = () => {
+      elements.forEach((el) => {
+        const rect = el.getBoundingClientRect();
+        const windowHeight = window.innerHeight;
+
+        if (rect.top < windowHeight && rect.bottom > 0) {
+          const progress =
+            1 - Math.min(Math.max(rect.top / windowHeight, 0), 1);
+
+          const scale = 1.08 - progress * 0.08;
+          (el as HTMLElement).style.transform = `scale(${scale})`;
+        }
+      });
+    };
+
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
+
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+}
+function useTitleZoomOnLoad() {
+  useEffect(() => {
+    const el = document.querySelector('[data-zoom-title]');
+    if (!el) return;
+
+    setTimeout(() => {
+      el.classList.add('zoom-active');
+    }, 100); // small delay so initial scale renders
+  }, []);
+}
+
+
 
 import { ViewState } from '@/lib/types';
 
@@ -104,48 +142,89 @@ const Footer = () => (
 
 export default function HomePage({ onNavigate }: HomePageProps) {
   useScrollReveal();
-
+useScrollZoom();
+useTitleZoomOnLoad();
   return (
     <div className="min-h-screen bg-[#0F3D36] text-foreground overflow-x-hidden">
       <main>
 
         {/* ================= HERO ================= */}
-        <section className="relative h-[520px] md:h-[600px] overflow-hidden rounded-none">
-  {/* Background Video */}
-  <video
-    className="absolute inset-0 w-full h-full object-cover"
-    src={homeVideo}
-    autoPlay
-    loop
-    muted
-    playsInline
-  />
+       {/* ================= INTRO / TEXT HERO ================= */}
+<section className="relative bg-[#0F3D36] text-white overflow-hidden">
+  <div className="max-w-[1300px] mx-auto px-6 pt-28 pb-24">
 
-  {/* Overlay */}
-  <div className="absolute inset-0 bg-[#0f2f2a]/55" />
+    {/* FLOATING HEADING */}
+<h1
+  data-zoom-title
+  className="
+    font-serif
+    text-[clamp(3rem,8vw,7rem)]
+    leading-[0.95]
+    tracking-tight
+    mb-20
+    text-white
+    will-change-transform
+  "
+>
+  Carbon Intelligence
+</h1>
 
-  {/* Content */}
-  <div className="relative z-10 h-full flex items-center">
-    <div className="max-w-[1100px] mx-auto px-6 text-center">
 
-      <h1 className="text-4xl md:text-6xl font-medium text-white tracking-tight mb-6">
-        Carbon Intelligence
-      </h1>
-
-      <p className="text-base md:text-lg text-white/85 max-w-2xl mx-auto leading-relaxed mb-10">
-        Explore real-world climate projects with institutional-grade clarity,
-        live verification, and trusted market data.
+    <div className="flex flex-col md:flex-row items-start justify-between gap-10">
+      <p
+        data-reveal
+        data-float
+        className="  max-w-xl
+    text-lg
+    md:text-xl
+    text-white/80
+    leading-relaxed"
+        style={{ transitionDelay: '120ms' }}
+      >
+       Explore real-world climate projects with institutional-grade clarity,live verification, and trusted market data.OffSet helps investors, teams, and institutionsnavigate climate impact with confidence — combiningtransparent insights, verified methodologies, anddecision-ready intelligence in one unified platform.
       </p>
 
-      <button 
-      onClick={() => onNavigate('portfolio')}
-      className="inline-flex items-center justify-center px-8 py-3 text-sm font-medium rounded-md bg-black text-white hover:bg-black/90 transition">
+      <button className="inline-flex items-center justify-center px-8 py-3 text-sm font-medium rounded-md bg-black text-white hover:bg-black/90 transition">
         View Portfolio
       </button>
-
     </div>
+
   </div>
 </section>
+
+
+{/* ================= VISUAL BLOCKS ================= */}
+{/* ================= VISUAL BLOCKS ================= */}
+<section className="bg-[#0F3D36] py-20">
+  <div className="max-w-7xl mx-auto px-6 grid md:grid-cols-2 gap-10">
+
+    <div
+      data-reveal
+      className="h-[320px] rounded-xl overflow-hidden bg-neutral-200"
+    >
+      <img
+        data-zoom
+        src={place}
+        alt="Climate project"
+        className="w-full h-full object-cover transition-transform duration-300 will-change-transform"
+      />
+    </div>
+
+    <div
+      data-reveal
+      className="h-[320px] rounded-xl overflow-hidden bg-neutral-200"
+    >
+      <img
+        data-zoom
+        src={placeholder}
+        alt="Carbon analytics"
+        className="w-full h-full object-cover transition-transform duration-300 will-change-transform"
+      />
+    </div>
+
+  </div>
+</section>
+
 
 
         {/* ================= MARKETPLACE PREVIEW ================= */}

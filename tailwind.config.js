@@ -78,6 +78,7 @@ export default {
         // Using a clean, professional font stack if you don't have a custom one
         display: ['Poppins', 'Arial', 'sans-serif'],
         body: ['Inter', 'Helvetica', 'sans-serif'],
+        serif: ['Playfair Display', 'serif'],
       },
       keyframes: {
         float: {
