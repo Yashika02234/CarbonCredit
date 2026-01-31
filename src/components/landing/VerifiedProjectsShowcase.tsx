@@ -2,7 +2,8 @@ import { useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
 /* ===== MEDIA ===== */
-import mangroveVideo from "../../assets/images/mangrove.mp4";
+const mangroveVideo = "https://drive.google.com/file/d/1GsQgvANiw7LAQn1okk5xGbljKQQLXqjv/view?usp=sharing"
+
 import solarVideo from "../../assets/images/solar.mp4";
 import methaneVideo from "../../assets/images/methane.mp4";
 import forestVideo from "../../assets/images/forest.mp4";
