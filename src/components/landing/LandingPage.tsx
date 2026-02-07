@@ -11,6 +11,7 @@ import landingv from '../../assets/images/landingv.mp4';
 import { useScrollReveal } from '../../hooks/useScrollReveal';
 import VerifiedProjectsShowcase from './VerifiedProjectsShowcase';
 import education  from "../../assets/images/education.mp4"
+import VerificationFlow from './VerificationFlow';
 
 type Testimonial = {
   quote: string;
@@ -232,144 +233,7 @@ export default function LandingPage({ onOpenAuth }: LandingPageProps) {
 </section>
 
       {/* ================= TRUST & VERIFICATION ================= */}
-{/* ================= VERIFICATION PROCESS FLOW ================= */}
-<section
-  className="
-    relative
-    bg-[#3F5D50]
-    text-white
-    overflow-hidden
-    -mt-32
-    z-30
-    rounded-t-[56px]
-  "
->
-
-  {/* ===== SOFT BLEND FROM ABOVE ===== */}
-  <div className="absolute top-0 left-0 w-full h-24 bg-gradient-to-b from-[#f3f4ff]/95 to-transparent pointer-events-none" />
-
-  {/* ===== CURVED TOP ===== */}
-  <div className="absolute top-0 left-0 w-full overflow-hidden leading-none">
-    <svg
-      className="relative block w-[130%] h-[160px] -translate-x-[5%]"
-      viewBox="0 0 1200 160"
-      preserveAspectRatio="none"
-    >
-      <path
-        d="M0,80 C300,180 900,-20 1200,100 L1200,0 L0,0 Z"
-        fill="#f3f4ff"
-      />
-    </svg>
-  </div>
-
-  <div className="relative pt-40 pb-36 px-6 lg:px-12">
-    <div className="max-w-[1300px] mx-auto">
-
-      {/* ===== HEADER ===== */}
-      <div className="text-center mb-24" data-reveal="up">
-       
-
-        <h2 className="text-4xl md:text-5xl font-medium tracking-tight">
-          How Credits Are Verified
-        </h2>
-
-        <p className="text-white/80 mt-6 max-w-2xl mx-auto">
-          Every project passes through a structured validation and scoring
-          pipeline — combining registry data, methodology checks, and
-          risk signals into a decision-ready trust profile.
-        </p>
-      </div>
-
-      {/* ===== FLOW STEPS ===== */}
-      <div className="grid md:grid-cols-4 gap-10 relative">
-
-        {[
-          {
-            step: "01",
-            title: "Project Intake",
-            desc: "Registry records, methodology details, and issuance data are ingested and normalized.",
-          },
-          {
-            step: "02",
-            title: "Methodology Check",
-            desc: "Standards, vintages, and baselines are validated against accepted frameworks.",
-          },
-          {
-            step: "03",
-            title: "Risk & Integrity Scan",
-            desc: "Automated signals flag duplication, leakage, and vintage quality risks.",
-          },
-          {
-            step: "04",
-            title: "Trust Score Output",
-            desc: "A composite trust score and audit trail are generated for buyers.",
-          },
-        ].map((item) => (
-          <div
-            key={item.step}
-            data-reveal="up"
-            className="
-              relative
-              group
-              bg-white/95 text-gray-900
-              p-10 rounded-2xl
-              shadow-[0_30px_80px_rgba(0,0,0,0.25)]
-              transition-all duration-500
-              hover:-translate-y-2
-              hover:bg-[#30574E]
-            "
-          >
-            {/* STEP BADGE */}
-            <div className="
-              absolute -top-5 left-8
-              px-4 py-1
-              rounded-full
-              bg-[#6bc14a]
-              text-white text-xs font-semibold
-              tracking-wider
-              shadow-md
-            ">
-              STEP {item.step}
-            </div>
-
-            <h3 className="
-              text-xl font-medium mb-4 mt-4
-              transition-colors duration-300
-              group-hover:text-white
-            ">
-              {item.title}
-            </h3>
-
-            <p className="
-              text-gray-600 leading-relaxed
-              transition-colors duration-300
-              group-hover:text-white/85
-            ">
-              {item.desc}
-            </p>
-          </div>
-        ))}
-
-      </div>
-
-      {/* ===== BOTTOM TRUST NOTE ===== */}
-      <div
-        className="
-          text-center mt-20
-          text-white/80
-          text-sm
-          max-w-2xl
-          mx-auto
-        "
-        data-reveal="up"
-      >
-        Full audit trails and raw registry references remain accessible —
-        enabling independent validation and institutional compliance checks.
-      </div>
-
-    </div>
-  </div>
-</section>
+<VerificationFlow/>
 
 
 {/* ================= TESTIMONIALS ================= */}
