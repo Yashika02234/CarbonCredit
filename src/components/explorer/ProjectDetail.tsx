@@ -271,16 +271,17 @@ const [quantity, setQuantity] = useState<number>(1);
       <ReportTemplate project={project} />
 
       <PaymentModal
-  isOpen={isPaymentOpen}
-  onClose={() => setIsPaymentOpen(false)}
-  project={project}
-  quantity={quantity}
-  onSuccess={() => {
-    setIsPaymentOpen(false);
-    onBack(); // TEMP: go back to marketplace
-    // later → navigate to portfolio
-  }}
-/>
+           isOpen={isPaymentOpen}
+           onClose={() => {
+              setIsPaymentOpen(false);
+              onBack(); // TEMP: go back to marketplace
+
+              // later → navigate to portfolio
+           } }
+           project={project}
+           quantity={quantity} onNavigate={function (): void {
+              throw new Error('Function not implemented.');
+           } }/>
 
 
       <header className="relative pt-32 pb-8 px-6 md:px-12 max-w-7xl mx-auto" ref={overviewRef}>

@@ -1,7 +1,6 @@
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
 import ReactDOMServer from "react-dom/server";
-import React from "react";
 
 export const downloadPDF = async (
   component: JSX.Element,
