@@ -5,7 +5,7 @@ import AddAssetModal from "./AddAssetModal";
 import RetireCreditsModal from "./RetireCreditsModal";
 import CertificatePDF from "./CertificatePDF";
 import { downloadPDF } from "@/utils/downloadPDF";
-import ActiveProjectsSection from "./ActiveProjectsSection";
+import { ActiveProjectsSection } from "./ActiveProjectsSection";
 
 
 
