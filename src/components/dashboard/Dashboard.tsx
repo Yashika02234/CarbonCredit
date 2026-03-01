@@ -1,277 +1,376 @@
-import { useState, useEffect, useMemo } from "react";
-import { ChevronDown, Check, Wallet } from "lucide-react";
-import leaves from "../../assets/images/dashboard-bg.jpg";
+import { useMemo } from "react";
+import {
+  Wallet,
+  Leaf,
+  CheckCircle2,
+  TrendingUp,
+  
+} from "lucide-react";
+import { usePortfolio } from "@/context/PortfolioContext";
+import earth from "../../assets/images/dashearth.jpg";
 
-// IMPORT DATA FROM YOUR FILE
-import { ACTIVITY_DATA, getChartData } from "../../lib/mock-data";
+import {
+  PieChart,
+  Pie,
+  Cell,
+  ResponsiveContainer,
+  Tooltip,
+} from "recharts";
 
-export default function Dashboard() {
-  // --- STATE ---
-  const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
-  const [selectedMonth, setSelectedMonth] = useState("Sep");
-  const [selectedView, setSelectedView] = useState("Year to View");
-  const [selectedMetric, setSelectedMetric] = useState("CO₂e");
-  const [activityFilter, setActivityFilter] = useState("View All");
-  const [userName, setUserName] = useState("User");
+type DashboardProps = {
+  onNavigate?: (view: "portfolio" | "marketplace" | "home" | "dashboard") => void;
+};
 
+export default function Dashboard({ onNavigate }: DashboardProps) {
+  const { assets, certificates } = usePortfolio();
 
-  // --- GET DYNAMIC GRAPH DATA ---
-  // We pass the selected view and month to our helper function
-  const currentGraphData = getChartData(selectedView, selectedMonth);
+  /* ================= DATA ================= */
 
-  // --- CALCULATE TOTALS ---
-  const totalOffset = useMemo(() => {
-    return ACTIVITY_DATA.reduce((acc, item) => acc + item.amount, 0).toLocaleString();
-  }, []);
+  const ownedAssets = assets.filter(a => a.status === "owned");
+  const totalBought = assets.reduce((s, a) => s + a.quantity, 0);
+  const totalRetired = certificates.reduce((s, c) => s + c.quantity, 0);
+  const activeProjects = ownedAssets.length;
 
-  // --- FILTER ACTIVITY LIST ---
-  const filteredActivity = useMemo(() => {
-    if (activityFilter === "View All") return ACTIVITY_DATA;
-    return ACTIVITY_DATA.filter(item => item.type === activityFilter);
-  }, [activityFilter]);
-useEffect(() => {
-  const storedName = localStorage.getItem("offset_user_name");
+  const retirementRatio =
+    totalBought === 0 ? 0 : Math.round((totalRetired / totalBought) * 100);
 
-  if (storedName && storedName.trim().length > 0) {
-    setUserName(storedName);
-  } else {
-    setUserName("User");
-  }
-}, []);
+  const pieData = [
+    { name: "Retired", value: totalRetired },
+    { name: "Available", value: Math.max(totalBought - totalRetired, 0) },
+  ];
 
+  const insight = useMemo(() => {
+    if (totalBought === 0) return "Start purchasing credits to see your impact.";
+    if (retirementRatio > 70) return "Excellent progress in climate action.";
+    if (retirementRatio > 40) return "Good momentum. Retire more credits.";
+    return "Most credits are still active. Consider retiring some.";
+  }, [retirementRatio, totalBought]);
 
-  // --- CLICK OUTSIDE HANDLER ---
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      const target = event.target as HTMLElement;
-      if (!target.closest('.dropdown-container')) {
-        setActiveDropdown(null);
-      }
-    }
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
-
-  const toggleDropdown = (name: string) => {
-    setActiveDropdown(activeDropdown === name ? null : name);
-  };
+  /* ================= UI ================= */
 
   return (
-    <div className="min-h-screen bg-[#FDFBF7] text-[#2F3E33] pt-32 pb-12 font-sans selection:bg-[#9CCBA0]/30 relative">
-      
-      {/* BACKGROUND */}
-      <div className="fixed top-0 left-0 w-full h-full pointer-events-none z-0">
-        <img 
-          src={leaves} 
-          alt="Leaves Background" 
-          className="w-full h-full object-cover opacity-100 mix-blend-multiply object-top"
-        />
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-[#FDFBF7]/60 to-[#FDFBF7]"></div>
-      </div>
+    <div className="min-h-screen bg-[#F6FBF8] text-[#064E3B]">
 
-      <main className="relative z-10 max-w-5xl mx-auto px-6 space-y-10">
-
-        {/* HEADER */}
-        <section className="flex justify-between items-end">
+      {/* ===== HEADER ===== */}
+      <section className="max-w-[1400px] mx-auto px-10 pt-28 pb-10">
+        <div className="flex justify-between items-center">
           <div>
-           <h1 className="text-5xl font-serif text-[#1A2F23] mb-3">
-  Welcome, {userName}!
+           <h1 className="text-9xl font-light tracking-tight">
+  Dashboard
+
 </h1>
 
-            <p className="text-xl text-[#5C6F66]">Track Your Impact</p>
+            <p className="text-5xl text-emerald-700/70 mt-1 py-10">
+              Overview of your 
+              <br />
+             
+              climate impact
+            </p>
           </div>
+
           
-          <div className="hidden md:flex items-center gap-3 bg-white/60 backdrop-blur-md px-5 py-3 rounded-2xl border border-white shadow-sm">
-             <div className="p-2 bg-emerald-100 rounded-full text-emerald-700">
-                <Wallet className="w-5 h-5" />
-             </div>
-             <div>
-                <p className="text-xs text-[#5C6F66] uppercase font-bold tracking-wider">Total Offset</p>
-                <p className="text-lg font-mono font-bold text-[#1A2F23]">{totalOffset} t</p>
-             </div>
-          </div>
-        </section>
+        </div>
+      </section>
 
-        {/* CHART CARD */}
-        <section className="bg-[#F4F1E8]/80 backdrop-blur-md rounded-[30px] p-8 shadow-sm relative overflow-visible border border-white/60">
-          
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-12 relative z-20">
-            <h2 className="text-2xl font-serif text-[#2F3E33]">Total {selectedMetric} Offset</h2>
-            
-            {/* CONTROLS */}
-            <div className="flex items-center gap-2 bg-[#EAE7DE] p-1.5 rounded-2xl w-fit relative dropdown-container shadow-inner">
-              
-              {/* MONTH DROPDOWN */}
-              <div className="relative">
-                <button 
-                  onClick={() => toggleDropdown("month")}
-                  className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all ${
-                    activeDropdown === "month" || selectedMonth !== "Sep" ? "bg-white text-[#2F3E33] shadow-sm" : "text-[#6B7B73] hover:text-[#2F3E33]"
-                  }`}
+      {/* ===== KPI CARDS ===== */}
+      <section className="bg-[#1E2623] text-white">
+  <div className="max-w-[1400px] mx-auto px-10 py-20">
+    
+   
+
+    <div className="grid grid-cols-1 md:grid-cols-4 gap-12">
+      <StatCard icon={Wallet} label="Credits Bought" value={`${totalBought}`} />
+      <StatCard icon={CheckCircle2} label="Credits Retired" value={`${totalRetired}`} />
+      <StatCard icon={Leaf} label="Active Projects" value={activeProjects} />
+      <StatCard icon={TrendingUp} label="Retirement Ratio" value={`${retirementRatio}%`} />
+    </div>
+
+  </div>
+</section>
+
+
+      {/* ===== MAIN GRID ===== */}
+      <section className="max-w-[1400px] mx-auto px-10 pb-24 grid grid-cols-12 gap-10 py-10">
+
+        {/* IMPACT DISTRIBUTION */}
+        <div className="col-span-12 md:col-span-8 bg-white rounded-3xl p-6 border shadow-sm">
+         
+
+          <div className="relative rounded-2xl overflow-hidden">
+            <img
+              src={earth}
+              alt="Earth Impact"
+              className="w-full h-[340px] object-cover"
+            />
+          </div>
+        </div>
+
+        {/* ASSET ALLOCATION */}
+        <div className="col-span-12 md:col-span-4 bg-white rounded-3xl p-6 border shadow-sm">
+          <h2 className="font-semibold text-4xl mb-6">Asset Allocation</h2>
+
+          <div className="h-[260px]">
+            <ResponsiveContainer>
+              <PieChart>
+                <Pie
+                  data={pieData}
+                  dataKey="value"
+                  innerRadius={60}
+                  outerRadius={90}
+                  paddingAngle={4}
                 >
-                  {selectedMonth}
-                </button>
-                {activeDropdown === "month" && (
-                  <div className="absolute top-full left-0 mt-2 w-32 bg-white rounded-2xl shadow-xl border border-[#EBE8E0] p-2 overflow-hidden z-50 animate-in fade-in zoom-in-95 duration-200">
-                    <div className="grid grid-cols-2 gap-1">
-                      {["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct"].map((m) => (
-                        <button
-                          key={m}
-                          onClick={() => { setSelectedMonth(m); setActiveDropdown(null); }}
-                          className={`text-xs py-2 rounded-lg hover:bg-[#F4F1E8] ${selectedMonth === m ? 'font-bold bg-[#F4F1E8]' : ''}`}
-                        >
-                          {m}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* VIEW DROPDOWN */}
-              <div className="relative">
-                <button 
-                  onClick={() => toggleDropdown("view")}
-                  className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all ${
-                    activeDropdown === "view" || selectedView === "Year to View" ? "bg-[#D6D3C9] text-[#2F3E33] shadow-sm" : "text-[#6B7B73] hover:text-[#2F3E33]"
-                  }`}
-                >
-                  {selectedView}
-                </button>
-                {activeDropdown === "view" && (
-                  <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-44 bg-white rounded-2xl shadow-xl border border-[#EBE8E0] p-1 z-50">
-                    {["Year to View", "Month to View", "Week to View"].map((v) => (
-                      <button 
-                        key={v} 
-                        onClick={() => { setSelectedView(v); setActiveDropdown(null); }} 
-                        className="w-full text-left px-3 py-2 text-sm rounded-xl hover:bg-[#F4F1E8] flex justify-between"
-                      >
-                        {v} {selectedView === v && <Check className="w-3 h-3"/>}
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-
-              {/* METRIC DROPDOWN */}
-              <div className="relative">
-                <button 
-                  onClick={() => toggleDropdown("metric")}
-                  className={`px-4 py-2 rounded-xl text-sm font-semibold flex items-center gap-1 transition-all ${
-                    activeDropdown === "metric" ? "bg-white text-[#2F3E33] shadow-sm" : "text-[#6B7B73] hover:text-[#2F3E33]"
-                  }`}
-                >
-                  {selectedMetric} <ChevronDown className="w-3 h-3" />
-                </button>
-                {activeDropdown === "metric" && (
-                  <div className="absolute top-full right-0 mt-2 w-32 bg-white rounded-2xl shadow-xl border border-[#EBE8E0] p-1 z-50">
-                    {["CO₂e", "tCO₂", "kg CO₂"].map((m) => (
-                      <button
-                        key={m}
-                        onClick={() => { setSelectedMetric(m); setActiveDropdown(null); }}
-                        className={`w-full text-left px-3 py-2 text-sm rounded-xl hover:bg-[#F4F1E8] flex justify-between ${selectedMetric === m ? 'font-bold bg-[#F4F1E8]' : ''}`}
-                      >
-                        {m} {selectedMetric === m && <Check className="w-3 h-3"/>}
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </div>
+                  <Cell fill="#22C55E" />
+                  <Cell fill="#D1FAE5" />
+                </Pie>
+                <Tooltip />
+              </PieChart>
+            </ResponsiveContainer>
           </div>
 
-          {/* === THE GRAPH === */}
-          <div className="relative h-64 w-full mt-4 select-none">
-            
-            {/* GRID LINES */}
-            <div className="absolute inset-0 flex flex-col justify-between text-xs text-[#9CA3AF] font-medium pointer-events-none z-0">
-              {[500, 300, 100, 0].map((val, i) => (
-                <div key={i} className="flex items-center w-full">
-                   <span className="w-8 text-right mr-4 opacity-50 font-mono">{val}K</span>
-                   <div className="h-[1px] w-full bg-[#D6D3C9]/50 border-t border-dashed border-[#B0B0B0]/40"></div>
-                </div>
-              ))}
-            </div>
+          <p className="text-sm text-center text-emerald-700/70 mt-4">
+            {insight}
+          </p>
+        </div>
 
-            {/* BARS CONTAINER - Uses 'currentGraphData' from mock file */}
-            <div className="absolute inset-0 flex items-end justify-between pl-12 pr-4 pb-6 z-10 gap-2 md:gap-4">
-              {currentGraphData.map((item, index) => (
-                <div key={index} className="flex flex-col items-center gap-3 flex-1 group cursor-pointer h-full justify-end">
-                  
-                  {/* BAR */}
-                  <div 
-                    className="w-full max-w-[48px] md:max-w-[64px] rounded-t-lg transition-all duration-700 ease-out hover:scale-[1.02] relative overflow-hidden group-hover:shadow-lg origin-bottom"
-                    style={{ 
-                      height: item.h,
-                      backgroundColor: '#638666',
-                      backgroundImage: 'linear-gradient(180deg, #9CCBA0 0%, #557C58 100%)' 
-                    }}
-                  >
-                    <div className="absolute top-0 left-0 w-full h-1/3 bg-gradient-to-b from-white/30 to-transparent"></div>
-                  </div>
+        {/* PROJECT BREAKDOWN */}
+      {/* PROJECT IMPACT ALLOCATION */}
+<div className="col-span-12 bg-white rounded-3xl p-6 border shadow-sm">
+  <h2 className="font-semibold text-lg mb-6">
+    Project Impact Allocation
+  </h2>
 
-                  {/* LABEL */}
-                  <span className={`text-xs font-semibold transition-colors ${item.label === selectedMonth ? 'text-[#2F3E33]' : 'text-[#8C9E96]'}`}>
-                    {item.label}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
+  {assets.length === 0 ? (
+    <p className="text-sm text-emerald-700/70">
+      No projects yet. Visit marketplace to begin.
+    </p>
+  ) : (
+    <div className="space-y-6">
+      {assets.map((asset) => {
+        const retiredForProject = certificates
+          .filter(c => c.projectId === asset.projectId)
+          .reduce((s, c) => s + c.quantity, 0);
 
-        {/* RECENT ACTIVITY */}
-        <section className="relative z-30 pb-10">
-          <div className="flex items-center justify-between mb-6 px-2">
-            <h2 className="text-2xl font-serif text-[#2F3E33]">Recent Offsetting Activity</h2>
-            
-            <div className="relative dropdown-container">
-               <button 
-                 onClick={() => toggleDropdown("activity")}
-                 className="flex items-center gap-2 text-sm font-bold text-[#5C6F66] bg-[#F4F1E8] px-5 py-2.5 rounded-full hover:bg-[#EAE7DE] transition-colors"
-               >
-                 {activityFilter} <ChevronDown className="w-4 h-4"/>
-               </button>
-               
-               {activeDropdown === "activity" && (
-                  <div className="absolute top-full right-0 mt-2 w-48 bg-white rounded-2xl shadow-xl border border-[#EBE8E0] p-1 z-50">
-                    {["View All", "Forestry", "Renewable", "Blue Carbon"].map((opt) => (
-                      <button key={opt} onClick={() => { setActivityFilter(opt); setActiveDropdown(null); }} className="w-full text-left px-3 py-2 text-sm rounded-xl hover:bg-[#F4F1E8] flex justify-between">{opt}</button>
-                    ))}
-                  </div>
-               )}
-            </div>
-          </div>
+        const total = asset.quantity + retiredForProject;
 
-          <div className="bg-[#F4F1E8]/80 backdrop-blur-md rounded-[30px] p-2 space-y-1 border border-white/60">
-            {filteredActivity.map((item, i) => (
-              <div key={i} className="flex items-center justify-between p-4 md:p-6 hover:bg-[#EAE7DE] rounded-[24px] transition-colors cursor-pointer group">
-                <div className="flex items-center gap-5">
-                  <div className={`w-14 h-14 ${item.bg} rounded-full flex items-center justify-center text-white shadow-sm`}>
-                    <item.icon className="w-6 h-6" />
-                  </div>
-                  <div>
-                    <h3 className="text-lg font-bold text-[#2F3E33]">{item.project}</h3>
-                    <p className="text-xs md:text-sm text-[#7A8C82] mt-0.5">Verified • {item.type}</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-6">
-                  <span className="text-lg font-mono font-bold text-[#2F3E33] hidden md:block">
-                    {item.amount.toLocaleString()} €
-                  </span>
-                  <span className="bg-[#DEE5DE] text-[#4A6356] text-xs font-bold px-4 py-2 rounded-xl uppercase tracking-wider">
-                    Bought
-                  </span>
-                </div>
+        const retiredPercent =
+          total === 0 ? 0 : Math.round((retiredForProject / total) * 100);
+
+        const activePercent = 100 - retiredPercent;
+
+        return (
+          <div
+            key={asset.projectId}
+            className="group transition-all"
+          >
+            {/* LABEL ROW */}
+            <div className="flex justify-between items-center text-sm mb-2">
+              <div className="font-medium text-[#064E3B]">
+                {asset.projectName}
               </div>
+              <div className="text-emerald-700/70">
+                {retiredForProject} / {total} t retired
+              </div>
+            </div>
+
+            {/* BAR */}
+            <div className="relative h-2.5 rounded-full bg-emerald-100 overflow-hidden">
+              {/* RETIRED */}
+              <div
+                className="absolute left-0 top-0 h-full
+                  bg-gradient-to-r from-emerald-500 to-emerald-600
+                  transition-all duration-700 ease-out
+                  group-hover:brightness-110"
+                style={{ width: `${retiredPercent}%` }}
+              />
+
+              {/* ACTIVE */}
+              <div
+                className="absolute right-0 top-0 h-full
+                  bg-emerald-300/40
+                  transition-all duration-700"
+                style={{ width: `${activePercent}%` }}
+              />
+            </div>
+
+            {/* LEGEND */}
+            <div className="flex gap-4 text-xs mt-2 text-emerald-800/70">
+              <span className="flex items-center gap-1">
+                <span className="w-2 h-2 rounded-full bg-emerald-600" />
+                Retired
+              </span>
+              <span className="flex items-center gap-1">
+                <span className="w-2 h-2 rounded-full bg-emerald-300" />
+                Active
+              </span>
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  )}
+</div>
+
+      </section>
+
+      {/* ===== FOOT CTA ===== */}
+      <footer className="bg-[#3F5D50] text-white">
+  <section className="relative px-6 lg:px-12 py-32">
+
+    {/* WAVE */}
+    <div className="absolute top-0 left-0 w-full overflow-hidden leading-none">
+      <svg
+        className="relative block w-[130%] h-[160px] -translate-x-[5%]"
+        viewBox="0 0 1200 160"
+        preserveAspectRatio="none"
+      >
+        <path
+          d="M0,80 C300,180 900,-20 1200,100 L1200,0 L0,0 Z"
+          fill="#f3f4ff"
+        />
+      </svg>
+    </div>
+
+    <div className="max-w-[1600px] mx-auto grid lg:grid-cols-2 gap-24 items-center">
+
+      {/* LEFT – BRAND & CONTACT */}
+      <div className="text-white grid grid-cols-2 gap-20">
+        <div className="flex flex-col justify-between">
+          <div>
+            <h2 className="text-4xl font-medium tracking-tight mb-6">
+              Offset
+            </h2>
+
+            <p className="text-sm text-white/85 leading-relaxed max-w-xs mb-14">
+              Transparent, data-backed infrastructure for verified carbon credit trading.
+            </p>
+
+            <div className="space-y-3 text-sm text-white/90">
+              <p>123-456-7890</p>
+              <p>support@offset.com</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="flex flex-col justify-center">
+          <div className="mb-12">
+            <p className="text-xs uppercase tracking-widest text-white/70 mb-6">
+              Platform assurances
+            </p>
+            <ul className="space-y-5 text-sm text-white/90">
+              <li>• Verified project registry</li>
+              <li>• Permanent credit retirement</li>
+              <li>• Full transaction audit trail</li>
+            </ul>
+          </div>
+
+          <div className="flex items-center gap-6">
+            {['Portfolio', 'Marketplace'].map((item) => (
+              <button
+                key={item}
+                onClick={() =>
+                  onNavigate?.(
+                    item.toLowerCase() as "portfolio" | "marketplace"
+                  )
+                }
+                className="text-xs uppercase tracking-widest
+                  border border-white/40 px-4 py-2 rounded-full
+                  hover:bg-white hover:text-[#3F5D50] transition"
+              >
+                {item}
+              </button>
             ))}
-            {filteredActivity.length === 0 && (
-                <div className="p-8 text-center text-[#8C9E96]">No activity found for this filter.</div>
-            )}
           </div>
-        </section>
+        </div>
+      </div>
 
-      </main>
+      {/* RIGHT – TRUST CARD */}
+      <div className="bg-[#FFF1E6] rounded-[32px] p-14 shadow-[0_40px_120px_rgba(0,0,0,0.2)]">
+        <h3 className="text-3xl font-serif text-[#3F5D50] mb-6">
+          Your impact, secured
+        </h3>
+
+        <p className="text-sm text-[#3F5D50]/80 leading-relaxed mb-10">
+          All credits shown in this dashboard are sourced from verified projects
+          and tracked through permanent retirement records. Your climate claims
+          are transparent, auditable, and irreversible.
+        </p>
+
+        <div className="grid grid-cols-2 gap-6 text-sm text-[#3F5D50]/90">
+          <div>
+            <p className="font-medium mb-1">Verification</p>
+            <p className="text-xs">Registry-backed credits</p>
+          </div>
+          <div>
+            <p className="font-medium mb-1">Transparency</p>
+            <p className="text-xs">Full transaction history</p>
+          </div>
+          <div>
+            <p className="font-medium mb-1">Finality</p>
+            <p className="text-xs">Irreversible retirement</p>
+          </div>
+          <div>
+            <p className="font-medium mb-1">Compliance</p>
+            <p className="text-xs">Aligned with global standards</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+</footer>
+
     </div>
   );
 }
+
+/* ===== SMALL COMPONENT ===== */
+
+function StatCard({ icon: Icon, label, value }: any) {
+  return (
+    <div
+      className="
+        group
+        relative
+        py-8
+        border-b border-white/10
+        transition-colors duration-500
+      "
+    >
+      <div className="flex items-start justify-between gap-6">
+
+        {/* LEFT: ICON + LABEL */}
+        <div className="flex items-start gap-4">
+          <div className="mt-1">
+            <Icon className="w-5 h-5 text-emerald-400/80 group-hover:text-emerald-400 transition-colors duration-500" />
+          </div>
+
+          <div>
+            <p className="text-xs uppercase tracking-widest text-white/50 mb-2">
+              {label}
+            </p>
+
+            <p className="text-4xl font-medium tracking-tight text-white">
+              {value}
+            </p>
+          </div>
+        </div>
+
+        {/* RIGHT: META */}
+        <div className="text-xs text-white/40 mt-2">
+          Updated just now
+        </div>
+      </div>
+
+      {/* HOVER ACCENT LINE */}
+      <div
+        className="
+          absolute left-0 bottom-0 h-[1px] w-0
+          bg-emerald-400
+          group-hover:w-full
+          transition-all duration-[1200ms] ease-out
+        "
+      />
+    </div>
+  );
+}
+

@@ -1,16 +1,28 @@
 import  { useState, useEffect } from 'react';
+
 import { X, ShieldCheck, Loader2, ArrowRight, CheckCircle2,  Leaf } from 'lucide-react';
 import { CarbonCredit } from '../../lib/types';
+import { usePortfolio } from "../../context/PortfolioContext";
 
 interface PaymentModalProps {
   isOpen: boolean;
   onClose: () => void;
   project: CarbonCredit;
   quantity: number;
+  onNavigate: (view: "portfolio" | "marketplace" | "home" | "dashboard") => void;
 }
 
-export default function PaymentModal({ isOpen, onClose, project, quantity }: PaymentModalProps) {
+
+export default function PaymentModal({
+  isOpen,
+  onClose,
+  project,
+  quantity,
+  onNavigate,
+}: PaymentModalProps) {
+
   const [step, setStep] = useState<'review' | 'processing' | 'success'>('review');
+ 
 
   useEffect(() => {
     if (isOpen) setStep('review');
@@ -21,13 +33,21 @@ export default function PaymentModal({ isOpen, onClose, project, quantity }: Pay
   const totalCost = project.pricePerCredit * quantity;
   const fees = totalCost * 0.01; 
   const finalTotal = totalCost + fees;
+  const { buyCredits } = usePortfolio();
+
 
   const handlePurchase = async () => {
-    setStep('processing');
-    // Simulate transaction time
-    await new Promise(resolve => setTimeout(resolve, 2500));
-    setStep('success');
-  };
+  setStep('processing');
+
+
+  await new Promise(resolve => setTimeout(resolve, 2000));
+
+  // 🔑 THIS is the missing line
+  buyCredits(project, quantity);
+
+  setStep('success');
+  console.log("BUYING:", project.projectName, quantity);
+};
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
@@ -157,10 +177,11 @@ export default function PaymentModal({ isOpen, onClose, project, quantity }: Pay
               <div className="w-24 h-24 bg-emerald-500/10 rounded-full flex items-center justify-center mb-6 border border-emerald-500/20 shadow-[0_0_40px_-10px_rgba(16,185,129,0.3)]">
                 <CheckCircle2 className="w-12 h-12 text-emerald-400" />
               </div>
-              <h3 className="text-3xl font-bold text-white mb-2">Retired.</h3>
-              <p className="text-slate-400 max-w-xs mx-auto mb-8 text-sm leading-relaxed">
-                <span className="text-white font-bold">{quantity} tonnes</span> have been permanently removed from circulation.
-              </p>
+              <h3 className="text-3xl font-bold text-white mb-2">Credits Purchased</h3>
+<p className="text-slate-400 max-w-xs mx-auto mb-8 text-sm leading-relaxed">
+  <span className="text-white font-bold">{quantity} tonnes</span> have been added to your portfolio.
+</p>
+
               
               {/* Receipt Preview */}
               <div className="w-full bg-white/5 border border-white/5 rounded-xl p-4 mb-8 flex items-center gap-4 text-left">
@@ -168,20 +189,23 @@ export default function PaymentModal({ isOpen, onClose, project, quantity }: Pay
                     <Leaf className="w-5 h-5" />
                  </div>
                  <div>
-                    <p className="text-xs font-bold text-white">Retirement Certificate</p>
-                    <p className="text-[10px] font-mono text-slate-500">ID: CERT-{Math.floor(Math.random() * 999999)}</p>
+                    <p className="text-xs font-bold text-white">View in Portfolio</p>
+
                  </div>
-                 <button className="ml-auto text-xs font-bold text-emerald-400 hover:text-emerald-300">
-                    Download PDF
-                 </button>
+                
               </div>
 
-              <button 
-                onClick={onClose}
-                className="w-full py-4 bg-white text-black font-bold text-sm uppercase tracking-widest rounded-xl hover:bg-slate-200 transition-colors"
-              >
-                Return to Dashboard
-              </button>
+           <button
+  onClick={() => {
+    onClose();
+    onNavigate("portfolio");
+  }}
+  className="w-full py-4 bg-white text-black font-bold uppercase tracking-widest rounded-xl"
+>
+  View Portfolio
+</button>
+
+
             </div>
           )}
         </div>

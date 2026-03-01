@@ -1,23 +1,20 @@
-import { useState, Suspense, lazy } from 'react';
-import { Loader2 } from 'lucide-react';
-import { CarbonCredit, ViewState } from './lib/types';
+import { useState, Suspense, lazy } from "react";
+import { Loader2 } from "lucide-react";
+import { CarbonCredit, ViewState } from "./lib/types";
 
 // --- IMPORTS ---
-import Header from './components/layout/Header';
-import AuthModal from './components/layout/AuthModal';
+import Header from "./components/layout/Header";
+import AuthModal from "./components/layout/AuthModal";
 
 // --- LAZY IMPORTS ---
-const LandingPage = lazy(() => import('./components/landing/LandingPage'));
-const HomePage = lazy(() => import('./components/home/HomePage'));
-const Explorer = lazy(() => import('./components/explorer/Explorer'));
-const Portfolio = lazy(() => import('./components/portfolio/Portfolio'));
-const AboutPage = lazy(() => import('./components/about/AboutPage'));
-const ContactPage = lazy(() => import('./components/contact/ContactPage'));
-const ProjectDetail = lazy(() => import('./components/explorer/ProjectDetail'));
-const Dashboard = lazy(() => import('./components/dashboard/Dashboard'));
-
-
-// ViewState is imported from ./lib/types
+const LandingPage = lazy(() => import("./components/landing/LandingPage"));
+const HomePage = lazy(() => import("./components/home/HomePage"));
+const Explorer = lazy(() => import("./components/explorer/Explorer"));
+const Portfolio = lazy(() => import("./components/portfolio/Portfolio"));
+const AboutPage = lazy(() => import("./components/about/AboutPage"));
+const ContactPage = lazy(() => import("./components/contact/ContactPage"));
+const ProjectDetail = lazy(() => import("./components/explorer/ProjectDetail"));
+const Dashboard = lazy(() => import("./components/dashboard/Dashboard"));
 
 const PageLoader = () => (
   <div className="h-screen w-full flex items-center justify-center bg-background">
@@ -27,53 +24,58 @@ const PageLoader = () => (
 
 function App() {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
-  const [authMode, setAuthMode] = useState<'login' | 'signup'>('signup');
+  const [authMode, setAuthMode] = useState<"login" | "signup">("signup");
   const [showContact, setShowContact] = useState(false);
 
   const [currentView, setCurrentView] = useState<ViewState>(() => {
-    const savedAuth = localStorage.getItem('offset_isLoggedIn');
-    return savedAuth === 'true' ? 'home' : 'landing';
+    const savedAuth = localStorage.getItem("offset_isLoggedIn");
+    return savedAuth === "true" ? "home" : "landing";
   });
 
-  const [selectedProject, setSelectedProject] = useState<CarbonCredit | null>(null);
-
-  const [isLoggedIn, setIsLoggedIn] = useState(
-    () => localStorage.getItem('offset_isLoggedIn') === 'true'
+  const [selectedProject, setSelectedProject] = useState<CarbonCredit | null>(
+    null
   );
 
-  // --- ACTIONS ---
+  const [isLoggedIn, setIsLoggedIn] = useState(
+    () => localStorage.getItem("offset_isLoggedIn") === "true"
+  );
+
+  // ---------------- ACTIONS ----------------
+
   const handleNavigate = (view: ViewState) => {
-    if (view === 'contact') {
+    if (view === "contact") {
       setShowContact(true);
       return;
     }
     setCurrentView(view);
     setSelectedProject(null);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  const handleOpenAuth = (mode: 'login' | 'signup') => {
+  const handleOpenAuth = (mode: "login" | "signup") => {
     setAuthMode(mode);
     setIsAuthModalOpen(true);
   };
 
   const handleAuthSuccess = () => {
-    localStorage.setItem('offset_isLoggedIn', 'true');
+    localStorage.setItem("offset_isLoggedIn", "true");
     setIsLoggedIn(true);
     setIsAuthModalOpen(false);
-    handleNavigate('home');
+    handleNavigate("home");
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('offset_isLoggedIn');
+    localStorage.removeItem("offset_isLoggedIn");
     setIsLoggedIn(false);
-    handleNavigate('landing');
+    handleNavigate("landing");
   };
+
+  // ---------------- RENDER ----------------
 
   return (
     <div className="min-h-screen bg-background text-foreground font-sans selection:bg-[#30574E]/30">
       <Header
-        showContent={true}
+        showContent
         isLoggedIn={isLoggedIn}
         currentView={currentView}
         onNavigate={handleNavigate}
@@ -106,30 +108,32 @@ function App() {
             selectedProject ? (
               <ProjectDetail
                 project={selectedProject}
-                onBack={() => handleNavigate('marketplace')}
+                onBack={() => handleNavigate("marketplace")}
               />
             ) : (
               <>
-  {currentView === 'home' && <HomePage onNavigate={handleNavigate} />}
+                {currentView === "home" && (
+                  <HomePage onNavigate={handleNavigate} />
+                )}
 
-  {currentView === 'marketplace' && (
-    <Explorer
-      onSelectProject={(p: CarbonCredit) => {
-        setSelectedProject(p);
-        window.scrollTo(0, 0);
-      }}
-    />
-  )}
+                {currentView === "marketplace" && (
+                  <Explorer
+                    onSelectProject={(p: CarbonCredit) => {
+                      setSelectedProject(p);
+                      window.scrollTo({ top: 0 });
+                    }}
+                  />
+                )}
 
-  {currentView === 'portfolio' && <Portfolio />}
-  {currentView === 'dashboard' && <Dashboard />}   {/* 👤 FIX */}
-  {currentView === 'about' && <AboutPage />}
-
-  {currentView === 'landing' && <HomePage onNavigate={handleNavigate} />}
-</>
-
+                {currentView === "portfolio" && <Portfolio />}
+                {currentView === "dashboard" && <Dashboard />}
+                {currentView === "about" && <AboutPage />}
+                {currentView === "landing" && (
+                  <LandingPage onOpenAuth={handleOpenAuth} />
+                )}
+              </>
             )
-          ) : currentView === 'about' ? (
+          ) : currentView === "about" ? (
             <AboutPage />
           ) : (
             <LandingPage onOpenAuth={handleOpenAuth} />

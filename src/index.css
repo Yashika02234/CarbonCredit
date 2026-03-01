@@ -153,3 +153,11 @@
 .zoom-active[data-zoom-title] {
   transform: scale(1.08);
 }
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.animate-fade {
+  animation: fadeIn 600ms ease forwards;
+}

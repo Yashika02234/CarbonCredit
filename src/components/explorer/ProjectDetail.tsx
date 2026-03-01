@@ -1,24 +1,20 @@
 // src/components/explorer/ProjectDetail.tsx
-import { useState, useEffect, useRef } from 'react';
+import { useState, useRef } from 'react';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
+import PaymentModal from "../payment/PaymentModal";
+
 import { 
   ArrowLeft, 
   Leaf, 
   Globe2, 
   CheckCircle2, 
-  X,
-  CreditCard as CreditCardIcon, 
-  Loader2,
   ArrowRight,
-  Smartphone,
   ChevronDown,
   Trees,
   Wind,
   Search,
-  Download,
-  Calendar,
-  Lock} from 'lucide-react';
+  Download} from 'lucide-react';
 import { CarbonCredit } from '../../lib/types';
 
 interface ProjectDetailProps {
@@ -244,153 +240,13 @@ const ImpactStats = () => (
 );
 
 // --- PAYMENT MODAL ---
-function PaymentModal({ isOpen, onClose, project, quantity }: any) {
-  const [step, setStep] = useState('review');
-  const [paymentMethod, setPaymentMethod] = useState('card');
-  const [cardName, setCardName] = useState('');
-  const [cardNumber, setCardNumber] = useState('');
-  const [expiry, setExpiry] = useState('');
-  const [cvc, setCvc] = useState('');
 
-  useEffect(() => {
-    if (isOpen) {
-      setStep('review');
-      setPaymentMethod('card');
-      setCardName('');
-      setCardNumber('');
-      setExpiry('');
-      setCvc('');
-    }
-  }, [isOpen]);
-
-  if (!isOpen) return null;
-  
-  const handleProcess = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setStep('processing');
-    await new Promise(resolve => setTimeout(resolve, 3000));
-    setStep('success');
-  }
-
-  const total = (project.pricePerCredit * quantity).toFixed(2);
-
-  return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-[#2F3E33]/40 backdrop-blur-sm transition-opacity" onClick={onClose} />
-      
-      <div className="relative w-full max-w-md bg-[#FDFBF7] rounded-[2rem] shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
-        <div className="flex items-center justify-between p-6 border-b border-[#EBE8E0]">
-           <h3 className="font-serif text-xl text-[#2F3E33]">
-             {step === 'review' ? 'Checkout' : step === 'processing' ? 'Processing' : 'Completed'}
-           </h3>
-           <button onClick={onClose} className="text-[#5C6F66] hover:text-[#2F3E33]"><X className="w-5 h-5"/></button>
-        </div>
-
-        <div className="p-6 overflow-y-auto">
-          {step === 'review' && (
-            <div className="space-y-6">
-               <div className="bg-[#F4F1E8] p-4 rounded-xl flex gap-4">
-                  <img src={project.image} className="w-16 h-16 rounded-lg object-cover" alt="" />
-                  <div>
-                     <p className="font-bold text-[#2F3E33]">{project.projectName}</p>
-                     <p className="text-xs text-[#5C6F66]">{quantity} Tonnes • {project.vintage}</p>
-                     <p className="font-mono text-emerald-700 mt-1">${total}</p>
-                  </div>
-               </div>
-               
-               <div className="grid grid-cols-2 gap-3">
-                  {['card', 'upi'].map(m => (
-                    <button 
-                      key={m}
-                      onClick={() => setPaymentMethod(m)}
-                      className={`flex flex-col items-center justify-center p-4 rounded-xl border-2 transition-all ${paymentMethod === m ? 'border-[#4F6F52] bg-[#E8EFE8]' : 'border-transparent bg-[#F4F1E8]'}`}
-                    >
-                       {m === 'card' ? <CreditCardIcon className="w-5 h-5 mb-1" /> : <Smartphone className="w-5 h-5 mb-1"/>}
-                       <span className="text-xs font-bold uppercase">{m}</span>
-                    </button>
-                  ))}
-               </div>
-
-               {paymentMethod === 'card' && (
-                 <form onSubmit={handleProcess} className="space-y-4 animate-in fade-in slide-in-from-top-2">
-                    <div className="space-y-2">
-                        <label className="text-[10px] font-bold uppercase text-[#5C6F66] tracking-wider">Cardholder Name</label>
-                        <input required type="text" placeholder="John Doe" className="w-full bg-white border border-[#EBE8E0] p-3 rounded-xl text-sm outline-none focus:border-[#4F6F52] transition-colors" value={cardName} onChange={e => setCardName(e.target.value)} />
-                    </div>
-                    <div className="space-y-2">
-                        <label className="text-[10px] font-bold uppercase text-[#5C6F66] tracking-wider">Card Number</label>
-                        <div className="relative">
-                            <CreditCardIcon className="absolute left-3 top-3 w-4 h-4 text-[#8C9E96]" />
-                            <input required type="text" maxLength={19} placeholder="0000 0000 0000 0000" className="w-full bg-white border border-[#EBE8E0] p-3 pl-10 rounded-xl text-sm outline-none focus:border-[#4F6F52] transition-colors font-mono" value={cardNumber} onChange={e => setCardNumber(e.target.value)} />
-                        </div>
-                    </div>
-                    <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                            <label className="text-[10px] font-bold uppercase text-[#5C6F66] tracking-wider">Expiry</label>
-                            <div className="relative">
-                                <Calendar className="absolute left-3 top-3 w-4 h-4 text-[#8C9E96]" />
-                                <input required type="text" maxLength={5} placeholder="MM/YY" className="w-full bg-white border border-[#EBE8E0] p-3 pl-10 rounded-xl text-sm outline-none focus:border-[#4F6F52] transition-colors font-mono" value={expiry} onChange={e => setExpiry(e.target.value)} />
-                            </div>
-                        </div>
-                        <div className="space-y-2">
-                            <label className="text-[10px] font-bold uppercase text-[#5C6F66] tracking-wider">CVC</label>
-                            <div className="relative">
-                                <Lock className="absolute left-3 top-3 w-4 h-4 text-[#8C9E96]" />
-                                <input required type="text" maxLength={3} placeholder="123" className="w-full bg-white border border-[#EBE8E0] p-3 pl-10 rounded-xl text-sm outline-none focus:border-[#4F6F52] transition-colors font-mono" value={cvc} onChange={e => setCvc(e.target.value)} />
-                            </div>
-                        </div>
-                    </div>
-                    <button type="submit" className="w-full py-4 bg-[#4F6F52] text-white font-bold rounded-xl hover:bg-[#3E5842] transition-colors flex items-center justify-center gap-2 mt-4">
-                      Pay ${total} <ArrowRight className="w-4 h-4" />
-                    </button>
-                 </form>
-               )}
-
-               {paymentMethod === 'upi' && (
-                 <div className="bg-white border border-[#EBE8E0] p-6 rounded-2xl flex flex-col items-center text-center animate-in fade-in slide-in-from-top-2">
-                    <p className="text-xs font-bold text-[#5C6F66] mb-4 uppercase tracking-wider">Scan to Pay ${total}</p>
-                    <div className="p-2 bg-white rounded-xl shadow-sm border border-gray-100 mb-4">
-                        <img src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=upi://pay?pa=offset@bank&pn=OffsetPlatform&am=${total}&cu=USD`} alt="UPI QR Code" className="w-32 h-32" />
-                    </div>
-                    <p className="text-[10px] text-[#8C9E96] mb-6">Supported by GPay, PhonePe, Paytm</p>
-                    <button onClick={handleProcess} className="w-full py-4 bg-[#4F6F52] text-white font-bold rounded-xl hover:bg-[#3E5842] transition-colors flex items-center justify-center gap-2">
-                      I Have Scanned & Paid <ArrowRight className="w-4 h-4" />
-                    </button>
-                 </div>
-               )}
-            </div>
-          )}
-
-          {step === 'processing' && (
-             <div className="py-10 text-center space-y-4">
-                <Loader2 className="w-10 h-10 text-[#4F6F52] animate-spin mx-auto" />
-                <p className="text-[#5C6F66]">Verifying credentials...</p>
-                <p className="text-xs text-[#8C9E96]">Please do not close this window</p>
-             </div>
-          )}
-
-          {step === 'success' && (
-             <div className="py-6 text-center space-y-4 animate-in zoom-in-95 duration-300">
-                <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto text-emerald-600">
-                   <CheckCircle2 className="w-8 h-8" />
-                </div>
-                <div>
-                   <h4 className="text-xl font-serif text-[#2F3E33]">Payment Successful!</h4>
-                   <p className="text-sm text-[#5C6F66] mt-2">You have successfully offset {quantity} tonnes.</p>
-                </div>
-                <button onClick={onClose} className="w-full py-3 bg-[#E8EFE8] text-[#2F3E33] font-bold rounded-xl">Close</button>
-             </div>
-          )}
-        </div>
-      </div>
-    </div>
-  )
-}
 
 // --- MAIN PAGE ---
 
 export default function ProjectDetail({ project, onBack }: ProjectDetailProps) {
-  const [quantity] = useState<number>(12);
+const [quantity, setQuantity] = useState<number>(1);
+
   const [isPaymentOpen, setIsPaymentOpen] = useState(false);
 
   // Refs for Scrolling
@@ -414,13 +270,18 @@ export default function ProjectDetail({ project, onBack }: ProjectDetailProps) {
       {/* Invisible Report Template for PDF Generation */}
       <ReportTemplate project={project} />
 
-      <PaymentModal 
-        isOpen={isPaymentOpen} 
-        onClose={() => setIsPaymentOpen(false)} 
-        project={project}
-        quantity={quantity}
-        action="buy"
-      />
+      <PaymentModal
+  isOpen={isPaymentOpen}
+  onClose={() => setIsPaymentOpen(false)}
+  project={project}
+  quantity={quantity}
+  onSuccess={() => {
+    setIsPaymentOpen(false);
+    onBack(); // TEMP: go back to marketplace
+    // later → navigate to portfolio
+  }}
+/>
+
 
       <header className="relative pt-32 pb-8 px-6 md:px-12 max-w-7xl mx-auto" ref={overviewRef}>
          <button
@@ -498,6 +359,34 @@ export default function ProjectDetail({ project, onBack }: ProjectDetailProps) {
                   Details <ChevronDown className="w-3 h-3" />
                </button>
             </div>
+            <div className="flex items-center gap-4">
+  <span className="text-xs font-bold uppercase text-[#5C6F66]">
+    Credits
+  </span>
+
+  <button
+    onClick={() => setQuantity(q => Math.max(1, q - 1))}
+    className="px-3 py-1 rounded-lg border border-[#EBE8E0] text-lg"
+  >
+    −
+  </button>
+
+  <span className="w-8 text-center font-mono text-lg">
+    {quantity}
+  </span>
+
+  <button
+    onClick={() =>
+      setQuantity(q =>
+        Math.min(project.availableCredits, q + 1)
+      )
+    }
+    className="px-3 py-1 rounded-lg border border-[#EBE8E0] text-lg"
+  >
+    +
+  </button>
+</div>
+
 
             <button 
               onClick={handleBuyClick}
