@@ -49,7 +49,6 @@ export interface ReportData {
 
 export type ViewState =
   | 'landing'
-  | 'home'
   | 'marketplace'
   | 'portfolio'
   | 'about'

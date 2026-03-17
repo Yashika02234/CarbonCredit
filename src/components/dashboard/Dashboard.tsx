@@ -49,10 +49,10 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
   /* ================= UI ================= */
 
   return (
-    <div className="min-h-screen bg-[#F6FBF8] text-[#064E3B]">
+    <div className=" bg-[#F6FBF8] text-[#064E3B]">
 
       {/* ===== HEADER ===== */}
-      <section className="max-w-[1400px] mx-auto px-10 pt-28 pb-10">
+      <section className="max-w-[1400px] mx-auto px-10 pt-10 pb-10">
         <div className="flex justify-between items-center">
           <div>
            <h1 className="text-9xl font-light tracking-tight">

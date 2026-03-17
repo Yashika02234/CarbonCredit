@@ -186,15 +186,16 @@ export default function Explorer({
   );
 
   return (
-    <div className="min-h-screen bg-gray-50 text-gray-800">
+    <div className="bg-gray-50 text-gray-800">
       <div className="max-w-[1600px] mx-auto px-6 pt-10">
 
         {/* HEADER */}
         <div className="mb-8">
-          <h1 className="text-3xl font-semibold mb-2">
-            Carbon Credit Marketplace
+          <h1 className="text-7xl font-light tracking-tight">
+            Carbon Credit 
+            Marketplace
           </h1>
-          <p className="text-sm text-gray-500">
+          <p className="text-3xl text-emerald-700/70 mt-1 py-2">
             Explore verified climate projects across the globe
           </p>
         </div>

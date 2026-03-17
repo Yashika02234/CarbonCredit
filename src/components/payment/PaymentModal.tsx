@@ -1,7 +1,14 @@
-import  { useState, useEffect } from 'react';
-
-import { X, ShieldCheck, Loader2, ArrowRight, CheckCircle2,  Leaf } from 'lucide-react';
-import { CarbonCredit } from '../../lib/types';
+import { useState, useEffect, ChangeEvent } from "react";
+import type { ReactNode } from "react";
+import {
+  X,
+  Loader2,
+  CheckCircle2,
+  Lock,
+  CreditCard,
+  Smartphone,
+} from "lucide-react";
+import { CarbonCredit } from "../../lib/types";
 import { usePortfolio } from "../../context/PortfolioContext";
 
 interface PaymentModalProps {
@@ -12,6 +19,28 @@ interface PaymentModalProps {
   onNavigate: (view: "portfolio" | "marketplace" | "home" | "dashboard") => void;
 }
 
+type Step = "review" | "processing" | "success";
+type PaymentMethod = "card" | "upi";
+
+type PaymentForm = {
+  email: string;
+  country: string;
+  cardName: string;
+  cardNumber: string;
+  expiry: string;
+  cvc: string;
+  upiId: string;
+};
+
+const initialForm: PaymentForm = {
+  email: "",
+  country: "India",
+  cardName: "",
+  cardNumber: "",
+  expiry: "",
+  cvc: "",
+  upiId: "",
+};
 
 export default function PaymentModal({
   isOpen,
@@ -20,203 +49,500 @@ export default function PaymentModal({
   quantity,
   onNavigate,
 }: PaymentModalProps) {
+  const { buyCredits } = usePortfolio();
 
-  const [step, setStep] = useState<'review' | 'processing' | 'success'>('review');
- 
+  const [step, setStep] = useState<Step>("review");
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("card");
+  const [form, setForm] = useState<PaymentForm>(initialForm);
+  const [errors, setErrors] = useState<Partial<PaymentForm>>({});
 
   useEffect(() => {
-    if (isOpen) setStep('review');
+    if (isOpen) {
+      setStep("review");
+      setPaymentMethod("card");
+      setForm(initialForm);
+      setErrors({});
+    }
+  }, [isOpen]);
+
+  useEffect(() => {
+    document.body.style.overflow = isOpen ? "hidden" : "";
+    return () => {
+      document.body.style.overflow = "";
+    };
   }, [isOpen]);
 
   if (!isOpen) return null;
 
-  const totalCost = project.pricePerCredit * quantity;
-  const fees = totalCost * 0.01; 
-  const finalTotal = totalCost + fees;
-  const { buyCredits } = usePortfolio();
+  const subtotal = project.pricePerCredit * quantity;
+  const platformFee = subtotal * 0.01;
+  const totalDue = subtotal + platformFee;
 
+  const formatCardNumber = (value: string) => {
+    const cleaned = value.replace(/\D/g, "").slice(0, 16);
+    return cleaned.replace(/(.{4})/g, "$1 ").trim();
+  };
+
+  const formatExpiry = (value: string) => {
+    const cleaned = value.replace(/\D/g, "").slice(0, 4);
+    if (cleaned.length <= 2) return cleaned;
+    return `${cleaned.slice(0, 2)}/${cleaned.slice(2)}`;
+  };
+
+  const formatCvc = (value: string) => value.replace(/\D/g, "").slice(0, 4);
+
+  const getCardType = (number: string) => {
+    const cleaned = number.replace(/\s/g, "");
+    if (/^4/.test(cleaned)) return "Visa";
+    if (/^5[1-5]/.test(cleaned)) return "Mastercard";
+    if (/^3[47]/.test(cleaned)) return "Amex";
+    if (/^6/.test(cleaned)) return "RuPay";
+    return "Card";
+  };
+
+  const isValidUpi = (upi: string) =>
+    /^[a-zA-Z0-9._-]{2,}@[a-zA-Z]{2,}$/.test(upi);
+
+  const validate = () => {
+    const nextErrors: Partial<PaymentForm> = {};
+
+    if (!form.email.trim()) {
+      nextErrors.email = "Email is required";
+    } else if (!/\S+@\S+\.\S+/.test(form.email)) {
+      nextErrors.email = "Enter a valid email";
+    }
+
+    if (!form.country.trim()) {
+      nextErrors.country = "Country is required";
+    }
+
+    if (paymentMethod === "card") {
+      if (!form.cardName.trim()) nextErrors.cardName = "Name is required";
+      if (form.cardNumber.replace(/\s/g, "").length !== 16) {
+        nextErrors.cardNumber = "Enter valid card number";
+      }
+      if (!/^\d{2}\/\d{2}$/.test(form.expiry)) {
+        nextErrors.expiry = "Use MM/YY";
+      }
+      if (form.cvc.length < 3) {
+        nextErrors.cvc = "Enter valid CVC";
+      }
+    }
+
+    if (paymentMethod === "upi") {
+      if (!form.upiId.trim()) {
+        nextErrors.upiId = "UPI ID is required";
+      } else if (!isValidUpi(form.upiId.trim())) {
+        nextErrors.upiId = "Enter a valid UPI ID";
+      }
+    }
+
+    setErrors(nextErrors);
+    return Object.keys(nextErrors).length === 0;
+  };
+
+  const isCardValid =
+    form.cardName.trim().length > 0 &&
+    form.cardNumber.replace(/\s/g, "").length === 16 &&
+    /^\d{2}\/\d{2}$/.test(form.expiry) &&
+    form.cvc.length >= 3;
+
+  const isFormValid =
+    /\S+@\S+\.\S+/.test(form.email) &&
+    form.country.trim().length > 0 &&
+    (paymentMethod === "card" ? isCardValid : isValidUpi(form.upiId.trim()));
+
+  const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+
+    let nextValue = value;
+    if (name === "cardNumber") nextValue = formatCardNumber(value);
+    if (name === "expiry") nextValue = formatExpiry(value);
+    if (name === "cvc") nextValue = formatCvc(value);
+
+    setForm((prev) => ({ ...prev, [name]: nextValue }));
+    setErrors((prev) => ({ ...prev, [name]: "" }));
+  };
 
   const handlePurchase = async () => {
-  setStep('processing');
+    if (!validate()) return;
 
-
-  await new Promise(resolve => setTimeout(resolve, 2000));
-
-  // 🔑 THIS is the missing line
-  buyCredits(project, quantity);
-
-  setStep('success');
-  console.log("BUYING:", project.projectName, quantity);
-};
+    setStep("processing");
+    await new Promise((resolve) => setTimeout(resolve, 1500));
+    buyCredits(project, quantity);
+    setStep("success");
+  };
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-      
-      {/* 1. Cinematic Backdrop */}
-      <div 
-        className="absolute inset-0 bg-[#050505]/90 backdrop-blur-xl transition-opacity animate-in fade-in duration-300" 
-        onClick={onClose}
-      />
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/30 p-4 backdrop-blur-sm">
+      <div className="relative w-full max-w-4xl rounded-3xl bg-white shadow-2xl">
+        <button
+          onClick={onClose}
+          className="absolute right-5 top-5 z-10 rounded-full p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-800"
+        >
+          <X className="h-5 w-5" />
+        </button>
 
-      {/* 2. The "Transaction Window" */}
-      <div className="relative w-full max-w-lg bg-[#0A0A0A] border border-white/10 rounded-3xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300 flex flex-col max-h-[90vh]">
-        
-        {/* Header Bar */}
-        <div className="flex items-center justify-between p-6 border-b border-white/5 bg-white/[0.02]">
-          <div className="flex items-center gap-3">
-            <div className={`w-2.5 h-2.5 rounded-full ${step === 'processing' ? 'bg-yellow-400 animate-pulse' : step === 'success' ? 'bg-emerald-400' : 'bg-slate-400'}`} />
-            <span className="text-xs font-mono font-bold text-slate-300 uppercase tracking-widest">
-              {step === 'review' && 'Confirm Allocation'}
-              {step === 'processing' && 'Processing Chain'}
-              {step === 'success' && 'Asset Retired'}
-            </span>
+        {step === "review" && (
+          <div className="grid lg:grid-cols-[0.95fr_1.05fr]">
+            <div className="border-b border-slate-200 p-6 lg:border-b-0 lg:border-r lg:p-8">
+              <p className="text-xs font-medium uppercase tracking-[0.18em] text-slate-400">
+                Order summary
+              </p>
+
+              <div className="mt-6">
+                <h2 className="text-3xl font-semibold text-slate-900">
+                  ${totalDue.toFixed(2)}
+                </h2>
+                <p className="mt-2 text-sm text-slate-500">
+                  Secure checkout for carbon credit purchase
+                </p>
+              </div>
+
+              <div className="mt-8 rounded-2xl border border-slate-200 p-5">
+                <p className="text-base font-semibold text-slate-900">
+                  {project.projectName}
+                </p>
+                <p className="mt-1 text-sm text-slate-500">
+                  {quantity} credit{quantity > 1 ? "s" : ""} • Vintage{" "}
+                  {project.vintage}
+                </p>
+
+                <div className="mt-5 space-y-3 border-t border-slate-200 pt-5">
+                  <SummaryRow label="Subtotal" value={`$${subtotal.toFixed(2)}`} />
+                  <SummaryRow
+                    label="Platform fee"
+                    value={`$${platformFee.toFixed(2)}`}
+                  />
+                  <SummaryRow label="Project ID" value={project.unicId} mono />
+                </div>
+
+                <div className="mt-5 flex items-center justify-between border-t border-slate-200 pt-5">
+                  <span className="text-sm font-medium text-slate-700">Total</span>
+                  <span className="text-xl font-semibold text-slate-900">
+                    ${totalDue.toFixed(2)}
+                  </span>
+                </div>
+              </div>
+
+              <div className="mt-6 flex items-center gap-2 text-sm text-slate-500">
+                <Lock className="h-4 w-4" />
+                Encrypted payment flow
+              </div>
+            </div>
+
+            <div className="p-6 lg:p-8">
+              <div className="mx-auto max-w-md">
+                <h3 className="text-2xl font-semibold text-slate-900">Payment</h3>
+                <p className="mt-2 text-sm text-slate-500">
+                  Choose a payment method and complete your purchase.
+                </p>
+
+                <div className="mt-6 grid grid-cols-2 gap-3">
+                  <MethodButton
+                    active={paymentMethod === "card"}
+                    onClick={() => setPaymentMethod("card")}
+                    icon={<CreditCard className="h-4 w-4" />}
+                    title="Card"
+                  />
+                  <MethodButton
+                    active={paymentMethod === "upi"}
+                    onClick={() => setPaymentMethod("upi")}
+                    icon={<Smartphone className="h-4 w-4" />}
+                    title="UPI"
+                  />
+                </div>
+
+                <div className="mt-6 space-y-4">
+                  <Field
+                    label="Email"
+                    name="email"
+                    value={form.email}
+                    onChange={handleChange}
+                    placeholder="yashika@example.com"
+                    error={errors.email}
+                  />
+
+                  <SelectField
+                    label="Country"
+                    name="country"
+                    value={form.country}
+                    onChange={handleChange}
+                    error={errors.country}
+                    options={["India", "United States", "United Kingdom", "Germany"]}
+                  />
+
+                  {paymentMethod === "card" && (
+                    <div className="space-y-4">
+                      <Field
+                        label="Name on card"
+                        name="cardName"
+                        value={form.cardName}
+                        onChange={handleChange}
+                        placeholder="Yashika Agrawal"
+                        error={errors.cardName}
+                      />
+
+                      <Field
+                        label="Card number"
+                        name="cardNumber"
+                        value={form.cardNumber}
+                        onChange={handleChange}
+                        placeholder="1234 1234 1234 1234"
+                        error={errors.cardNumber}
+                        rightSlot={
+                          <span className="text-xs text-slate-500">
+                            {getCardType(form.cardNumber)}
+                          </span>
+                        }
+                      />
+
+                      <div className="grid grid-cols-2 gap-4">
+                        <Field
+                          label="Expiry"
+                          name="expiry"
+                          value={form.expiry}
+                          onChange={handleChange}
+                          placeholder="MM/YY"
+                          error={errors.expiry}
+                        />
+                        <Field
+                          label="CVC"
+                          name="cvc"
+                          value={form.cvc}
+                          onChange={handleChange}
+                          placeholder="***"
+                          error={errors.cvc}
+                          type="password"
+                        />
+                      </div>
+                    </div>
+                  )}
+
+                  {paymentMethod === "upi" && (
+                    <div className="space-y-4">
+                      <Field
+                        label="UPI ID"
+                        name="upiId"
+                        value={form.upiId}
+                        onChange={handleChange}
+                        placeholder="yashika@paytm"
+                        error={errors.upiId}
+                      />
+
+                      <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-500">
+                        Supports Google Pay, PhonePe, Paytm, BHIM and other UPI
+                        apps.
+                      </div>
+                    </div>
+                  )}
+
+                  <button
+                    type="button"
+                    onClick={handlePurchase}
+                    disabled={!isFormValid}
+                    className={`mt-2 w-full rounded-2xl py-3.5 text-sm font-semibold transition ${
+                      isFormValid
+                        ? "bg-slate-900 text-white hover:bg-slate-800"
+                        : "cursor-not-allowed bg-slate-200 text-slate-400"
+                    }`}
+                  >
+                    Pay ${totalDue.toFixed(2)}
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
-          <button onClick={onClose} className="text-slate-500 hover:text-white transition-colors">
-            <X className="w-5 h-5" />
-          </button>
-        </div>
+        )}
 
-        {/* Content Body */}
-        <div className="p-8 overflow-y-auto custom-scrollbar">
-          
-          {/* STEP 1: REVIEW */}
-          {step === 'review' && (
-            <div className="space-y-8 animate-in slide-in-from-right-4 duration-300">
-              
-              {/* Asset Ticket */}
-              <div className="bg-white/5 rounded-2xl p-5 border border-white/5 relative overflow-hidden group">
-                <div className="absolute top-0 left-0 w-1 h-full bg-emerald-500" />
-                <div className="flex justify-between items-start mb-4">
-                   <div>
-                      <p className="text-[10px] text-slate-500 uppercase tracking-widest font-bold mb-1">Asset ID</p>
-                      <p className="text-xs font-mono text-emerald-400">{project.unicId}</p>
-                   </div>
-                   <div className="text-right">
-                      <p className="text-[10px] text-slate-500 uppercase tracking-widest font-bold mb-1">Vintage</p>
-                      <p className="text-xs font-mono text-white">{project.vintage}</p>
-                   </div>
-                </div>
-                <h3 className="text-lg font-bold text-white mb-4">{project.projectName}</h3>
-                <div className="flex justify-between items-end border-t border-white/10 pt-4">
-                   <div>
-                      <p className="text-[10px] text-slate-500 uppercase tracking-widest font-bold mb-1">Quantity</p>
-                      <p className="text-xl font-mono text-white">{quantity} t</p>
-                   </div>
-                   <div className="text-right">
-                      <p className="text-[10px] text-slate-500 uppercase tracking-widest font-bold mb-1">Unit Price</p>
-                      <p className="text-sm font-mono text-slate-300">${project.pricePerCredit.toFixed(2)}</p>
-                   </div>
-                </div>
-              </div>
-
-              {/* Financials */}
-              <div className="space-y-3">
-                <div className="flex justify-between text-sm">
-                  <span className="text-slate-500 font-medium">Subtotal</span>
-                  <span className="text-slate-300 font-mono">${totalCost.toFixed(2)}</span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-slate-500 font-medium">Network Fee (1%)</span>
-                  <span className="text-slate-300 font-mono">${fees.toFixed(2)}</span>
-                </div>
-                <div className="h-px bg-white/10 my-2" />
-                <div className="flex justify-between text-lg">
-                  <span className="text-white font-bold">Total</span>
-                  <span className="text-emerald-400 font-mono font-bold">${finalTotal.toFixed(2)}</span>
-                </div>
-              </div>
-
-              {/* Payment Method Stub */}
-              <div className="flex items-center gap-4 p-4 rounded-xl border border-white/10 bg-black/40">
-                <div className="w-10 h-6 bg-slate-200 rounded flex items-center justify-center">
-                   <div className="w-6 h-6 rounded-full bg-red-500 opacity-80 -mr-3" />
-                   <div className="w-6 h-6 rounded-full bg-yellow-500 opacity-80" />
-                </div>
-                <div>
-                   <p className="text-xs text-white font-bold">Mastercard •••• 4242</p>
-                   <p className="text-[10px] text-slate-500">Expires 12/28</p>
-                </div>
-                <div className="ml-auto">
-                   <ShieldCheck className="w-4 h-4 text-emerald-500" />
-                </div>
-              </div>
-
-              <button
-                onClick={handlePurchase}
-                className="w-full py-4 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-sm uppercase tracking-widest rounded-xl shadow-lg shadow-emerald-900/20 flex items-center justify-center gap-2 transition-all hover:scale-[1.01]"
-              >
-                Confirm Allocation <ArrowRight className="w-4 h-4" />
-              </button>
+        {step === "processing" && (
+          <div className="flex min-h-[520px] flex-col items-center justify-center px-6 text-center">
+            <div className="mb-5 rounded-full bg-slate-100 p-4">
+              <Loader2 className="h-8 w-8 animate-spin text-slate-700" />
             </div>
-          )}
+            <h3 className="text-2xl font-semibold text-slate-900">
+              Processing payment
+            </h3>
+            <p className="mt-2 max-w-sm text-sm text-slate-500">
+              Please wait while we confirm your transaction.
+            </p>
+          </div>
+        )}
 
-          {/* STEP 2: PROCESSING */}
-          {step === 'processing' && (
-            <div className="py-12 flex flex-col items-center justify-center text-center animate-in fade-in zoom-in-95">
-              <div className="relative mb-8">
-                {/* Rings */}
-                <div className="absolute inset-0 rounded-full border-2 border-emerald-500/20 animate-ping duration-1000" />
-                <div className="absolute inset-[-10px] rounded-full border border-emerald-500/10 animate-pulse duration-2000" />
-                
-                {/* Spinner */}
-                <div className="w-20 h-20 rounded-full border-2 border-t-emerald-400 border-r-emerald-500/50 border-b-transparent border-l-transparent animate-spin flex items-center justify-center bg-black/50 backdrop-blur-md">
-                   <Loader2 className="w-8 h-8 text-emerald-400 animate-pulse" />
-                </div>
-              </div>
-              <h3 className="text-xl font-bold text-white mb-2 tracking-tight">Securing Assets</h3>
-              <div className="space-y-1">
-                 <p className="text-[10px] font-mono text-emerald-500/80 uppercase tracking-widest animate-pulse">Writing to Ledger...</p>
-                 <p className="text-[10px] font-mono text-slate-600 uppercase tracking-widest">Block #1928374</p>
-              </div>
+        {step === "success" && (
+          <div className="flex min-h-[520px] flex-col items-center justify-center px-6 text-center">
+            <div className="mb-5 rounded-full bg-emerald-50 p-4">
+              <CheckCircle2 className="h-8 w-8 text-emerald-600" />
             </div>
-          )}
+            <h3 className="text-2xl font-semibold text-slate-900">
+              Payment successful
+            </h3>
+            <p className="mt-2 max-w-sm text-sm text-slate-500">
+              Your credits have been added to your portfolio.
+            </p>
 
-          {/* STEP 3: SUCCESS */}
-          {step === 'success' && (
-            <div className="py-4 flex flex-col items-center text-center animate-in zoom-in-95 duration-500">
-              <div className="w-24 h-24 bg-emerald-500/10 rounded-full flex items-center justify-center mb-6 border border-emerald-500/20 shadow-[0_0_40px_-10px_rgba(16,185,129,0.3)]">
-                <CheckCircle2 className="w-12 h-12 text-emerald-400" />
-              </div>
-              <h3 className="text-3xl font-bold text-white mb-2">Credits Purchased</h3>
-<p className="text-slate-400 max-w-xs mx-auto mb-8 text-sm leading-relaxed">
-  <span className="text-white font-bold">{quantity} tonnes</span> have been added to your portfolio.
-</p>
-
-              
-              {/* Receipt Preview */}
-              <div className="w-full bg-white/5 border border-white/5 rounded-xl p-4 mb-8 flex items-center gap-4 text-left">
-                 <div className="w-10 h-10 bg-slate-800 rounded flex items-center justify-center text-emerald-500">
-                    <Leaf className="w-5 h-5" />
-                 </div>
-                 <div>
-                    <p className="text-xs font-bold text-white">View in Portfolio</p>
-
-                 </div>
-                
-              </div>
-
-           <button
-  onClick={() => {
-    onClose();
-    onNavigate("portfolio");
-  }}
-  className="w-full py-4 bg-white text-black font-bold uppercase tracking-widest rounded-xl"
->
-  View Portfolio
-</button>
-
-
+            <div className="mt-6 rounded-2xl border border-slate-200 px-5 py-4 text-left">
+              <p className="font-medium text-slate-900">{project.projectName}</p>
+              <p className="mt-1 text-sm text-slate-500">
+                {quantity} credit{quantity > 1 ? "s" : ""} purchased
+              </p>
+              <p className="mt-3 text-sm font-semibold text-slate-900">
+                Total paid: ${totalDue.toFixed(2)}
+              </p>
             </div>
-          )}
-        </div>
-        
-        {/* Footer Security Badge */}
-        <div className="bg-black/40 p-4 text-center border-t border-white/5 backdrop-blur-md">
-          <p className="text-[9px] text-slate-600 flex items-center justify-center gap-1.5 uppercase tracking-widest font-bold">
-            <ShieldCheck className="w-3 h-3" /> End-to-End Encryption
-          </p>
-        </div>
+
+            <button
+              onClick={() => {
+                onClose();
+                onNavigate("portfolio");
+              }}
+              className="mt-6 rounded-2xl bg-slate-900 px-6 py-3 text-sm font-semibold text-white transition hover:bg-slate-800"
+            >
+              View Portfolio
+            </button>
+          </div>
+        )}
       </div>
     </div>
+  );
+}
+
+function SummaryRow({
+  label,
+  value,
+  mono = false,
+}: {
+  label: string;
+  value: string;
+  mono?: boolean;
+}) {
+  return (
+    <div className="flex items-center justify-between gap-4 text-sm">
+      <span className="text-slate-500">{label}</span>
+      <span className={`text-slate-900 ${mono ? "font-mono text-xs" : "font-medium"}`}>
+        {value}
+      </span>
+    </div>
+  );
+}
+
+type FieldProps = {
+  label: string;
+  name: string;
+  value: string;
+  onChange: (e: ChangeEvent<HTMLInputElement>) => void;
+  placeholder?: string;
+  error?: string;
+  type?: string;
+  rightSlot?: ReactNode;
+};
+
+function Field({
+  label,
+  name,
+  value,
+  onChange,
+  placeholder,
+  error,
+  type = "text",
+  rightSlot,
+}: FieldProps) {
+  return (
+    <div>
+      <label className="mb-2 block text-sm font-medium text-slate-700">
+        {label}
+      </label>
+
+      <div
+        className={`flex items-center rounded-2xl border px-4 py-3 ${
+          error
+            ? "border-red-300 bg-red-50"
+            : "border-slate-200 bg-white focus-within:border-slate-400"
+        }`}
+      >
+        <input
+          name={name}
+          value={value}
+          onChange={onChange}
+          type={type}
+          placeholder={placeholder}
+          className="w-full bg-transparent text-sm text-slate-900 outline-none placeholder:text-slate-400"
+        />
+        {rightSlot && <div className="ml-3 shrink-0">{rightSlot}</div>}
+      </div>
+
+      {error && <p className="mt-1.5 text-xs text-red-500">{error}</p>}
+    </div>
+  );
+}
+
+type SelectFieldProps = {
+  label: string;
+  name: string;
+  value: string;
+  onChange: (e: ChangeEvent<HTMLSelectElement>) => void;
+  error?: string;
+  options: string[];
+};
+
+function SelectField({
+  label,
+  name,
+  value,
+  onChange,
+  error,
+  options,
+}: SelectFieldProps) {
+  return (
+    <div>
+      <label className="mb-2 block text-sm font-medium text-slate-700">
+        {label}
+      </label>
+
+      <select
+        name={name}
+        value={value}
+        onChange={onChange}
+        className={`w-full rounded-2xl border px-4 py-3 text-sm outline-none ${
+          error
+            ? "border-red-300 bg-red-50 text-slate-900"
+            : "border-slate-200 bg-white text-slate-900 focus:border-slate-400"
+        }`}
+      >
+        {options.map((option) => (
+          <option key={option} value={option}>
+            {option}
+          </option>
+        ))}
+      </select>
+
+      {error && <p className="mt-1.5 text-xs text-red-500">{error}</p>}
+    </div>
+  );
+}
+
+type MethodButtonProps = {
+  active: boolean;
+  onClick: () => void;
+  icon: ReactNode;
+  title: string;
+};
+
+function MethodButton({ active, onClick, icon, title }: MethodButtonProps) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`rounded-2xl border px-4 py-3 transition ${
+        active
+          ? "border-slate-900 bg-slate-900 text-white"
+          : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
+      }`}
+    >
+      <div className="flex items-center justify-center gap-2">
+        {icon}
+        <span className="text-sm font-medium">{title}</span>
+      </div>
+    </button>
   );
 }
