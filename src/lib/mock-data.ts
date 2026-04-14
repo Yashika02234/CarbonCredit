@@ -1,5 +1,5 @@
 // src/lib/mock-data.ts
-import { CarbonCredit } from './types';
+import { CarbonCredit } from "./types";
 import { Leaf, Wind, Droplets, TrendingUp } from "lucide-react";
 
 // ==================================================================
@@ -7,30 +7,30 @@ import { Leaf, Wind, Droplets, TrendingUp } from "lucide-react";
 // ==================================================================
 
 export const projectTypes = [
-  'all',
-  'Forestry (REDD+)',
-  'Renewable Energy',
-  'Blue Carbon',
-  'Community Projects',
-  'Waste Recovery',
-  'Tech-Based Removal',
+  "all",
+  "Forestry (REDD+)",
+  "Renewable Energy",
+  "Blue Carbon",
+  "Community Projects",
+  "Waste Recovery",
+  "Tech-Based Removal",
 ];
 
-export const registryTypes = ['all', 'reward', 'purchase', 'payment'];
+export const registryTypes = ["all", "reward", "purchase", "payment"];
 
 export const sortOptions: { [key: string]: string } = {
-  trustScore: 'Trust Score',
-  vintage: 'Newest (Vintage)',
-  availableCredits: 'Available (High)',
-  pricePerCredit: 'Price (Low)',
+  trustScore: "Trust Score",
+  vintage: "Newest (Vintage)",
+  availableCredits: "Available (High)",
+  pricePerCredit: "Price (Low)",
 };
 
 export const REGISTRIES = [
-  'Verra (VCS)',
-  'Gold Standard',
-  'Climate Action Reserve',
-  'American Carbon Registry',
-  'Puro.earth',
+  "Verra (VCS)",
+  "Gold Standard",
+  "Climate Action Reserve",
+  "American Carbon Registry",
+  "Puro.earth",
 ] as const;
 
 // ==================================================================
@@ -39,236 +39,255 @@ export const REGISTRIES = [
 
 const baseMockCredits: CarbonCredit[] = [
   {
-    id: '1',
-    unicId: 'VCS-2891-2023-001',
-    projectName: 'Amazon Rainforest Conservation',
-    location: 'Acre, Brazil',
-    country: 'Brazil',
-    registry: 'Verra (VCS)',
+    id: "1",
+    batch_id: "B1",
+    unicId: "B1",
+    projectName: "Amazon Rainforest Conservation",
+    location: "Acre, Brazil",
+    country: "Brazil",
+    registry: "Verra (VCS)",
     vintage: 2023,
-    status: 'active',
+    status: "SELLABLE",
     trustScore: 94,
     availableCredits: 12500,
+    available_quantity: 12500,
+    total_quantity: 14000,
+    sold_quantity: 1500,
+    retired_quantity: 0,
     pricePerCredit: 18.5,
-    projectType: 'Forestry (REDD+)',
-    image: 'https://images.pexels.com/photos/975771/pexels-photo-975771.jpeg',
+    projectType: "Forestry (REDD+)",
+    methodology: "ARR",
+    updated_at: "2026-03-17T20:10:00Z",
+    version: 12,
+    image: "https://images.pexels.com/photos/975771/pexels-photo-975771.jpeg",
   },
   {
-    id: '2',
-    unicId: 'GS-4512-2022-048',
-    projectName: 'Wind Energy Maharashtra',
-    location: 'Maharashtra, India',
-    country: 'India',
-    registry: 'Gold Standard',
+    id: "2",
+    batch_id: "B2",
+    unicId: "B2",
+    projectName: "Wind Energy Maharashtra",
+    location: "Maharashtra, India",
+    country: "India",
+    registry: "Gold Standard",
     vintage: 2022,
-    status: 'active',
+    status: "SELLABLE",
     trustScore: 88,
     availableCredits: 8400,
+    available_quantity: 8400,
+    total_quantity: 10000,
+    sold_quantity: 1600,
+    retired_quantity: 0,
     pricePerCredit: 15.2,
-    projectType: 'Renewable Energy',
-    image: 'https://images.pexels.com/photos/414837/pexels-photo-414837.jpeg',
+    projectType: "Renewable Energy",
+    methodology: "RENEWABLE",
+    updated_at: "2026-03-17T20:10:00Z",
+    version: 8,
+    image: "https://images.pexels.com/photos/414837/pexels-photo-414837.jpeg",
   },
   {
-    id: '3',
-    unicId: 'CAR-1223-2023-092',
-    projectName: 'Clean Cookstoves for Kenya',
-    location: 'Nairobi Region, Kenya',
-    country: 'Kenya',
-    registry: 'Climate Action Reserve',
+    id: "3",
+    batch_id: "B3",
+    unicId: "B3",
+    projectName: "Clean Cookstoves for Kenya",
+    location: "Nairobi Region, Kenya",
+    country: "Kenya",
+    registry: "Climate Action Reserve",
     vintage: 2023,
-    status: 'active',
+    status: "SELLABLE",
     trustScore: 91,
     availableCredits: 5600,
+    available_quantity: 5600,
+    total_quantity: 6200,
+    sold_quantity: 600,
+    retired_quantity: 0,
     pricePerCredit: 12.8,
-    projectType: 'Community Projects',
-    image: 'https://images.pexels.com/photos/6473875/pexels-photo-6473875.jpeg',
+    projectType: "Community Projects",
+    methodology: "COMMUNITY",
+    updated_at: "2026-03-17T20:10:00Z",
+    version: 10,
+    image: "https://images.pexels.com/photos/6473875/pexels-photo-6473875.jpeg",
   },
   {
-    id: '4',
-    unicId: 'VCS-3345-2021-156',
-    projectName: 'Sumatra Peatland Restoration',
-    location: 'Sumatra, Indonesia',
-    country: 'Indonesia',
-    registry: 'Verra (VCS)',
+    id: "4",
+    batch_id: "B4",
+    unicId: "B4",
+    projectName: "Sumatra Peatland Restoration",
+    location: "Sumatra, Indonesia",
+    country: "Indonesia",
+    registry: "Verra (VCS)",
     vintage: 2021,
-    status: 'retired',
+    status: "UNAVAILABLE",
     trustScore: 86,
     availableCredits: 0,
+    available_quantity: 0,
+    total_quantity: 9000,
+    sold_quantity: 7000,
+    retired_quantity: 2000,
     pricePerCredit: 16.0,
-    projectType: 'Blue Carbon',
-    image: 'https://images.pexels.com/photos/1179229/pexels-photo-1179229.jpeg',
+    projectType: "Blue Carbon",
+    methodology: "ARR",
+    updated_at: "2026-03-17T20:10:00Z",
+    version: 14,
+    image: "https://images.pexels.com/photos/1179229/pexels-photo-1179229.jpeg",
   },
   {
-    id: '5',
-    unicId: 'ACR-2876-2023-034',
-    projectName: 'Solar Energy Rural Communities',
-    location: 'Tamil Nadu, India',
-    country: 'India',
-    registry: 'American Carbon Registry',
+    id: "5",
+    batch_id: "B5",
+    unicId: "B5",
+    projectName: "Solar Energy Rural Communities",
+    location: "Tamil Nadu, India",
+    country: "India",
+    registry: "American Carbon Registry",
     vintage: 2023,
-    status: 'active',
+    status: "SELLABLE",
     trustScore: 89,
     availableCredits: 9800,
+    available_quantity: 9800,
+    total_quantity: 11000,
+    sold_quantity: 1200,
+    retired_quantity: 0,
     pricePerCredit: 14.5,
-    projectType: 'Renewable Energy',
-    image: 'https://images.pexels.com/photos/433308/pexels-photo-433308.jpeg',
+    projectType: "Renewable Energy",
+    methodology: "RENEWABLE",
+    updated_at: "2026-03-17T20:10:00Z",
+    version: 11,
+    image: "https://images.pexels.com/photos/433308/pexels-photo-433308.jpeg",
   },
   {
-    id: '6',
-    unicId: 'GS-5234-2022-071',
-    projectName: 'Andean Forest Protection',
-    location: 'Cusco, Peru',
-    country: 'Peru',
-    registry: 'Gold Standard',
+    id: "6",
+    batch_id: "B6",
+    unicId: "B6",
+    projectName: "Andean Forest Protection",
+    location: "Cusco, Peru",
+    country: "Peru",
+    registry: "Gold Standard",
     vintage: 2022,
-    status: 'active',
+    status: "SELLABLE",
     trustScore: 92,
     availableCredits: 7200,
+    available_quantity: 7200,
+    total_quantity: 8100,
+    sold_quantity: 900,
+    retired_quantity: 0,
     pricePerCredit: 19.3,
-    projectType: 'Forestry (REDD+)',
-    image: 'https://images.pexels.com/photos/1179225/pexels-photo-1179225.jpeg',
+    projectType: "Forestry (REDD+)",
+    methodology: "ARR",
+    updated_at: "2026-03-17T20:10:00Z",
+    version: 9,
+    image: "https://images.pexels.com/photos/1179225/pexels-photo-1179225.jpeg",
   },
   {
-    id: '7',
-    unicId: 'VCS-4123-2023-089',
-    projectName: 'Blue Carbon Mangrove Restoration',
-    location: 'Delta Region, Vietnam',
-    country: 'Vietnam',
-    registry: 'Verra (VCS)',
+    id: "7",
+    batch_id: "B7",
+    unicId: "B7",
+    projectName: "Blue Carbon Mangrove Restoration",
+    location: "Delta Region, Vietnam",
+    country: "Vietnam",
+    registry: "Verra (VCS)",
     vintage: 2023,
-    status: 'pending',
+    status: "SELLABLE",
     trustScore: 78,
     availableCredits: 4500,
+    available_quantity: 4500,
+    total_quantity: 5000,
+    sold_quantity: 500,
+    retired_quantity: 0,
     pricePerCredit: 13.7,
-    projectType: 'Blue Carbon',
-    image: 'https://images.pexels.com/photos/1619299/pexels-photo-1619299.jpeg',
+    projectType: "Blue Carbon",
+    methodology: "ARR",
+    updated_at: "2026-03-17T20:10:00Z",
+    version: 6,
+    image: "https://images.pexels.com/photos/1619299/pexels-photo-1619299.jpeg",
   },
   {
-    id: '8',
-    unicId: 'CAR-3567-2022-145',
-    projectName: 'Oaxaca Biogas Digesters',
-    location: 'Oaxaca, Mexico',
-    country: 'Mexico',
-    registry: 'Climate Action Reserve',
+    id: "8",
+    batch_id: "B8",
+    unicId: "B8",
+    projectName: "Oaxaca Biogas Digesters",
+    location: "Oaxaca, Mexico",
+    country: "Mexico",
+    registry: "Climate Action Reserve",
     vintage: 2022,
-    status: 'active',
+    status: "SELLABLE",
     trustScore: 85,
     availableCredits: 6300,
+    available_quantity: 6300,
+    total_quantity: 7000,
+    sold_quantity: 700,
+    retired_quantity: 0,
     pricePerCredit: 11.9,
-    projectType: 'Waste Recovery',
-    image: 'https://images.pexels.com/photos/2516423/pexels-photo-2516423.jpeg',
+    projectType: "Waste Recovery",
+    methodology: "WASTE",
+    updated_at: "2026-03-17T20:10:00Z",
+    version: 7,
+    image: "https://images.pexels.com/photos/2516423/pexels-photo-2516423.jpeg",
   },
   {
-    id: '9',
-    unicId: 'PURO-9001-2024-001',
-    projectName: 'Biochar Carbon Removal',
-    location: 'Helsinki, Finland',
-    country: 'Finland',
-    registry: 'Puro.earth',
+    id: "9",
+    batch_id: "B9",
+    unicId: "B9",
+    projectName: "Biochar Carbon Removal",
+    location: "Helsinki, Finland",
+    country: "Finland",
+    registry: "Puro.earth",
     vintage: 2024,
-    status: 'active',
+    status: "SELLABLE",
     trustScore: 96,
     availableCredits: 2000,
+    available_quantity: 2000,
+    total_quantity: 2400,
+    sold_quantity: 400,
+    retired_quantity: 0,
     pricePerCredit: 120.0,
-    projectType: 'Tech-Based Removal',
-    image: 'https://images.pexels.com/photos/1834400/pexels-photo-1834400.jpeg',
+    projectType: "Tech-Based Removal",
+    methodology: "CDR",
+    updated_at: "2026-03-17T20:10:00Z",
+    version: 5,
+    image: "https://images.pexels.com/photos/1834400/pexels-photo-1834400.jpeg",
   },
 ];
 
-// statuses aligned with Explorer filters (lowercase)
-const STATUSES = ['active', 'retired', 'pending'] as const;
-
-// tweak helper (keeps values in a nice range)
-const clamp = (value: number, min: number, max: number) =>
-  Math.max(min, Math.min(max, value));
-
-export const mockCredits: CarbonCredit[] = Array.from(
-  { length: 10000 }, 
-  (_, idx) => {
-    const base = baseMockCredits[idx % baseMockCredits.length];
-
-    const status = STATUSES[idx % STATUSES.length];
-
-    const vintage = 2021 + (idx % 4); // 2021–2024 loop
-    const priceJitter = ((idx % 7) - 3) * 0.4; // -1.2 .. +1.2
-    const trustJitter = (idx % 9) - 4; // -4 .. +4
-
-    const pricePerCredit = clamp(
-      base.pricePerCredit + priceJitter,
-      5,
-      200,
-    );
-
-    const trustScore = clamp(
-      base.trustScore + trustJitter,
-      70,
-      99,
-    );
-
-    const availableCredits =
-      base.availableCredits + (idx % 500) * 10; // some scaling
-
-    // make IDs + UNIC IDs unique-ish but readable
-    const series = Math.floor(idx / baseMockCredits.length)
-      .toString()
-      .padStart(3, '0');
-
-    const id = `${base.id}-${series}-${idx}`;
-    const unicPrefix = base.unicId.split('-')[0]; // e.g. "VCS", "GS"
-    const unicId = `${unicPrefix}-${vintage}-${series}-${String(idx).padStart(
-      4,
-      '0',
-    )}`;
-
-    return {
-      ...base,
-      id,
-      unicId,
-      status,
-      vintage,
-      pricePerCredit,
-      trustScore,
-      availableCredits,
-    };
-  },
-);
+// Use only unique base projects for clean testing.
+export const mockCredits: CarbonCredit[] = baseMockCredits.map((item) => ({
+  ...item,
+}));
 
 // ==================================================================
-// 3. DASHBOARD ACTIVITY DATA (THIS IS WHAT WAS MISSING)
+// 3. DASHBOARD ACTIVITY DATA
 // ==================================================================
 
 export const ACTIVITY_DATA = [
-  { 
-    id: "CRT-01", 
-    project: "Forest Conservation", 
-    amount: 1650, 
-    type: "Forestry", 
-    icon: Leaf, 
-    bg: "bg-[#749A74]" 
+  {
+    id: "CRT-01",
+    project: "Forest Conservation",
+    amount: 1650,
+    type: "Forestry",
+    icon: Leaf,
+    bg: "bg-[#749A74]",
   },
-  { 
-    id: "CRT-02", 
-    project: "Wind Farm", 
-    amount: 12000, 
-    type: "Renewable", 
-    icon: Wind, 
-    bg: "bg-[#8FA3AD]" 
+  {
+    id: "CRT-02",
+    project: "Wind Farm",
+    amount: 12000,
+    type: "Renewable",
+    icon: Wind,
+    bg: "bg-[#8FA3AD]",
   },
-  { 
-    id: "CRT-03", 
-    project: "Mangrove Restoration", 
-    amount: 80000, 
-    type: "Blue Carbon", 
-    icon: Droplets, 
-    bg: "bg-[#7FA3C4]" 
+  {
+    id: "CRT-03",
+    project: "Mangrove Restoration",
+    amount: 80000,
+    type: "Blue Carbon",
+    icon: Droplets,
+    bg: "bg-[#7FA3C4]",
   },
-  { 
-    id: "CRT-04", 
-    project: "Clean Cookstoves", 
-    amount: 400, 
-    type: "Community", 
-    icon: TrendingUp, 
-    bg: "bg-orange-400" 
+  {
+    id: "CRT-04",
+    project: "Clean Cookstoves",
+    amount: 400,
+    type: "Community",
+    icon: TrendingUp,
+    bg: "bg-orange-400",
   },
 ];
 
@@ -304,7 +323,7 @@ export const getChartData = (viewMode: string, currentMonthLabel: string) => {
         { label: "Apr", h: "75%" },
         { label: "May", h: "70%" },
         { label: "Jun", h: "65%" },
-        { label: currentMonthLabel, h: "90%" }, 
+        { label: currentMonthLabel, h: "90%" },
       ];
   }
 };

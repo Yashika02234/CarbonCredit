@@ -5,6 +5,7 @@ import { CarbonCredit } from "../lib/types";
 
 type OwnedAsset = {
   projectId: string;
+  batchId: string;
   projectName: string;
   quantity: number;
   price: number;
@@ -12,6 +13,7 @@ type OwnedAsset = {
   status: "owned" | "retired";
   createdAt: number;
   image: string;
+  purchaseId?: string;
 };
 
 type Certificate = {
@@ -23,10 +25,16 @@ type Certificate = {
   createdAt: number;
 };
 
+type RegisterPurchaseInput = {
+  project: CarbonCredit;
+  quantity: number;
+  purchaseId?: string;
+};
+
 type PortfolioContextType = {
   assets: OwnedAsset[];
   certificates: Certificate[];
-  buyCredits: (project: CarbonCredit, quantity: number) => void;
+  registerPurchase: (input: RegisterPurchaseInput) => void;
   retireCredits: (projectId: string, quantity: number) => void;
 };
 
@@ -44,15 +52,26 @@ export function PortfolioProvider({
   const [assets, setAssets] = useState<OwnedAsset[]>([]);
   const [certificates, setCertificates] = useState<Certificate[]>([]);
 
-  /* -------- BUY CREDITS -------- */
-  const buyCredits = (project: CarbonCredit, quantity: number) => {
-    setAssets(prev => {
-      const existing = prev.find(a => a.projectId === project.id);
+  /* -------- REGISTER SUCCESSFUL PURCHASE -------- */
+  const registerPurchase = ({
+    project,
+    quantity,
+    purchaseId,
+  }: RegisterPurchaseInput) => {
+    const projectId = project.id;
+    const batchId = project.batch_id || project.unicId || project.id;
+
+    setAssets((prev) => {
+      const existing = prev.find((a) => a.batchId === batchId && a.status === "owned");
 
       if (existing) {
-        return prev.map(a =>
-          a.projectId === project.id
-            ? { ...a, quantity: a.quantity + quantity }
+        return prev.map((a) =>
+          a.batchId === batchId && a.status === "owned"
+            ? {
+                ...a,
+                quantity: a.quantity + quantity,
+                purchaseId: purchaseId || a.purchaseId,
+              }
             : a
         );
       }
@@ -60,7 +79,8 @@ export function PortfolioProvider({
       return [
         ...prev,
         {
-          projectId: project.id,
+          projectId,
+          batchId,
           projectName: project.projectName,
           quantity,
           price: project.pricePerCredit,
@@ -68,21 +88,24 @@ export function PortfolioProvider({
           status: "owned",
           createdAt: Date.now(),
           image: project.image,
+          purchaseId,
         },
       ];
     });
   };
 
-  /* -------- RETIRE CREDITS (PARTIAL) -------- */
+  /* -------- RETIRE CREDITS -------- */
   const retireCredits = (projectId: string, quantity: number) => {
-    setAssets(prevAssets => {
-      const asset = prevAssets.find(a => a.projectId === projectId);
+    setAssets((prevAssets) => {
+      const asset = prevAssets.find(
+        (a) => a.projectId === projectId && a.status === "owned"
+      );
+
       if (!asset || quantity <= 0 || quantity > asset.quantity) {
         return prevAssets;
       }
 
-      // create certificate
-      setCertificates(prev => [
+      setCertificates((prev) => [
         ...prev,
         {
           certificateId: `CERT-${Date.now()}`,
@@ -94,35 +117,32 @@ export function PortfolioProvider({
         },
       ]);
 
-      // update asset
-      return prevAssets.map(a => {
-        if (a.projectId !== projectId) return a;
+      return prevAssets
+        .map((a) => {
+          if (a.projectId !== projectId || a.status !== "owned") return a;
 
-        const remaining = a.quantity - quantity;
+          const remaining = a.quantity - quantity;
 
-        if (remaining === 0) {
+          if (remaining === 0) {
+            return {
+              ...a,
+              quantity: 0,
+              status: "retired" as const,
+            };
+          }
+
           return {
             ...a,
-            quantity: 0,
-            status: "retired",
+            quantity: remaining,
           };
-        }
-
-        return {
-          ...a,
-          quantity: remaining,
-        };
-      });
+        });
     });
   };
 
   /* -------- PERSISTENCE -------- */
   useEffect(() => {
     localStorage.setItem("portfolio_assets", JSON.stringify(assets));
-    localStorage.setItem(
-      "portfolio_certificates",
-      JSON.stringify(certificates)
-    );
+    localStorage.setItem("portfolio_certificates", JSON.stringify(certificates));
   }, [assets, certificates]);
 
   useEffect(() => {
@@ -135,6 +155,7 @@ export function PortfolioProvider({
         parsed.map((a: any) => ({
           ...a,
           createdAt: a.createdAt ?? Date.now(),
+          batchId: a.batchId ?? a.projectId,
         }))
       );
     }
@@ -152,7 +173,7 @@ export function PortfolioProvider({
 
   return (
     <PortfolioContext.Provider
-      value={{ assets, certificates, buyCredits, retireCredits }}
+      value={{ assets, certificates, registerPurchase, retireCredits }}
     >
       {children}
     </PortfolioContext.Provider>

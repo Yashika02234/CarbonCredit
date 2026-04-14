@@ -1,13 +1,14 @@
-import { useState, Suspense, lazy } from "react";
+import { useState, Suspense, lazy, useEffect, useCallback } from "react";
 import { Loader2 } from "lucide-react";
 import { CarbonCredit, ViewState } from "./lib/types";
+import { getBatches } from "./lib/api";
 
-// --- IMPORTS ---
 import Header from "./components/layout/Header";
+import IntroAnimation from "./components/layout/IntroAnimation";
 import AuthModal from "./components/layout/AuthModal";
 import WorkspaceShell from "./components/workspace/WorkspaceShell";
+import { mapBatchToCredit } from "./lib/mappers";
 
-// --- LAZY IMPORTS ---
 const LandingPage = lazy(() => import("./components/landing/LandingPage"));
 const Explorer = lazy(() => import("./components/explorer/Explorer"));
 const Portfolio = lazy(() => import("./components/portfolio/Portfolio"));
@@ -22,6 +23,8 @@ const PageLoader = () => (
   </div>
 );
 
+
+
 function App() {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [authMode, setAuthMode] = useState<"login" | "signup">("signup");
@@ -33,10 +36,41 @@ function App() {
   });
 
   const [selectedProject, setSelectedProject] = useState<CarbonCredit | null>(null);
+  const [projects, setProjects] = useState<CarbonCredit[]>([]);
+  const [isProjectsLoading, setIsProjectsLoading] = useState(true);
 
   const [isLoggedIn, setIsLoggedIn] = useState(
     () => localStorage.getItem("offset_isLoggedIn") === "true"
   );
+
+  const loadProjects = useCallback(async () => {
+    try {
+      setIsProjectsLoading(true);
+      const data = await getBatches();
+      const mapped = ((data as any).items || []).map((item: any) => mapBatchToCredit(item));
+      setProjects(mapped);
+
+      setSelectedProject((prev) => {
+        if (!prev) return prev;
+        const updated = mapped.find((p: CarbonCredit) => p.batch_id === prev.batch_id);
+        return updated || prev;
+      });
+    } catch (error) {
+      console.error("Failed to load projects", error);
+      setProjects([]);
+    } finally {
+      setIsProjectsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!isLoggedIn) return;
+
+    loadProjects();
+    const interval = setInterval(loadProjects, 5000);
+
+    return () => clearInterval(interval);
+  }, [isLoggedIn, loadProjects]);
 
   const handleNavigate = (view: ViewState) => {
     if (view === "contact") {
@@ -64,12 +98,58 @@ function App() {
   const handleLogout = () => {
     localStorage.removeItem("offset_isLoggedIn");
     setIsLoggedIn(false);
+    setProjects([]);
+    setSelectedProject(null);
     handleNavigate("landing");
   };
 
+  const handlePurchaseSuccess = async (
+    batchId: string,
+    remaining?: number,
+    newVersion?: number
+  ) => {
+    setProjects((prev) =>
+      prev.map((p) =>
+        p.batch_id === batchId
+          ? {
+              ...p,
+              available_quantity:
+                typeof remaining === "number" ? remaining : p.available_quantity,
+              availableCredits:
+                typeof remaining === "number" ? remaining : p.availableCredits,
+              version: typeof newVersion === "number" ? newVersion : p.version,
+              status:
+                typeof remaining === "number" && remaining <= 0
+                  ? "UNAVAILABLE"
+                  : p.status,
+            }
+          : p
+      )
+    );
+
+    setSelectedProject((prev) => {
+      if (!prev || prev.batch_id !== batchId) return prev;
+      return {
+        ...prev,
+        available_quantity:
+          typeof remaining === "number" ? remaining : prev.available_quantity,
+        availableCredits:
+          typeof remaining === "number" ? remaining : prev.availableCredits,
+        version: typeof newVersion === "number" ? newVersion : prev.version,
+        status:
+          typeof remaining === "number" && remaining <= 0
+            ? "UNAVAILABLE"
+            : prev.status,
+      };
+    });
+
+    await loadProjects();
+  };
+
   return (
-    <div className="min-h-screen bg-background text-foreground font-sans selection:bg-[#30574E]/30">
-      <Header
+    <IntroAnimation enabled={!isLoggedIn}>
+      <div className="min-h-screen bg-background text-foreground font-sans selection:bg-[#30574E]/30">
+        <Header
         showContent
         isLoggedIn={isLoggedIn}
         currentView={currentView}
@@ -102,6 +182,7 @@ function App() {
               <ProjectDetail
                 project={selectedProject}
                 onBack={() => handleNavigate("marketplace")}
+                onPurchaseSuccess={handlePurchaseSuccess}
               />
             ) : (
               <WorkspaceShell
@@ -110,6 +191,8 @@ function App() {
                 dashboard={<Dashboard />}
                 marketplace={
                   <Explorer
+                    projects={projects}
+                    isLoading={isProjectsLoading}
                     onSelectProject={(p: CarbonCredit) => {
                       setSelectedProject(p);
                       window.scrollTo({ top: 0 });
@@ -126,7 +209,8 @@ function App() {
           )}
         </Suspense>
       </main>
-    </div>
+      </div>
+    </IntroAnimation>
   );
 }
 

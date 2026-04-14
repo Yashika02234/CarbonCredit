@@ -1,483 +1,817 @@
 // src/components/explorer/ProjectDetail.tsx
-import { useState, useRef } from 'react';
-import html2canvas from 'html2canvas';
-import jsPDF from 'jspdf';
+import { useState, useRef, useEffect, useCallback, useMemo } from "react";
+import html2canvas from "html2canvas";
+import jsPDF from "jspdf";
 import PaymentModal from "../payment/PaymentModal";
+import {
+  ArrowLeft,
+  Download,
+  Loader2,
+  ShieldCheck,
+  Leaf,
+  BadgeCheck,
+  RefreshCw,
+  MapPin,
+  Calendar,
+  Layers3,
+  Sparkles,
+  AlertTriangle,
+} from "lucide-react";
 
-import { 
-  ArrowLeft, 
-  Leaf, 
-  Globe2, 
-  CheckCircle2, 
-  ArrowRight,
-  ChevronDown,
-  Trees,
-  Wind,
-  Search,
-  Download} from 'lucide-react';
-import { CarbonCredit } from '../../lib/types';
+import { CarbonCredit } from "../../lib/types";
+import { getBatchDetail, getBatchAvailability } from "../../lib/api";
+import { mapBatchToCredit } from "../../lib/mappers";
 
 interface ProjectDetailProps {
   project: CarbonCredit;
   onBack: () => void;
+  onPurchaseSuccess?: (
+    batchId: string,
+    remaining?: number,
+    newVersion?: number
+  ) => void;
 }
 
-// --- THEME CONSTANTS ---
 const THEME = {
-  bg: "bg-[#FDFBF7]",
-  card: "bg-[#F4F1E8]",
-  textMain: "text-[#2F3E33]",
-  textSub: "text-[#5C6F66]",
-  greenDark: "bg-[#4F6F52]",
-  greenLight: "bg-[#9CCBA0]",
-  greenSoft: "bg-[#E8EFE8]",
-  border: "border-[#EBE8E0]"
+  lightBg: "bg-[#F6FBF8]",
+  darkBg: "bg-[#0B1F19]",
+  darkCard: "bg-[#112720]",
+  lightCard: "bg-white",
+  lightMuted: "text-emerald-700/70",
+  darkMuted: "text-white/70",
 };
 
-// --- HELPER: GENERATE PROPER PDF REPORT ---
+// ================= PDF =================
 const generateProjectReport = async (project: CarbonCredit) => {
-  // We target the HIDDEN report template, not the main screen
-  const element = document.getElementById('official-report-template');
-  if (!element) {
-    alert("Error finding report template.");
-    return;
-  }
+  const element = document.getElementById("official-report-template");
+  if (!element) return;
 
-  // Temporarily make it visible/positioned for capture (if needed by some browsers)
-  // but usually absolute positioning off-screen works fine with html2canvas.
-  
   try {
-    const canvas = await html2canvas(element, { 
-        scale: 2, // High resolution
-        useCORS: true, // Allow images to load
-        logging: false
+    const canvas = await html2canvas(element, {
+      scale: 2,
+      useCORS: true,
     });
-    
-    const imgData = canvas.toDataURL('image/jpeg', 1.0);
-    const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
-    
+
+    const imgData = canvas.toDataURL("image/jpeg", 1.0);
+
+    const pdf = new jsPDF();
     const pdfWidth = pdf.internal.pageSize.getWidth();
     const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
-    
-    pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight);
-    pdf.save(`${project.projectName.replace(/\s+/g, '_')}_Verified_Report.pdf`);
+
+    pdf.addImage(imgData, "JPEG", 0, 0, pdfWidth, pdfHeight);
+    pdf.save(`${project.projectName.replace(/\s+/g, "_")}.pdf`);
   } catch (err) {
-    console.error("PDF Generation failed", err);
-    alert("Could not generate report. Please try again.");
+    console.error("PDF failed", err);
   }
 };
 
-// --- HIDDEN REPORT COMPONENT (A4 STYLED) ---
-const ReportTemplate = ({ project }: { project: CarbonCredit }) => (
-  <div 
-    id="official-report-template" 
-    className="absolute -left-[9999px] top-0 w-[794px] min-h-[1123px] bg-white text-slate-800 p-12 font-serif"
-    style={{ fontFamily: 'Georgia, serif' }} // Enforce serif for formal look
-  >
-      {/* Header */}
-      <div className="flex justify-between items-start border-b-2 border-slate-800 pb-6 mb-8">
-          <div>
-              <h1 className="text-3xl font-bold text-slate-900 uppercase tracking-wide">Verification Report</h1>
-              <p className="text-sm text-slate-500 mt-1">Carbon Offset Issuance & Project Audit</p>
-          </div>
-          <div className="text-right">
-              <div className="flex items-center justify-end gap-2 text-emerald-700 font-bold mb-1">
-                  <Leaf className="w-5 h-5" /> Offset Platform
-              </div>
-              <p className="text-xs text-slate-400 font-sans">Report ID: OF-{Math.floor(Math.random()*100000)}</p>
-              <p className="text-xs text-slate-400 font-sans">Date: {new Date().toLocaleDateString()}</p>
-          </div>
+// ================= REPORT =================
+const ReportTemplate = ({ project }: { project: CarbonCredit }) => {
+  const credits = project.available_quantity ?? project.availableCredits ?? 0;
+
+  return (
+    <div
+      id="official-report-template"
+      className="absolute -left-[9999px] top-0 w-[794px] min-h-[1123px] bg-white p-10"
+    >
+      <h1 className="text-2xl font-bold mb-6">Verification Report</h1>
+
+      <p>
+        <b>Project:</b> {project.projectName}
+      </p>
+      <p>
+        <b>Location:</b> {project.location}
+      </p>
+      <p>
+        <b>Registry:</b> {project.registry}
+      </p>
+      <p>
+        <b>Vintage:</b> {project.vintage}
+      </p>
+
+      <div className="mt-6">
+        <p className="text-lg font-bold">{credits.toLocaleString()}</p>
+        <p>tCO₂ Offset</p>
       </div>
-
-      {/* Main Project Info */}
-      <div className="mb-10">
-          <h2 className="text-xl font-bold text-slate-800 mb-4 border-l-4 border-emerald-600 pl-3">1. Project Summary</h2>
-          <div className="grid grid-cols-2 gap-8">
-              <div className="space-y-4">
-                  <div>
-                      <p className="text-xs uppercase font-sans font-bold text-slate-400">Project Name</p>
-                      <p className="text-lg font-bold">{project.projectName}</p>
-                  </div>
-                  <div>
-                      <p className="text-xs uppercase font-sans font-bold text-slate-400">Location</p>
-                      <p className="text-base">{project.location}, {project.country}</p>
-                  </div>
-              </div>
-              <div className="space-y-4">
-                  <div className="flex justify-between border-b border-slate-100 pb-2">
-                      <span className="text-sm text-slate-500">Project Type</span>
-                      <span className="font-bold text-slate-800">{project.projectType}</span>
-                  </div>
-                  <div className="flex justify-between border-b border-slate-100 pb-2">
-                      <span className="text-sm text-slate-500">Registry Standard</span>
-                      <span className="font-bold text-slate-800">{project.registry}</span>
-                  </div>
-                  <div className="flex justify-between border-b border-slate-100 pb-2">
-                      <span className="text-sm text-slate-500">Vintage Year</span>
-                      <span className="font-bold text-slate-800">{project.vintage}</span>
-                  </div>
-                  <div className="flex justify-between border-b border-slate-100 pb-2">
-                      <span className="text-sm text-slate-500">Unique Identifier</span>
-                      <span className="font-mono text-xs font-bold text-slate-600">{project.unicId}</span>
-                  </div>
-              </div>
-          </div>
-      </div>
-
-      {/* Impact Data */}
-      <div className="mb-10 bg-slate-50 p-6 rounded-xl border border-slate-200">
-          <h2 className="text-xl font-bold text-slate-800 mb-6 border-l-4 border-emerald-600 pl-3">2. Impact Metrics</h2>
-          
-          <div className="grid grid-cols-3 gap-6 text-center mb-8">
-              <div className="p-4 bg-white rounded shadow-sm">
-                  <p className="text-3xl font-bold text-emerald-700">{project.availableCredits.toLocaleString()}</p>
-                  <p className="text-xs uppercase font-sans font-bold text-slate-400 mt-1">tCO₂ Sequestered</p>
-              </div>
-              <div className="p-4 bg-white rounded shadow-sm">
-                  <p className="text-3xl font-bold text-emerald-700">{project.trustScore || 92}/100</p>
-                  <p className="text-xs uppercase font-sans font-bold text-slate-400 mt-1">Audit Trust Score</p>
-              </div>
-              <div className="p-4 bg-white rounded shadow-sm">
-                  <p className="text-3xl font-bold text-emerald-700">210k</p>
-                  <p className="text-xs uppercase font-sans font-bold text-slate-400 mt-1">Trees Equivalent</p>
-              </div>
-          </div>
-
-          <div className="text-sm text-slate-600 leading-relaxed text-justify">
-              This project has been rigorously audited against the {project.registry} methodology. 
-              Remote sensing data combined with on-ground verification confirms that the carbon 
-              sequestration targets for the vintage year {project.vintage} have been met or exceeded. 
-              The project contributes directly to UN Sustainable Development Goals (SDGs) #13 (Climate Action) 
-              and #15 (Life on Land).
-          </div>
-      </div>
-
-      {/* Verification Stamp Area */}
-      <div className="mt-12 flex justify-between items-end border-t-2 border-slate-800 pt-8">
-          <div>
-              <p className="text-xs font-sans text-slate-400 mb-4">Digitally Signed by:</p>
-              <div className="h-12 w-48 border-b border-dashed border-slate-400 mb-2 relative">
-                  <span className="absolute bottom-2 left-0 font-script text-2xl text-slate-800 italic">Offset Verification Team</span>
-              </div>
-              <p className="text-xs font-bold text-slate-800">Authorized Auditor</p>
-          </div>
-
-          {/* STAMP */}
-          <div className="border-4 border-emerald-600 text-emerald-600 rounded p-2 px-4 transform -rotate-12 opacity-80 select-none">
-              <p className="text-xl font-black uppercase tracking-widest text-center">VERIFIED</p>
-              <p className="text-[10px] font-bold text-center uppercase">Offset Ledger</p>
-          </div>
-      </div>
-
-      {/* Footer */}
-      <div className="mt-auto pt-12 text-center">
-          <p className="text-[10px] text-slate-400 font-sans">
-              This document is a formal record of the project's status at the time of generation. 
-              It does not constitute a financial receipt for a specific transaction unless accompanied by a Transaction Hash.
-          </p>
-      </div>
-  </div>
-);
-
-// --- SUB-COMPONENT: AREA CHART (UI ONLY) ---
-const ImpactAreaChart = () => (
-  <div className="relative h-64 w-full">
-    <div className="absolute inset-0 flex flex-col justify-between text-[10px] text-[#8C9E96] font-medium pointer-events-none z-0 py-2">
-       {[600, 500, 400, 250].map((val, i) => (
-         <div key={i} className="flex items-center w-full">
-            <span className="w-8 text-right mr-2 opacity-50">{val}k</span>
-            <div className="h-[1px] w-full bg-[#D6D3C9]/40"></div>
-         </div>
-       ))}
     </div>
-    <svg viewBox="0 0 100 50" preserveAspectRatio="none" className="absolute inset-0 w-full h-full z-10 pl-10 pb-6 pt-4">
-      <defs>
-        <linearGradient id="chartFill" x1="0" x2="0" y1="0" y2="1">
-          <stop offset="0%" stopColor="#9CCBA0" stopOpacity="0.8" />
-          <stop offset="100%" stopColor="#9CCBA0" stopOpacity="0.1" />
-        </linearGradient>
-      </defs>
-      <path d="M0,50 L10,48 L20,45 L30,40 L40,35 L50,30 L60,25 L70,18 L80,12 L90,8 L100,5 V50 H0 Z" fill="url(#chartFill)" stroke="none" />
-      <path d="M0,50 L10,48 L20,45 L30,40 L40,35 L50,30 L60,25 L70,18 L80,12 L90,8 L100,5" fill="none" stroke="#4F6F52" strokeWidth="0.5" />
-      {[ {x: 20, y: 45}, {x: 40, y: 35}, {x: 60, y: 25}, {x: 80, y: 12} ].map((p, i) => (
-        <circle key={i} cx={p.x} cy={p.y} r="1" fill="#2F3E33" stroke="#FDFBF7" strokeWidth="0.5" />
-      ))}
-    </svg>
-    <div className="absolute bottom-0 left-10 right-0 flex justify-between text-[10px] text-[#8C9E96] font-medium">
-       {['2019', '2020', '2021', '2022', '2023', '2024', '2025'].map(y => <span key={y}>{y}</span>)}
+  );
+};
+
+// ================= SMALL UI =================
+function StatTile({
+  label,
+  value,
+  note,
+}: {
+  label: string;
+  value: string | number;
+  note?: string;
+}) {
+  return (
+    <div className="rounded-[28px] border border-white/10 bg-white/5 backdrop-blur-xl p-5">
+      <p className="text-[11px] uppercase tracking-[0.18em] text-white/45 mb-2">
+        {label}
+      </p>
+      <p className="text-2xl md:text-3xl font-medium tracking-tight text-white">
+        {value}
+      </p>
+      {note && <p className="text-sm text-white/60 mt-2">{note}</p>}
     </div>
-    <div className="absolute top-4 right-4 bg-white shadow-sm border border-[#EBE8E0] px-3 py-1.5 rounded-lg text-center">
-       <p className="text-xs font-bold text-[#2F3E33]">616,000</p>
-       <p className="text-[9px] text-[#5C6F66] uppercase">Offset</p>
+  );
+}
+
+function InfoCard({
+  title,
+  children,
+  right,
+}: {
+  title: string;
+  children: React.ReactNode;
+  right?: React.ReactNode;
+}) {
+  return (
+    <div className="rounded-[30px] bg-white border border-emerald-900/8 shadow-[0_20px_60px_rgba(6,78,59,0.08)] p-6 md:p-7">
+      <div className="flex items-center justify-between gap-4 mb-5">
+        <h2 className="text-xl md:text-2xl font-semibold tracking-tight text-[#064E3B]">
+          {title}
+        </h2>
+        {right}
+      </div>
+      {children}
     </div>
-  </div>
-);
+  );
+}
 
-// --- SUB-COMPONENT: IMPACT STATS ---
-const ImpactStats = () => (
-  <div className="flex flex-col md:flex-row items-center gap-12 h-full w-full">
-     <div className="flex-shrink-0">
-        <div className="relative w-32 h-32">
-           <svg viewBox="0 0 36 36" className="w-full h-full rotate-[-90deg]">
-              <path className="text-[#E8EFE8]" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" strokeWidth="4" />
-              <path className="text-[#4F6F52]" strokeDasharray="75, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round" />
-           </svg>
-           <div className="absolute inset-0 flex flex-col items-center justify-center text-[#2F3E33]">
-              <span className="text-3xl font-serif font-bold">350</span>
-              <span className="text-[9px] uppercase font-bold tracking-widest text-[#5C6F66]">Species</span>
-           </div>
-        </div>
-     </div>
-     <div className="flex-1 w-full h-32 flex items-end justify-between gap-4">
-        {[30, 45, 60, 80, 55, 75, 90].map((h, i) => (
-           <div key={i} className="flex-1 h-full flex flex-col justify-end gap-2 group">
-              <div className={`w-full rounded-t-sm transition-all duration-500 group-hover:opacity-80 ${i % 2 === 0 ? 'bg-[#4F6F52]' : 'bg-[#9CCBA0]'}`} style={{ height: `${h}%` }} />
-              <span className="text-[10px] text-center font-bold text-[#8C9E96]">20{18+i}</span>
-           </div>
-        ))}
-     </div>
-  </div>
-);
+function MetaRow({
+  label,
+  value,
+}: {
+  label: string;
+  value: React.ReactNode;
+}) {
+  return (
+    <div className="flex items-start justify-between gap-6 py-3 border-b border-emerald-900/8 last:border-b-0">
+      <span className="text-sm text-emerald-700/65">{label}</span>
+      <span className="text-sm font-medium text-[#064E3B] text-right">
+        {value}
+      </span>
+    </div>
+  );
+}
 
-// --- PAYMENT MODAL ---
+// ================= MAIN =================
+export default function ProjectDetail({
+  project,
+  onBack,
+  onPurchaseSuccess,
+}: ProjectDetailProps) {
+  const [projectDetail, setProjectDetail] = useState<CarbonCredit>(project);
+  const [isDetailLoading, setIsDetailLoading] = useState(false);
+  const [detailError, setDetailError] = useState<string | null>(null);
 
-
-// --- MAIN PAGE ---
-
-export default function ProjectDetail({ project, onBack }: ProjectDetailProps) {
-const [quantity, setQuantity] = useState<number>(1);
+  const [quantity, setQuantity] = useState(1);
+  const [quantityInput, setQuantityInput] = useState("1");
+  const [quantityError, setQuantityError] = useState("");
+  const [inventoryNotice, setInventoryNotice] = useState("");
 
   const [isPaymentOpen, setIsPaymentOpen] = useState(false);
 
-  // Refs for Scrolling
   const overviewRef = useRef<HTMLDivElement>(null);
-  const impactRef = useRef<HTMLDivElement>(null);
-  const detailsRef = useRef<HTMLDivElement>(null);
 
-  const trustScore = project.trustScore || 92;
+  const availableCredits =
+    projectDetail.available_quantity ?? projectDetail.availableCredits ?? 0;
 
-  const scrollToSection = (ref: any) => {
-    ref.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  const isSellable =
+    projectDetail.status === "SELLABLE" && availableCredits > 0;
+
+  const totalCost = useMemo(() => {
+    return Number((quantity * (projectDetail.pricePerCredit || 0)).toFixed(2));
+  }, [quantity, projectDetail.pricePerCredit]);
+
+  const trustScore = projectDetail.trustScore || 92;
+
+  const validateQuantity = useCallback((value: string, maxAvailable: number) => {
+    if (value.trim() === "") {
+      return "Please enter a quantity.";
+    }
+
+    const parsed = Number(value);
+
+    if (!Number.isFinite(parsed) || !Number.isInteger(parsed)) {
+      return "Please enter a valid whole number.";
+    }
+
+    if (parsed < 1) {
+      return "Quantity must be at least 1.";
+    }
+
+    if (maxAvailable <= 0) {
+      return "This batch is currently unavailable.";
+    }
+
+    if (parsed > maxAvailable) {
+      return `Only ${maxAvailable.toLocaleString()} credits are available.`;
+    }
+
+    return "";
+  }, []);
+
+  const loadProjectDetail = useCallback(async () => {
+    try {
+      setIsDetailLoading(true);
+      setDetailError(null);
+
+      const data = await getBatchDetail(project.batch_id);
+      const mapped = mapBatchToCredit(data as any);
+      setProjectDetail(mapped);
+    } catch (error: any) {
+      console.error("Failed to load project detail", error);
+      setDetailError(error?.message || "Failed to load latest project details.");
+    } finally {
+      setIsDetailLoading(false);
+    }
+  }, [project.batch_id]);
+
+  const refreshAvailability = useCallback(async () => {
+    try {
+      const data = await getBatchAvailability(project.batch_id);
+
+      let notice = "";
+
+      setProjectDetail((prev) => {
+        const prevAvailable =
+          prev.available_quantity ?? prev.availableCredits ?? 0;
+        const prevVersion = prev.version;
+
+        if (
+          prevAvailable !== data.available_quantity ||
+          prevVersion !== data.version
+        ) {
+          notice = `Inventory changed. Available credits updated from ${prevAvailable.toLocaleString()} to ${data.available_quantity.toLocaleString()}. Please review your quantity before continuing.`;
+        }
+
+        return {
+          ...prev,
+          available_quantity: data.available_quantity,
+          availableCredits: data.available_quantity,
+          sold_quantity: data.sold_quantity,
+          retired_quantity: data.retired_quantity,
+          version: data.version,
+          updated_at: data.updated_at,
+          status: data.available_quantity <= 0 ? "UNAVAILABLE" : "SELLABLE",
+        };
+      });
+
+      if (notice) {
+        setInventoryNotice(notice);
+      }
+    } catch (error) {
+      console.error("Failed to refresh availability", error);
+    }
+  }, [project.batch_id]);
+
+  useEffect(() => {
+    setProjectDetail(project);
+    setDetailError(null);
+  }, [project]);
+
+  useEffect(() => {
+    setQuantity(1);
+    setQuantityInput("1");
+    setQuantityError("");
+    setInventoryNotice("");
+  }, [project.batch_id]);
+
+  useEffect(() => {
+    loadProjectDetail();
+  }, [loadProjectDetail]);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      refreshAvailability();
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, [refreshAvailability]);
+
+  // Cross-tab sync for localStorage-backed mock inventory
+  useEffect(() => {
+    const handleStorage = (e: StorageEvent) => {
+      if (e.key === "offset_mock_inventory_v1") {
+        refreshAvailability();
+        loadProjectDetail();
+      }
+    };
+
+    window.addEventListener("storage", handleStorage);
+    return () => {
+      window.removeEventListener("storage", handleStorage);
+    };
+  }, [refreshAvailability, loadProjectDetail]);
+
+  useEffect(() => {
+    const error = validateQuantity(quantityInput, availableCredits);
+    setQuantityError(error);
+
+    if (!error) {
+      const parsed = Number(quantityInput);
+      if (Number.isFinite(parsed) && Number.isInteger(parsed)) {
+        setQuantity(parsed);
+      }
+    }
+  }, [quantityInput, availableCredits, validateQuantity]);
+
+  const handleIncrease = () => {
+    const next = Math.min(availableCredits, quantity + 1);
+    setQuantity(next);
+    setQuantityInput(String(next));
+    setQuantityError("");
+    setInventoryNotice("");
   };
 
-  const handleBuyClick = () => {
-    setIsPaymentOpen(true);
+  const handleDecrease = () => {
+    const next = Math.max(1, quantity - 1);
+    setQuantity(next);
+    setQuantityInput(String(next));
+    setQuantityError("");
+    setInventoryNotice("");
+  };
+
+  const handleQuantityInput = (value: string) => {
+    setQuantityInput(value);
+    setInventoryNotice("");
+  };
+
+  const handleQuantityBlur = () => {
+    // Keep the user's entered value visible.
+    // Do not silently reset or clamp it on blur.
+  };
+
+  const handleLocalPurchaseSuccess = async (
+    batchId: string,
+    remaining?: number,
+    newVersion?: number
+  ) => {
+    setProjectDetail((prev) => {
+      if (prev.batch_id !== batchId) return prev;
+
+      return {
+        ...prev,
+        available_quantity:
+          typeof remaining === "number" ? remaining : prev.available_quantity,
+        availableCredits:
+          typeof remaining === "number" ? remaining : prev.availableCredits,
+        version: typeof newVersion === "number" ? newVersion : prev.version,
+        status:
+          typeof remaining === "number" && remaining <= 0
+            ? "UNAVAILABLE"
+            : "SELLABLE",
+      };
+    });
+
+    onPurchaseSuccess?.(batchId, remaining, newVersion);
+    await refreshAvailability();
   };
 
   return (
-    <div id="project-report-content" className={`min-h-screen ${THEME.bg} text-[#2F3E33] font-sans selection:bg-[#9CCBA0]/30`}>
-      
-      {/* Invisible Report Template for PDF Generation */}
-      <ReportTemplate project={project} />
+    <div className={`min-h-screen ${THEME.lightBg} text-[#064E3B]`}>
+      <ReportTemplate project={projectDetail} />
 
       <PaymentModal
-           isOpen={isPaymentOpen}
-           onClose={() => {
-              setIsPaymentOpen(false);
-              onBack(); // TEMP: go back to marketplace
+        isOpen={isPaymentOpen}
+        onClose={() => setIsPaymentOpen(false)}
+        project={projectDetail}
+        quantity={quantity}
+        onNavigate={(view) => {
+          if (view === "portfolio") {
+            onBack();
+          }
+        }}
+        onPurchaseSuccess={handleLocalPurchaseSuccess}
+      />
 
-              // later → navigate to portfolio
-           } }
-           project={project}
-           quantity={quantity} onNavigate={function (): void {
-              throw new Error('Function not implemented.');
-           } }/>
+      <div className="max-w-[1400px] mx-auto px-6 md:px-10 pt-4">
+        {isDetailLoading && (
+          <div className="mb-3 rounded-2xl border border-emerald-900/8 bg-white px-4 py-3 text-sm text-emerald-800 shadow-sm flex items-center gap-2">
+            <Loader2 className="w-4 h-4 animate-spin" />
+            Refreshing latest project data...
+          </div>
+        )}
 
+        {detailError && (
+          <div className="mb-3 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+            {detailError}
+          </div>
+        )}
+      </div>
 
-      <header className="relative pt-32 pb-8 px-6 md:px-12 max-w-7xl mx-auto" ref={overviewRef}>
-         <button
-  onClick={onBack}
-  className="flex items-center gap-2
-              
-             px-3 py-2 rounded-lg shadow-sm
-             text-[#5C6F66] hover:text-[#2F3E33]
-             transition text-sm font-bold uppercase tracking-wider"
->
-  <ArrowLeft className="w-4 h-4" />
-  Back
-</button>
+      <section className={`${THEME.darkBg} text-white`}>
+        <div
+          className="max-w-[1400px] mx-auto px-6 md:px-10 pt-8 pb-12"
+          ref={overviewRef}
+        >
+          <button
+            onClick={onBack}
+            className="mb-8 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-white/90 hover:bg-white/10 transition"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            Back
+          </button>
 
+          <div className="grid lg:grid-cols-[1.15fr_0.85fr] gap-8 items-end">
+            <div>
+              <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs uppercase tracking-[0.18em] text-white/70 mb-5">
+                <Sparkles className="w-3.5 h-3.5" />
+                Verified Carbon Asset
+              </div>
 
-         <div className="mb-6 pt-5">
-            <h1 className="text-4xl md:text-5xl font-serif text-[#1A2F23] mb-2">{project.projectName}</h1>
-            <div className="flex flex-wrap items-center gap-4 text-sm text-[#5C6F66]">
-               <span className="font-medium">{project.country} – {project.location.split(',')[0]}</span>
-               <span className="w-1 h-1 bg-[#D6D3C9] rounded-full" />
-               <span className="bg-[#E8EFE8] px-2 py-0.5 rounded text-[#2F3E33] text-xs font-bold uppercase">{project.projectType}</span>
-               <span className="bg-[#F4F1E8] px-2 py-0.5 rounded text-[#5C6F66] text-xs font-bold uppercase">Conservation</span>
+              <h1 className="text-4xl md:text-6xl lg:text-7xl font-light tracking-tight leading-none">
+                {projectDetail.projectName}
+              </h1>
+
+              <div className="mt-5 flex flex-wrap items-center gap-4 text-sm text-white/70">
+                <span className="inline-flex items-center gap-2">
+                  <MapPin className="w-4 h-4" />
+                  {projectDetail.country} · {projectDetail.location}
+                </span>
+                <span className="inline-flex items-center gap-2">
+                  <Calendar className="w-4 h-4" />
+                  Vintage {projectDetail.vintage}
+                </span>
+                <span className="inline-flex items-center gap-2">
+                  <Layers3 className="w-4 h-4" />
+                  {projectDetail.registry}
+                </span>
+              </div>
+
+              <p className="mt-8 max-w-2xl text-white/75 leading-relaxed text-sm md:text-base">
+                Explore verified project details, track real-time availability,
+                and purchase credits through a clean, transparent marketplace
+                experience built for climate-focused investing.
+              </p>
+
+              <div className="mt-10 grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-3xl">
+                <StatTile
+                  label="Available credits"
+                  value={availableCredits.toLocaleString()}
+                  note={isSellable ? "Live inventory" : "Currently unavailable"}
+                />
+                <StatTile
+                  label="Price per credit"
+                  value={`$${projectDetail.pricePerCredit}`}
+                  note="Current batch pricing"
+                />
+                <StatTile
+                  label="Trust score"
+                  value={trustScore}
+                  note="Registry-backed confidence"
+                />
+              </div>
             </div>
-         </div>
 
-         <div className="w-full h-[400px] rounded-[2rem]  overflow-hidden relative shadow-sm border border-[#EBE8E0]">
-            <img src={project.image} alt={project.projectName} className="w-full h-full object-cover" />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent pointer-events-none" />
-            
-            <div className="absolute bottom-6 left-6 bg-white/90 backdrop-blur-sm px-4 py-2 rounded-xl flex items-center gap-3 shadow-sm">
-               <div className="relative w-10 h-10 flex items-center justify-center">
-                  <svg className="w-full h-full rotate-[-90deg]">
-                     <circle cx="20" cy="20" r="18" stroke="#E6EEF3" strokeWidth="3" fill="none" />
-                     <circle cx="20" cy="20" r="18" stroke="#10b981" strokeWidth="3" fill="none" strokeDasharray="113" strokeDashoffset={113 - (113 * trustScore) / 100} />
-                  </svg>
-                  <span className="absolute text-[10px] font-bold">{trustScore}</span>
-               </div>
-               <div>
-                  <p className="text-[10px] uppercase font-bold text-[#8C9E96] tracking-wider">Trust Score</p>
-                  <p className="text-xs font-bold text-[#2F3E33]">Excellent</p>
-               </div>
-            </div>
-         </div>
-      </header>
+            <div className="relative">
+              <div className="absolute -inset-4 rounded-[36px] bg-emerald-500/10 blur-3xl" />
+              <div className="relative overflow-hidden rounded-[36px] border border-white/10 shadow-[0_30px_100px_rgba(0,0,0,0.35)]">
+                <img
+                  src={projectDetail.image}
+                  alt={projectDetail.projectName}
+                  className="w-full h-[420px] md:h-[520px] object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#06120F]/75 via-[#06120F]/15 to-transparent" />
 
-      <section className="bg-[#F4F1E8] border-y border-[#EBE8E0]">
-         <div className="max-w-7xl mx-auto px-6 md:px-12 py-6">
-            <div className="flex flex-wrap md:flex-nowrap items-center justify-between gap-8">
-               <div className="flex-1">
-                  <p className="text-3xl font-serif text-[#2F3E33] mb-1">{project.availableCredits.toLocaleString()}</p>
-                  <p className="text-xs font-bold text-[#5C6F66] uppercase tracking-wider">tCO₂ Offset</p>
-               </div>
-               <div className="w-px h-12 bg-[#D6D3C9] hidden md:block" />
-               <div className="flex-1">
-                  <p className="text-3xl font-serif text-[#2F3E33] mb-1">${project.pricePerCredit.toFixed(2)}</p>
-                  <p className="text-xs font-bold text-[#5C6F66] uppercase tracking-wider">per ton</p>
-               </div>
-               <div className="w-px h-12 bg-[#D6D3C9] hidden md:block" />
-               <div className="flex-1">
-                  <p className="text-3xl font-serif text-[#2F3E33] mb-1">{(project.availableCredits * 1.5).toLocaleString()}</p>
-                  <p className="text-xs font-bold text-[#5C6F66] uppercase tracking-wider">Credits Available</p>
-               </div>
+                <div className="absolute bottom-0 left-0 right-0 p-6 md:p-7">
+                  <div className="grid grid-cols-3 gap-3">
+                    <div className="rounded-2xl border border-white/10 bg-white/10 backdrop-blur-xl p-4">
+                      <p className="text-[11px] uppercase tracking-[0.18em] text-white/50">
+                        Status
+                      </p>
+                      <p className="mt-2 text-sm font-medium text-white">
+                        {isSellable ? "Sellable" : "Unavailable"}
+                      </p>
+                    </div>
+                    <div className="rounded-2xl border border-white/10 bg-white/10 backdrop-blur-xl p-4">
+                      <p className="text-[11px] uppercase tracking-[0.18em] text-white/50">
+                        Method
+                      </p>
+                      <p className="mt-2 text-sm font-medium text-white">
+                        {projectDetail.methodology || "Verified"}
+                      </p>
+                    </div>
+                    <div className="rounded-2xl border border-white/10 bg-white/10 backdrop-blur-xl p-4">
+                      <p className="text-[11px] uppercase tracking-[0.18em] text-white/50">
+                        Version
+                      </p>
+                      <p className="mt-2 text-sm font-medium text-white">
+                        {projectDetail.version ?? "-"}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
-         </div>
+          </div>
+        </div>
       </section>
 
-      <section className="sticky top-0 z-40 bg-[#FDFBF7]/90 backdrop-blur-md border-b border-[#EBE8E0]">
-         <div className="max-w-7xl mx-auto px-6 md:px-12 py-3 flex items-center justify-between">
-            <div className="flex items-center gap-1 md:gap-2">
-               <button onClick={() => scrollToSection(overviewRef)} className="px-4 py-2 bg-[#F4F1E8] hover:bg-[#E8EFE8] rounded-lg text-sm font-bold text-[#2F3E33] flex items-center gap-2 transition-colors">
-                 <Search className="w-4 h-4" /> Overview
-               </button>
-               <button onClick={() => scrollToSection(impactRef)} className="px-4 py-2 hover:bg-[#F4F1E8] rounded-lg text-sm font-medium text-[#5C6F66] transition-colors">Impact</button>
-               <button onClick={() => scrollToSection(detailsRef)} className="px-4 py-2 hover:bg-[#F4F1E8] rounded-lg text-sm font-medium text-[#5C6F66] transition-colors flex items-center gap-1">
-                  Details <ChevronDown className="w-3 h-3" />
-               </button>
+      <section className="sticky top-0 z-30 border-y border-emerald-900/8 bg-white/80 backdrop-blur-2xl">
+        <div className="max-w-[1400px] mx-auto px-6 md:px-10 py-4 flex flex-col lg:flex-row gap-4 lg:gap-6 lg:items-center lg:justify-between">
+          <div className="flex flex-col gap-2">
+            <div className="flex flex-wrap items-center gap-3 md:gap-4">
+              <button
+                onClick={handleDecrease}
+                disabled={availableCredits <= 0}
+                className="w-11 h-11 rounded-full border border-emerald-900/10 bg-[#F8FCFA] text-lg hover:bg-emerald-50 disabled:opacity-40"
+              >
+                -
+              </button>
+
+              <input
+                type="number"
+                min={1}
+                max={availableCredits}
+                value={quantityInput}
+                onChange={(e) => handleQuantityInput(e.target.value)}
+                onBlur={handleQuantityBlur}
+                className={`w-24 h-11 rounded-full bg-white text-center font-medium outline-none focus:ring-2 ${
+                  quantityError
+                    ? "border border-red-300 focus:ring-red-200"
+                    : "border border-emerald-900/10 focus:ring-emerald-200"
+                }`}
+              />
+
+              <button
+                onClick={handleIncrease}
+                disabled={availableCredits <= 0}
+                className="w-11 h-11 rounded-full border border-emerald-900/10 bg-[#F8FCFA] text-lg hover:bg-emerald-50 disabled:opacity-40"
+              >
+                +
+              </button>
+
+              <div className="h-8 w-px bg-emerald-900/10 hidden md:block" />
+
+              <div>
+                <p className="text-xs uppercase tracking-[0.18em] text-emerald-700/45">
+                  Estimated total
+                </p>
+                <p className="text-lg font-semibold">${totalCost}</p>
+              </div>
             </div>
-            <div className="flex items-center gap-4">
-  <span className="text-xs font-bold uppercase text-[#5C6F66]">
-    Credits
-  </span>
 
-  <button
-    onClick={() => setQuantity(q => Math.max(1, q - 1))}
-    className="px-3 py-1 rounded-lg border border-[#EBE8E0] text-lg"
-  >
-    −
-  </button>
+            {inventoryNotice && (
+              <div className="inline-flex items-start gap-2 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+                <AlertTriangle className="w-4 h-4 mt-0.5 shrink-0" />
+                <span>{inventoryNotice}</span>
+              </div>
+            )}
 
-  <span className="w-8 text-center font-mono text-lg">
-    {quantity}
-  </span>
+            {quantityError && (
+              <p className="text-sm text-red-600">{quantityError}</p>
+            )}
+          </div>
 
-  <button
-    onClick={() =>
-      setQuantity(q =>
-        Math.min(project.availableCredits, q + 1)
-      )
-    }
-    className="px-3 py-1 rounded-lg border border-[#EBE8E0] text-lg"
-  >
-    +
-  </button>
-</div>
-
-
-            <button 
-              onClick={handleBuyClick}
-              className="bg-[#4F6F52] hover:bg-[#3E5842] text-white px-6 py-2.5 rounded-lg text-sm font-bold uppercase tracking-wider flex items-center gap-2 transition-all shadow-sm active:scale-95"
+          <div className="flex flex-wrap items-center gap-3">
+            <button
+              onClick={refreshAvailability}
+              className="inline-flex items-center gap-2 rounded-full border border-emerald-900/10 bg-[#F8FCFA] px-4 py-3 text-sm hover:bg-emerald-50 transition"
             >
-               Buy Credits <ArrowRight className="w-4 h-4" />
+              <RefreshCw className="w-4 h-4" />
+              Refresh availability
             </button>
-         </div>
+
+            <button
+              onClick={() => generateProjectReport(projectDetail)}
+              className="inline-flex items-center gap-2 rounded-full border border-emerald-900/10 bg-white px-4 py-3 text-sm hover:bg-emerald-50 transition"
+            >
+              <Download className="w-4 h-4" />
+              Download report
+            </button>
+
+            <button
+              disabled={!isSellable || !!quantityError}
+              onClick={() => setIsPaymentOpen(true)}
+              className={`px-6 py-3 rounded-full text-sm font-medium transition ${
+                !isSellable || !!quantityError
+                  ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                  : "bg-[#0F3D2E] text-white hover:opacity-95 shadow-[0_15px_35px_rgba(6,78,59,0.22)]"
+              }`}
+            >
+              {isSellable ? "Buy Credits" : "Unavailable"}
+            </button>
+          </div>
+        </div>
       </section>
 
-      <main className="max-w-7xl mx-auto px-6 md:px-12 py-10 grid lg:grid-cols-3 gap-10">
-         
-         <div className="lg:col-span-2 space-y-10" ref={impactRef}>
-            
-            <section>
-               <div className="bg-[#F4F1E8] rounded-[2rem] p-6 md:p-8 border border-[#EBE8E0] shadow-sm">
-                  <div className="flex justify-between items-center mb-6">
-                     <h3 className="text-lg font-serif text-[#2F3E33]">Projected Impact</h3>
-                     <span className="bg-white px-3 py-1 rounded-full text-xs font-bold text-[#5C6F66] border border-[#EBE8E0]">2019 - 2024</span>
-                  </div>
-                  <ImpactAreaChart />
-               </div>
-            </section>
+      <section className={THEME.lightBg}>
+        <main className="max-w-[1400px] mx-auto px-6 md:px-10 py-10 grid xl:grid-cols-[1.1fr_0.9fr] gap-8">
+          <div className="space-y-8">
+            <InfoCard
+              title="Project Impact"
+              right={
+                <div className="inline-flex items-center gap-2 rounded-full bg-emerald-50 px-3 py-2 text-sm text-emerald-800">
+                  <Leaf className="w-4 h-4" />
+                  Climate-positive asset
+                </div>
+              }
+            >
+              <div className="grid md:grid-cols-3 gap-4">
+                <div className="rounded-[24px] bg-[#F8FCFA] border border-emerald-900/8 p-5">
+                  <p className="text-[11px] uppercase tracking-[0.18em] text-emerald-700/45">
+                    Carbon impact
+                  </p>
+                  <p className="mt-3 text-3xl font-medium tracking-tight">
+                    {availableCredits.toLocaleString()}
+                  </p>
+                  <p className="text-sm text-emerald-700/65 mt-2">
+                    tons CO₂ represented in current availability
+                  </p>
+                </div>
 
-            <section>
-               <h3 className="text-lg font-serif text-[#2F3E33] mb-4">Carbon Reduction Over Time</h3>
-               <div className="grid md:grid-cols-2 gap-6">
-                  <div className="bg-[#FDFBF7] border border-[#EBE8E0] rounded-[1.5rem] p-6 shadow-sm flex items-center gap-4">
-                     <div className="w-12 h-12 bg-[#E8EFE8] rounded-full flex items-center justify-center text-[#4F6F52]"><CheckCircle2 className="w-6 h-6" /></div>
-                     <div>
-                        <p className="text-xs font-bold text-[#5C6F66] uppercase tracking-wide">CO₂ Sequestered</p>
-                        <p className="text-2xl font-serif text-[#2F3E33]">{project.availableCredits.toLocaleString()} <span className="text-sm font-sans text-[#5C6F66]">tons</span></p>
-                     </div>
-                  </div>
-                  <div className="bg-[#FDFBF7] border border-[#EBE8E0] rounded-[1.5rem] p-6 shadow-sm flex items-center gap-4">
-                     <div className="w-12 h-12 bg-[#E8EFE8] rounded-full flex items-center justify-center text-[#4F6F52]"><Trees className="w-6 h-6" /></div>
-                     <div>
-                        <p className="text-xs font-bold text-[#5C6F66] uppercase tracking-wide">Equivalency</p>
-                        <p className="text-2xl font-serif text-[#2F3E33]">210,000 <span className="text-sm font-sans text-[#5C6F66]">Trees</span></p>
-                     </div>
-                  </div>
-               </div>
-            </section>
+                <div className="rounded-[24px] bg-[#F8FCFA] border border-emerald-900/8 p-5">
+                  <p className="text-[11px] uppercase tracking-[0.18em] text-emerald-700/45">
+                    Batch status
+                  </p>
+                  <p className="mt-3 text-2xl font-medium tracking-tight">
+                    {projectDetail.status}
+                  </p>
+                  <p className="text-sm text-emerald-700/65 mt-2">
+                    Updated from latest availability checks
+                  </p>
+                </div>
 
-            <section className="bg-[#F4F1E8] rounded-[2rem] p-8 border border-[#EBE8E0] shadow-sm">
-               <div className="flex justify-between items-center mb-6">
-                   <h3 className="text-lg font-serif text-[#2F3E33]">Impact Statistics</h3>
-                   <Leaf className="w-5 h-5 text-[#9CCBA0]" />
-               </div>
-               <ImpactStats />
-            </section>
-         </div>
+                <div className="rounded-[24px] bg-[#F8FCFA] border border-emerald-900/8 p-5">
+                  <p className="text-[11px] uppercase tracking-[0.18em] text-emerald-700/45">
+                    Inventory version
+                  </p>
+                  <p className="mt-3 text-3xl font-medium tracking-tight">
+                    {projectDetail.version ?? "-"}
+                  </p>
+                  <p className="text-sm text-emerald-700/65 mt-2">
+                    Used to keep purchase flow in sync
+                  </p>
+                </div>
+              </div>
 
-         <div className="space-y-8" ref={detailsRef}>
-            
-            <div className="bg-white rounded-[2rem] p-8 border border-[#EBE8E0] shadow-sm">
-               <h3 className="text-lg font-serif text-[#2F3E33] mb-4">About Project</h3>
-               <p className="text-[#5C6F66] leading-relaxed text-sm mb-6">
-                 This project focuses on protecting specific areas of the Amazon Rainforest from deforestation. By engaging local communities in sustainable land management, it ensures the longevity of critical biodiversity hotspots.
-               </p>
-               
-               <div className="space-y-4">
-                  <div className="flex items-center gap-3">
-                     <div className="w-8 h-8 rounded-full bg-[#E8EFE8] flex items-center justify-center"><Globe2 className="w-4 h-4 text-[#4F6F52]" /></div>
-                     <span className="text-sm font-medium text-[#2F3E33]">{project.registry} Registry</span>
-                  </div>
-                  <div className="flex items-center gap-3">
-                     <div className="w-8 h-8 rounded-full bg-[#E8EFE8] flex items-center justify-center"><Wind className="w-4 h-4 text-[#4F6F52]" /></div>
-                     <span className="text-sm font-medium text-[#2F3E33]">{project.vintage} Vintage</span>
-                  </div>
-               </div>
+              <p className="mt-6 text-sm md:text-base text-emerald-800/80 leading-relaxed">
+                This project detail page gives you a single transparent view of
+                project identity, registry-backed metadata, real-time inventory,
+                and purchasing access. It is designed to help users evaluate both
+                climate impact and transaction readiness before buying credits.
+              </p>
+            </InfoCard>
 
-               <button 
-                 onClick={() => generateProjectReport(project)}
-                 className="w-full mt-8 py-3 rounded-xl border border-[#EBE8E0] text-sm font-bold text-[#5C6F66] hover:bg-[#F4F1E8] transition-colors flex items-center justify-center gap-2 group"
-               >
-                  <Download className="w-4 h-4 group-hover:text-[#4F6F52]" /> Download Verified Report
-               </button>
+            <InfoCard
+              title="Why this project stands out"
+              right={
+                <div className="inline-flex items-center gap-2 rounded-full bg-[#0F3D2E] px-3 py-2 text-sm text-white">
+                  <ShieldCheck className="w-4 h-4" />
+                  Verified
+                </div>
+              }
+            >
+              <div className="grid md:grid-cols-3 gap-4">
+                <div className="rounded-[24px] border border-emerald-900/8 p-5">
+                  <BadgeCheck className="w-5 h-5 text-emerald-700 mb-4" />
+                  <p className="font-medium mb-2">Registry-backed identity</p>
+                  <p className="text-sm text-emerald-700/70">
+                    Verified metadata including registry, vintage, methodology,
+                    and live batch-level inventory.
+                  </p>
+                </div>
+
+                <div className="rounded-[24px] border border-emerald-900/8 p-5">
+                  <RefreshCw className="w-5 h-5 text-emerald-700 mb-4" />
+                  <p className="font-medium mb-2">Live availability refresh</p>
+                  <p className="text-sm text-emerald-700/70">
+                    Availability is refreshed automatically so users can trust
+                    the current visible inventory.
+                  </p>
+                </div>
+
+                <div className="rounded-[24px] border border-emerald-900/8 p-5">
+                  <Download className="w-5 h-5 text-emerald-700 mb-4" />
+                  <p className="font-medium mb-2">Downloadable reporting</p>
+                  <p className="text-sm text-emerald-700/70">
+                    PDF verification report generation helps reinforce trust and
+                    product transparency.
+                  </p>
+                </div>
+              </div>
+            </InfoCard>
+          </div>
+
+          <div className="space-y-8">
+            <InfoCard title="Project Details">
+              <div className="space-y-1">
+                <MetaRow label="Registry" value={projectDetail.registry || "-"} />
+                <MetaRow label="Vintage" value={projectDetail.vintage || "-"} />
+                <MetaRow
+                  label="Methodology"
+                  value={projectDetail.methodology || "-"}
+                />
+                <MetaRow label="Country" value={projectDetail.country || "-"} />
+                <MetaRow label="Location" value={projectDetail.location || "-"} />
+                <MetaRow label="Status" value={projectDetail.status || "-"} />
+                <MetaRow
+                  label="Available quantity"
+                  value={availableCredits.toLocaleString()}
+                />
+                <MetaRow
+                  label="Sold quantity"
+                  value={projectDetail.sold_quantity ?? "-"}
+                />
+                <MetaRow
+                  label="Retired quantity"
+                  value={projectDetail.retired_quantity ?? "-"}
+                />
+                <MetaRow label="Version" value={projectDetail.version ?? "-"} />
+              </div>
+            </InfoCard>
+
+            <InfoCard title="Purchase Summary">
+              <div className="rounded-[24px] bg-[#F8FCFA] border border-emerald-900/8 p-5">
+                <div className="flex items-center justify-between py-3 border-b border-emerald-900/8">
+                  <span className="text-sm text-emerald-700/70">
+                    Selected quantity
+                  </span>
+                  <span className="font-medium">{quantity}</span>
+                </div>
+                <div className="flex items-center justify-between py-3 border-b border-emerald-900/8">
+                  <span className="text-sm text-emerald-700/70">
+                    Price per credit
+                  </span>
+                  <span className="font-medium">
+                    ${projectDetail.pricePerCredit}
+                  </span>
+                </div>
+                <div className="flex items-center justify-between py-3">
+                  <span className="text-sm text-emerald-700/70">
+                    Estimated total
+                  </span>
+                  <span className="text-xl font-semibold">${totalCost}</span>
+                </div>
+              </div>
+
+              <div className="mt-5 flex flex-col sm:flex-row gap-3">
+                <button
+                  disabled={!isSellable || !!quantityError}
+                  onClick={() => setIsPaymentOpen(true)}
+                  className={`flex-1 px-5 py-3 rounded-full text-sm font-medium transition ${
+                    !isSellable || !!quantityError
+                      ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                      : "bg-[#0F3D2E] text-white hover:opacity-95"
+                  }`}
+                >
+                  {isSellable ? "Proceed to Purchase" : "Unavailable"}
+                </button>
+
+                <button
+                  onClick={() => generateProjectReport(projectDetail)}
+                  className="flex-1 inline-flex items-center justify-center gap-2 px-5 py-3 rounded-full border border-emerald-900/10 bg-white text-sm hover:bg-emerald-50 transition"
+                >
+                  <Download className="w-4 h-4" />
+                  Export Report
+                </button>
+              </div>
+            </InfoCard>
+          </div>
+        </main>
+      </section>
+
+      <section className={`${THEME.darkBg} text-white`}>
+        <div className="max-w-[1400px] mx-auto px-6 md:px-10 py-14">
+          <div className="grid md:grid-cols-3 gap-6">
+            <div className="rounded-[28px] border border-white/10 bg-white/5 backdrop-blur-xl p-6">
+              <p className="text-sm text-white/60 mb-2">Registry confidence</p>
+              <p className="text-3xl font-medium">{trustScore}</p>
+              <p className="text-sm text-white/65 mt-3">
+                Built to give users a quick confidence signal before purchase.
+              </p>
             </div>
 
-            <div className="h-64 rounded-[2rem] overflow-hidden relative group">
-               <img src="https://images.unsplash.com/photo-1524661135-423995f22d0b?auto=format&fit=crop&q=80&w=800" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" alt="Map" />
-               <div className="absolute inset-0 bg-[#2F3E33]/20 group-hover:bg-[#2F3E33]/10 transition-colors" />
-               <div className="absolute bottom-4 left-4 bg-white px-3 py-1.5 rounded-lg shadow-sm">
-                  <p className="text-[10px] uppercase font-bold text-[#8C9E96]">Location</p>
-                  <p className="text-xs font-bold text-[#2F3E33]">{project.location}</p>
-               </div>
+            <div className="rounded-[28px] border border-white/10 bg-white/5 backdrop-blur-xl p-6">
+              <p className="text-sm text-white/60 mb-2">Inventory health</p>
+              <p className="text-3xl font-medium">
+                {availableCredits > 0 ? "Live" : "Low"}
+              </p>
+              <p className="text-sm text-white/65 mt-3">
+                Availability is synced on interval refresh for better purchase
+                accuracy.
+              </p>
             </div>
-         </div>
-      </main>
+
+            <div className="rounded-[28px] border border-white/10 bg-white/5 backdrop-blur-xl p-6">
+              <p className="text-sm text-white/60 mb-2">Purchase readiness</p>
+              <p className="text-3xl font-medium">
+                {isSellable ? "Enabled" : "Locked"}
+              </p>
+              <p className="text-sm text-white/65 mt-3">
+                Buying is available only when the project remains sellable and
+                in stock.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
     </div>
   );
 }

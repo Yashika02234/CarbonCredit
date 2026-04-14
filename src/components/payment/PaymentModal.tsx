@@ -1,5 +1,6 @@
-import { useState, useEffect, ChangeEvent } from "react";
+import { useState, useEffect, ChangeEvent, useMemo, useRef } from "react";
 import type { ReactNode } from "react";
+import { usePortfolio } from "../../context/PortfolioContext";
 import {
   X,
   Loader2,
@@ -9,14 +10,26 @@ import {
   Smartphone,
 } from "lucide-react";
 import { CarbonCredit } from "../../lib/types";
-import { usePortfolio } from "../../context/PortfolioContext";
+import { createPurchase, getBatchAvailability } from "../../lib/api";
+import type { 
+  PurchaseSuccessResponse, 
+  PurchaseErrorResponse, 
+  AvailabilityResponse 
+} from "../../lib/api";
 
 interface PaymentModalProps {
   isOpen: boolean;
   onClose: () => void;
   project: CarbonCredit;
   quantity: number;
-  onNavigate: (view: "portfolio" | "marketplace" | "home" | "dashboard") => void;
+  onNavigate: (
+    view: "portfolio" | "marketplace" | "home" | "dashboard"
+  ) => void;
+  onPurchaseSuccess?: (
+    batchId: string,
+    remaining?: number,
+    newVersion?: number
+  ) => void;
 }
 
 type Step = "review" | "processing" | "success";
@@ -32,6 +45,8 @@ type PaymentForm = {
   upiId: string;
 };
 
+
+
 const initialForm: PaymentForm = {
   email: "",
   country: "India",
@@ -42,19 +57,36 @@ const initialForm: PaymentForm = {
   upiId: "",
 };
 
+function generateIdempotencyKey() {
+  return typeof crypto !== "undefined" && "randomUUID" in crypto
+    ? crypto.randomUUID()
+    : `purchase-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+}
+
 export default function PaymentModal({
   isOpen,
   onClose,
   project,
   quantity,
   onNavigate,
+  onPurchaseSuccess,
 }: PaymentModalProps) {
-  const { buyCredits } = usePortfolio();
-
   const [step, setStep] = useState<Step>("review");
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("card");
   const [form, setForm] = useState<PaymentForm>(initialForm);
   const [errors, setErrors] = useState<Partial<PaymentForm>>({});
+  const [submitError, setSubmitError] = useState("");
+  const [successData, setSuccessData] = useState<PurchaseSuccessResponse | null>(null);
+  const [idempotencyKey, setIdempotencyKey] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isInvalidBatch, setIsInvalidBatch] = useState(false);
+  const lastAttemptParams = useRef<{
+    batchId: string;
+    quantity: number;
+    expectedVersion: number;
+  } | null>(null);
+
+  const { registerPurchase } = usePortfolio();
 
   useEffect(() => {
     if (isOpen) {
@@ -62,6 +94,11 @@ export default function PaymentModal({
       setPaymentMethod("card");
       setForm(initialForm);
       setErrors({});
+      setSubmitError("");
+      setSuccessData(null);
+      setIdempotencyKey("");
+      setIsInvalidBatch(false);
+      lastAttemptParams.current = null;
     }
   }, [isOpen]);
 
@@ -72,11 +109,17 @@ export default function PaymentModal({
     };
   }, [isOpen]);
 
-  if (!isOpen) return null;
+  const batchId = getBatchId(project);
+  const batchVersion = getBatchVersion(project);
+  const currentAvailable =
+    project.available_quantity ?? project.availableCredits ?? 0;
 
-  const subtotal = project.pricePerCredit * quantity;
-  const platformFee = subtotal * 0.01;
-  const totalDue = subtotal + platformFee;
+  const subtotal = useMemo(
+    () => project.pricePerCredit * quantity,
+    [project.pricePerCredit, quantity]
+  );
+  const platformFee = useMemo(() => subtotal * 0.01, [subtotal]);
+  const totalDue = useMemo(() => subtotal + platformFee, [subtotal, platformFee]);
 
   const formatCardNumber = (value: string) => {
     const cleaned = value.replace(/\D/g, "").slice(0, 16);
@@ -152,7 +195,9 @@ export default function PaymentModal({
     form.country.trim().length > 0 &&
     (paymentMethod === "card" ? isCardValid : isValidUpi(form.upiId.trim()));
 
-  const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleChange = (
+    e: ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
     const { name, value } = e.target;
 
     let nextValue = value;
@@ -162,16 +207,215 @@ export default function PaymentModal({
 
     setForm((prev) => ({ ...prev, [name]: nextValue }));
     setErrors((prev) => ({ ...prev, [name]: "" }));
+    setSubmitError("");
   };
 
   const handlePurchase = async () => {
+    if (isSubmitting) return;
     if (!validate()) return;
 
-    setStep("processing");
-    await new Promise((resolve) => setTimeout(resolve, 1500));
-    buyCredits(project, quantity);
-    setStep("success");
+    if (!batchId) {
+      setSubmitError("Batch ID is missing for this project.");
+      return;
+    }
+
+    if (currentAvailable <= 0) {
+      setSubmitError("This batch is no longer available.");
+      return;
+    }
+
+    if (quantity > currentAvailable) {
+      setSubmitError(`Only ${currentAvailable} credits are currently available.`);
+      return;
+    }
+
+    setIsSubmitting(true);
+    setSubmitError("");
+
+    try {
+      // 1. Get latest availability to ensure we have the correct version
+      const latestAvailability: AvailabilityResponse =
+        await getBatchAvailability(batchId);
+
+      const expectedVersion =
+        typeof latestAvailability.version === "number"
+          ? latestAvailability.version
+          : batchVersion;
+
+      if (typeof expectedVersion !== "number") {
+        setSubmitError(
+          "Batch version is missing. Refresh batch details and try again."
+        );
+        setIsSubmitting(false);
+        return;
+      }
+
+      // 2. Inventory check
+      if (quantity > latestAvailability.available_quantity) {
+        setSubmitError(
+          `Only ${latestAvailability.available_quantity} credits are currently available.`
+        );
+        onPurchaseSuccess?.(
+          batchId,
+          latestAvailability.available_quantity,
+          latestAvailability.version
+        );
+        setIsSubmitting(false);
+        return;
+      }
+
+      // 3. Idempotency Key Management (Intent-based)
+      const currentParams = {
+        batchId,
+        quantity,
+        expectedVersion,
+      };
+
+      const paramsChanged =
+        !lastAttemptParams.current ||
+        lastAttemptParams.current.batchId !== currentParams.batchId ||
+        lastAttemptParams.current.quantity !== currentParams.quantity ||
+        lastAttemptParams.current.expectedVersion !==
+          currentParams.expectedVersion;
+
+      let activeKey = idempotencyKey;
+      if (paramsChanged || !activeKey) {
+        activeKey = generateIdempotencyKey();
+        setIdempotencyKey(activeKey);
+        lastAttemptParams.current = currentParams;
+      }
+
+      // 4. Move to processing step for the API call
+      setStep("processing");
+
+      // 5. Execute Purchase
+      const response: PurchaseSuccessResponse = await createPurchase({
+        mode: "SPECIFIC_BATCH",
+        batch_id: batchId,
+        requested_quantity: quantity,
+        buyer_reference: form.email.trim(),
+        idempotency_key: activeKey,
+        expected_version: expectedVersion,
+      });
+
+      // 6. Handle Success
+      registerPurchase({
+        project: {
+          ...project,
+          available_quantity:
+            response.remaining_available_quantity_after_purchase ??
+            response.remaining_available_quantity ??
+            project.available_quantity,
+          availableCredits:
+            response.remaining_available_quantity_after_purchase ??
+            response.remaining_available_quantity ??
+            project.availableCredits,
+          version: response.new_version ?? project.version,
+        },
+        quantity,
+        purchaseId: response.purchase_id,
+      });
+
+      onPurchaseSuccess?.(
+        batchId,
+        response.remaining_available_quantity_after_purchase ??
+          response.remaining_available_quantity,
+        response.new_version
+      );
+
+      setSuccessData(response);
+      setStep("success");
+    } catch (error: any) {
+      const err: PurchaseErrorResponse = error || {};
+
+      // Handle DUPLICATE_REQUEST as SUCCESS
+      if (err.error_code === "DUPLICATE_REQUEST") {
+        setSuccessData({
+          purchase_id: "ALREADY_PROCESSED",
+          status: "SUCCESS",
+          mode: "SPECIFIC_BATCH",
+          purchased_quantity: quantity,
+          created_at: new Date().toISOString(),
+        });
+        setStep("success");
+        return;
+      }
+
+      // Return to review step for other errors
+      setStep("review");
+
+      if (err.error_code === "STALE_INVENTORY") {
+        const hasCurrentData =
+          typeof err.current_available_quantity === "number" &&
+          typeof err.current_version === "number";
+
+        if (hasCurrentData) {
+          // Immediate UI update from error response
+          onPurchaseSuccess?.(
+            batchId,
+            err.current_available_quantity,
+            err.current_version
+          );
+        } else {
+          // Fallback refresh call
+          try {
+            const latest = await getBatchAvailability(batchId);
+            onPurchaseSuccess?.(
+              batchId,
+              latest.available_quantity,
+              latest.version
+            );
+          } catch (e) {
+            console.error("Failed to refresh availability after stale inventory error", e);
+          }
+        }
+
+        setSubmitError(
+          `Inventory changed. Please review the updated availability before retrying.${
+            typeof err.current_available_quantity === "number"
+              ? ` Available now: ${err.current_available_quantity}.`
+              : ""
+          }`
+        );
+      } else if (err.error_code === "INSUFFICIENT_INVENTORY") {
+        const available =
+          err.current_available_quantity ?? err.available_quantity;
+        
+        // Propagate current version if provided to stay aligned with latest state
+        if (typeof available === "number") {
+          onPurchaseSuccess?.(batchId, available, err.current_version);
+        }
+
+        setSubmitError(
+          typeof available === "number"
+            ? `Only ${available} credits are currently available. Please update your requested quantity.`
+            : err.message || "Requested quantity is higher than current availability."
+        );
+      } else if (err.error_code === "INVALID_BATCH") {
+        setIsInvalidBatch(true);
+        setSubmitError("This batch is no longer available for purchase. Please return to the explorer.");
+      } else {
+        // Unknown / Generic Fallback
+        setSubmitError(
+          err.message || "Something went wrong while processing your purchase. Please try again."
+        );
+      }
+    } finally {
+      setIsSubmitting(false);
+    }
   };
+
+  if (!isOpen) return null;
+
+  const purchasedQty =
+    successData?.purchased_quantity ??
+    successData?.allocated_quantity ??
+    quantity;
+
+  const remainingQty =
+    successData?.remaining_available_quantity_after_purchase ??
+    successData?.remaining_available_quantity;
+    
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/30 p-4 backdrop-blur-sm">
@@ -184,7 +428,7 @@ export default function PaymentModal({
         </button>
 
         {step === "review" && (
-          <div className="grid lg:grid-cols-[0.95fr_1.05fr]">
+          <div className="grid max-h-[90vh] overflow-y-auto lg:grid-cols-[0.95fr_1.05fr]">
             <div className="border-b border-slate-200 p-6 lg:border-b-0 lg:border-r lg:p-8">
               <p className="text-xs font-medium uppercase tracking-[0.18em] text-slate-400">
                 Order summary
@@ -209,16 +453,38 @@ export default function PaymentModal({
                 </p>
 
                 <div className="mt-5 space-y-3 border-t border-slate-200 pt-5">
-                  <SummaryRow label="Subtotal" value={`$${subtotal.toFixed(2)}`} />
+                  <SummaryRow
+                    label="Subtotal"
+                    value={`$${subtotal.toFixed(2)}`}
+                  />
                   <SummaryRow
                     label="Platform fee"
                     value={`$${platformFee.toFixed(2)}`}
                   />
-                  <SummaryRow label="Project ID" value={project.unicId} mono />
+                  <SummaryRow
+                    label="Project ID"
+                    value={batchId || project.unicId || "N/A"}
+                    mono
+                  />
+                  <SummaryRow
+                    label="Inventory version"
+                    value={
+                      typeof batchVersion === "number"
+                        ? String(batchVersion)
+                        : "N/A"
+                    }
+                    mono
+                  />
+                  <SummaryRow
+                    label="Available now"
+                    value={String(currentAvailable)}
+                  />
                 </div>
 
                 <div className="mt-5 flex items-center justify-between border-t border-slate-200 pt-5">
-                  <span className="text-sm font-medium text-slate-700">Total</span>
+                  <span className="text-sm font-medium text-slate-700">
+                    Total
+                  </span>
                   <span className="text-xl font-semibold text-slate-900">
                     ${totalDue.toFixed(2)}
                   </span>
@@ -233,7 +499,9 @@ export default function PaymentModal({
 
             <div className="p-6 lg:p-8">
               <div className="mx-auto max-w-md">
-                <h3 className="text-2xl font-semibold text-slate-900">Payment</h3>
+                <h3 className="text-2xl font-semibold text-slate-900">
+                  Payment
+                </h3>
                 <p className="mt-2 text-sm text-slate-500">
                   Choose a payment method and complete your purchase.
                 </p>
@@ -269,7 +537,12 @@ export default function PaymentModal({
                     value={form.country}
                     onChange={handleChange}
                     error={errors.country}
-                    options={["India", "United States", "United Kingdom", "Germany"]}
+                    options={[
+                      "India",
+                      "United States",
+                      "United Kingdom",
+                      "Germany",
+                    ]}
                   />
 
                   {paymentMethod === "card" && (
@@ -331,23 +604,32 @@ export default function PaymentModal({
                       />
 
                       <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-500">
-                        Supports Google Pay, PhonePe, Paytm, BHIM and other UPI
-                        apps.
+                        Supports Google Pay, PhonePe, Paytm, BHIM and other
+                        UPI apps.
                       </div>
+                    </div>
+                  )}
+
+                  {submitError && (
+                    <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                      {submitError}
                     </div>
                   )}
 
                   <button
                     type="button"
                     onClick={handlePurchase}
-                    disabled={!isFormValid}
-                    className={`mt-2 w-full rounded-2xl py-3.5 text-sm font-semibold transition ${
-                      isFormValid
+                    disabled={!isFormValid || currentAvailable <= 0 || isSubmitting || isInvalidBatch}
+                    className={`mt-2 w-full flex items-center justify-center gap-2 rounded-2xl py-3.5 text-sm font-semibold transition ${
+                      isFormValid && currentAvailable > 0 && !isSubmitting && !isInvalidBatch
                         ? "bg-slate-900 text-white hover:bg-slate-800"
                         : "cursor-not-allowed bg-slate-200 text-slate-400"
                     }`}
                   >
-                    Pay ${totalDue.toFixed(2)}
+                    {isSubmitting && <Loader2 className="h-4 w-4 animate-spin text-slate-400" />}
+                    {currentAvailable > 0
+                      ? isSubmitting ? "Processing..." : `Pay $${totalDue.toFixed(2)}`
+                      : "Unavailable"}
                   </button>
                 </div>
               </div>
@@ -378,14 +660,41 @@ export default function PaymentModal({
               Payment successful
             </h3>
             <p className="mt-2 max-w-sm text-sm text-slate-500">
-              Your credits have been added to your portfolio.
+              Your purchase was completed successfully.
             </p>
 
             <div className="mt-6 rounded-2xl border border-slate-200 px-5 py-4 text-left">
-              <p className="font-medium text-slate-900">{project.projectName}</p>
-              <p className="mt-1 text-sm text-slate-500">
-                {quantity} credit{quantity > 1 ? "s" : ""} purchased
+              <p className="font-medium text-slate-900">
+                {project.projectName}
               </p>
+              <p className="mt-1 text-sm text-slate-500">
+                {purchasedQty} credit{purchasedQty > 1 ? "s" : ""} purchased
+              </p>
+
+              {successData?.purchase_id === "ALREADY_PROCESSED" && (
+                <div className="mt-4 rounded-xl bg-emerald-50 p-3 text-xs font-medium text-emerald-700 border border-emerald-100 italic">
+                  Transaction already processed successfully.
+                </div>
+              )}
+
+              {successData?.purchase_id && (
+                <p className="mt-3 text-sm text-slate-500">
+                  Purchase ID:{" "}
+                  <span className="font-mono text-slate-900">
+                    {successData.purchase_id}
+                  </span>
+                </p>
+              )}
+
+              {typeof remainingQty === "number" && (
+                <p className="mt-2 text-sm text-slate-500">
+                  Remaining availability:{" "}
+                  <span className="font-semibold text-slate-900">
+                    {remainingQty}
+                  </span>
+                </p>
+              )}
+
               <p className="mt-3 text-sm font-semibold text-slate-900">
                 Total paid: ${totalDue.toFixed(2)}
               </p>
@@ -407,6 +716,24 @@ export default function PaymentModal({
   );
 }
 
+function getBatchId(project: CarbonCredit): string {
+  const p = project as CarbonCredit & {
+    batch_id?: string;
+    id?: string;
+    unicId?: string;
+  };
+
+  return p.batch_id || p.unicId || p.id || "";
+}
+
+function getBatchVersion(project: CarbonCredit): number | undefined {
+  const p = project as CarbonCredit & {
+    version?: number;
+  };
+
+  return p.version;
+}
+
 function SummaryRow({
   label,
   value,
@@ -419,7 +746,9 @@ function SummaryRow({
   return (
     <div className="flex items-center justify-between gap-4 text-sm">
       <span className="text-slate-500">{label}</span>
-      <span className={`text-slate-900 ${mono ? "font-mono text-xs" : "font-medium"}`}>
+      <span
+        className={`text-slate-900 ${mono ? "font-mono text-xs" : "font-medium"}`}
+      >
         {value}
       </span>
     </div>
