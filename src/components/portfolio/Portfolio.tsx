@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence, useScroll, useTransform, useSpring } from "framer-motion";
 import { ChevronDown, ArrowUpRight, CheckCircle2, ShieldCheck, Download, History, BadgeDollarSign, Leaf, Activity } from "lucide-react";
 
