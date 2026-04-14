@@ -1286,17 +1286,6 @@ function MagneticButton({
   );
 }
 
-function MiniSticky({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="flex items-center gap-2">
-      <span className="text-emerald-700/55 text-xs uppercase tracking-[0.18em]">
-        {label}
-      </span>
-      <span className="font-medium">{value}</span>
-    </div>
-  );
-}
-
 function StatCard({ icon: Icon, label, value }: any) {
   return (
     <div className="group relative py-8 border-b border-white/10 transition-colors duration-500">

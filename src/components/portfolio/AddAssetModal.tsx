@@ -47,7 +47,7 @@ status: "Active",
  projectType: "Forestry",
  unicId: formData.serialNumber || `VCS-${Math.floor(Math.random() * 100000)}-2023`,
  image: "https://images.unsplash.com/photo-1516214104703-d870798883c5?auto=format&fit=crop&q=80&w=1000"
- };
+ } as CarbonCredit;
 
 onAdd(newAsset);
  setIsVerifying(false);

@@ -34,7 +34,7 @@ const MOCK_PROJECTS: CarbonCredit[] = Array.from({ length: 100 }).map((_, i) => 
     projectType: type,
     unicId: `UNI-${i}-BRA`,
     image: `https://source.unsplash.com/random/800x600?nature,forest&sig=${i}`
-  };
+  } as CarbonCredit;
 });
 
 export function DataProvider({ children }: { children: ReactNode }) {

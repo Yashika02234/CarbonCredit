@@ -43,7 +43,6 @@ export default function Portfolio() {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [retireTarget, setRetireTarget] = useState<{ projectId: string; projectName: string; quantity: number; } | null>(null);
   const [logFilter, setLogFilter] = useState<"all" | "purchases" | "retirements">("all");
-  const [chartRange, setChartRange] = useState("ALL");
 
   // Portfolio Computations
   const ownedAssets = assets.filter((a) => a.status === "owned");
@@ -51,14 +50,6 @@ export default function Portfolio() {
   const activeCredits = ownedAssets.reduce((s, a) => s + a.quantity, 0);
   const retiredCredits = certificates.reduce((s, c) => s + c.quantity, 0);
   const portfolioValueNumeric = totalCredits * 12; // Static $12 mock price logic
-
-  const portfolioValueSeries = useMemo(() => {
-    let cumulative = 0;
-    return assets.map((a, index) => {
-      cumulative += a.quantity * 12; // Adjusted to uniform price for aesthetic chart
-      return { label: `M${index + 1}`, value: cumulative };
-    });
-  }, [assets]);
 
   const KPI = ({ label, valueNumeric, prefix = "", suffix = "", icon: Icon }: any) => (
     <motion.div
@@ -285,7 +276,7 @@ export default function Portfolio() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-black/5">
-                {assets.filter(asset => logFilter === 'all' || logFilter === 'purchases').map(asset => (
+                {assets.filter(_asset => logFilter === 'all' || logFilter === 'purchases').map(asset => (
                   <tr key={`buy-${asset.projectId}`} className="group hover:bg-neutral-50/50 transition-colors">
                     <td className="px-8 py-5 font-semibold text-neutral-600">{new Date(asset.createdAt || Date.now()).toLocaleDateString()}</td>
                     <td className="px-8 py-5">
@@ -302,7 +293,7 @@ export default function Portfolio() {
                     </td>
                   </tr>
                 ))}
-                {certificates.filter(cert => logFilter === 'all' || logFilter === 'retirements').map(cert => (
+                {certificates.filter(_cert => logFilter === 'all' || logFilter === 'retirements').map(cert => (
                   <tr key={`retire-${cert.certificateId}`} className="group hover:bg-neutral-50/50 transition-colors">
                     <td className="px-8 py-5 font-semibold text-neutral-600">{new Date(cert.createdAt || Date.now()).toLocaleDateString()}</td>
                     <td className="px-8 py-5">
