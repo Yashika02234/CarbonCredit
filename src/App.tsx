@@ -16,6 +16,7 @@ const AboutPage = lazy(() => import("./components/about/AboutPage"));
 const ContactPage = lazy(() => import("./components/contact/ContactPage"));
 const ProjectDetail = lazy(() => import("./components/explorer/ProjectDetail"));
 const Dashboard = lazy(() => import("./components/dashboard/Dashboard"));
+const AnalyzePage = lazy(() => import("./components/analyze/AnalyzePage"));
 
 const PageLoader = () => (
   <div className="h-screen w-full flex items-center justify-center bg-background">
@@ -199,6 +200,7 @@ function App() {
                     }}
                   />
                 }
+                analyze={<AnalyzePage />}
                 portfolio={<Portfolio />}
               />
             )

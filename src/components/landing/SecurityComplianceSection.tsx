@@ -13,37 +13,37 @@ export default function SecurityComplianceSection() {
     () => [
       {
         step: 1,
-        title: "Access Control",
-        subtitle: "Restricting system write access",
+        title: "Encrypted Workflows",
+        subtitle: "End-to-end data protection",
         description:
-          "All write operations are restricted to authenticated and authorized participants. Public access remains strictly read-only to preserve system integrity.",
+          "All compliance data — from emissions inputs to report outputs — flows through encrypted, access-controlled pipelines. No unprotected data transmission across the compliance stack.",
         image:
           "https://images.unsplash.com/photo-1555949963-ff9fe0c870eb?auto=format&fit=crop&w=2200&q=80",
       },
       {
         step: 2,
-        title: "Auditability",
-        subtitle: "Verifiable system history",
+        title: "Audit Logs",
+        subtitle: "Full calculation traceability",
         description:
-          "System events are recorded with full historical traceability, enabling independent audits and post-hoc verification.",
+          "Every data point, calculation step, validation decision, and report generation is logged with full attribution — creating a defensible audit trail for any regulatory review.",
         image:
           "https://images.unsplash.com/photo-1556155092-490a1ba16284?auto=format&fit=crop&w=2200&q=80",
       },
       {
         step: 3,
-        title: "Data Integrity",
-        subtitle: "Protection against mutation",
+        title: "Data Traceability",
+        subtitle: "Immutable emissions records",
         description:
-          "Critical records are append-only and protected against silent mutation or retroactive modification.",
+          "Critical emissions records are append-only and protected against retroactive modification. Every entry has a verified origin, timestamp, and chain of custody.",
         image:
           "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&w=2200&q=80",
       },
       {
         step: 4,
         title: "Regulatory Alignment",
-        subtitle: "Designed for oversight",
+        subtitle: "Built for CBAM, EU ETS & CSRD",
         description:
-          "Offset is designed to support evolving disclosure, reporting, and market oversight requirements.",
+          "OffsetX is architected to meet the requirements of active and emerging carbon compliance regulations — with infrastructure that adapts as disclosure obligations evolve.",
         image:
           "https://images.unsplash.com/photo-1450101499163-c8848c66ca85?auto=format&fit=crop&w=2200&q=80",
       },
@@ -69,16 +69,15 @@ export default function SecurityComplianceSection() {
             </p>
 
             <h2 className="mt-7 text-[44px] md:text-[64px] leading-[1.05] font-semibold tracking-tight text-black">
-              Security & compliance
+              Security & governance
               <br />
-              <span className="text-black/35">as structured infrastructure.</span>
+              <span className="text-black/35">as compliance infrastructure.</span>
             </h2>
           </div>
 
           <div className="lg:pt-16">
             <p className="text-black/60 text-lg leading-relaxed max-w-xl">
-              Offset approaches security and compliance as a layered system — not a checklist —
-              ensuring trust is enforced by design.
+              OffsetX treats security and governance as core compliance requirements — not features to be added later. Enterprise-grade reliability with full traceability at every layer.
             </p>
           </div>
         </div>
@@ -142,7 +141,7 @@ export default function SecurityComplianceSection() {
 
               <div className="mt-10 h-px w-full bg-white/10" />
               <p className="mt-5 text-xs tracking-[0.28em] uppercase text-white/45">
-                Built for audit-ready markets
+                Built for audit-ready carbon compliance
               </p>
             </div>
 

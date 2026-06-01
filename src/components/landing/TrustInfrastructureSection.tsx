@@ -32,44 +32,44 @@ export default function PlatformStickySections() {
   const blocks: SectionBlock[] = useMemo(
     () => [
       {
-        id: "different",
-        nav: ["How Offset Is Different", "Trust Infrastructure", "Who This Is For"],
-        activeNavLabel: "How Offset Is Different",
-        rightTitle: "How Offset Is Different",
+        id: "why",
+        nav: ["Why OffsetX", "Data Integrity Layer", "Global Vision"],
+        activeNavLabel: "Why OffsetX",
+        rightTitle: "Why OffsetX",
         rightDescription:
-          "Offset is built as neutral infrastructure for trust — not as a marketplace or registry replacement.",
+          "OffsetX is compliance infrastructure — not another ESG dashboard. Built for reliability, audit-grade workflows, and global regulatory readiness from day one.",
         rightItems: [
-          { title: "Integrity is computed", description: "Scores evolve continuously from registry signals." },
-          { title: "Full lifecycle traceability", description: "Credits remain contextual across transfers." },
-          { title: "Neutral by design", description: "Independent and auditable signals only." },
+          { title: "Compliance-native architecture", description: "Designed around regulatory workflows, not retrofitted onto existing tools." },
+          { title: "Audit-grade by default", description: "Every calculation, validation, and report is structured for regulator review." },
+          { title: "Infrastructure, not a dashboard", description: "OffsetX operates as the underlying layer — reliable, traceable, defensible." },
         ],
         image: "https://images.unsplash.com/photo-1509395176047-4a66953fd231?q=80&w=2000",
       },
       {
-        id: "infra",
-        nav: ["How Offset Is Different", "Trust Infrastructure", "Who This Is For"],
-        activeNavLabel: "Trust Infrastructure",
-        rightTitle: "Trust Infrastructure",
+        id: "integrity",
+        nav: ["Why OffsetX", "Data Integrity Layer", "Global Vision"],
+        activeNavLabel: "Data Integrity Layer",
+        rightTitle: "Data Integrity Layer",
         rightDescription:
-          "Offset is built on verifiable primitives that enforce integrity without reliance on trust.",
+          "OffsetX enforces immutability and traceability at the data layer — protecting emissions records against silent mutation and ensuring defensible audit trails.",
         rightItems: [
-          { title: "Ledger", description: "Append-only event history." },
-          { title: "UNIC", description: "Universal persistent identifier." },
-          { title: "Trust Score", description: "Continuously evaluated integrity signal." },
+          { title: "Append-only event logs", description: "All data inputs and changes are recorded immutably with timestamps." },
+          { title: "Encrypted workflows", description: "End-to-end encryption across all compliance data operations." },
+          { title: "Role-based traceability", description: "Every access, edit, and approval is attributed and logged." },
         ],
         image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=2000",
       },
       {
-        id: "who",
-        nav: ["How Offset Is Different", "Trust Infrastructure", "Who This Is For"],
-        activeNavLabel: "Who This Is For",
-        rightTitle: "Who This Is For",
+        id: "global",
+        nav: ["Why OffsetX", "Data Integrity Layer", "Global Vision"],
+        activeNavLabel: "Global Vision",
+        rightTitle: "Global Vision",
         rightDescription:
-          "Designed for institutions that require verifiable integrity — not marketing claims.",
+          "Europe-first — built for CBAM and EU ETS from the ground up. Long-term India expansion as carbon markets mature globally. OffsetX is the infrastructure layer for the next decade of carbon compliance.",
         rightItems: [
-          { title: "Enterprise", description: "Decision-grade signals at scale." },
-          { title: "Developers", description: "Integrate carbon intelligence." },
-          { title: "Government & Regulators", description: "Oversight and accountability." },
+          { title: "Europe-first strategy", description: "CBAM and EU ETS compliance is our core launch market." },
+          { title: "India expansion roadmap", description: "Positioned for CCTS and India's emerging compliance frameworks." },
+          { title: "Global architecture", description: "Multi-jurisdiction support built into the platform from day one." },
         ],
         image: "https://images.unsplash.com/photo-1520607162513-77705c0f0d4a?q=80&w=2000",
       },
@@ -143,15 +143,15 @@ export default function PlatformStickySections() {
       <section className="w-full bg-[#F6F5F1] pt-32 pb-24">
         <div className="max-w-[1600px] mx-auto px-6 lg:px-12">
           <p className="text-xs tracking-[0.28em] uppercase text-black/50">
-            OFFSET PLATFORM
+            OFFSETX PLATFORM
           </p>
 
           <h1 className="mt-8 text-[48px] md:text-[76px] leading-[1.04] font-semibold tracking-tight text-black max-w-[1100px]">
-            One home for operating and
+            One platform for operating and
             <br />
-            scaling carbon integrity.
+            scaling carbon compliance.
             <br />
-            <span className="text-black/35">However complex.</span>
+            <span className="text-black/35">However complex the regulation.</span>
           </h1>
         </div>
       </section>

@@ -53,7 +53,7 @@ interface HeaderProps {
   onLogout?: () => void;
 }
 
-const workspaceTabs: ViewState[] = ["dashboard", "marketplace", "portfolio"];
+const workspaceTabs: ViewState[] = ["dashboard", "marketplace", "analyze", "portfolio"];
 
 export default function Header({
   showContent = true,
@@ -287,6 +287,12 @@ export default function Header({
                 className="text-2xl font-semibold text-white capitalize"
               >
                 Marketplace
+              </button>
+              <button
+                onClick={() => handleNav("analyze")}
+                className="text-2xl font-semibold text-white capitalize"
+              >
+                Analyze
               </button>
               <button
                 onClick={() => handleNav("portfolio")}

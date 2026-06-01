@@ -8,28 +8,28 @@ export default function EducationCenter() {
   const items: FAQ[] = useMemo(
     () => [
       {
-        q: "What are carbon credits?",
-        a: "Carbon credits represent one tonne of CO₂ equivalent reduced or removed from the atmosphere through verified climate projects.",
+        q: "What is CBAM and who does it affect?",
+        a: "The EU Carbon Border Adjustment Mechanism (CBAM) imposes carbon levies on imports of steel, cement, aluminum, fertilizers, hydrogen, and electricity into the EU. Exporters in those sectors must report embedded emissions with verified data or face financial penalties from 2026.",
       },
       {
-        q: "Why does verification matter?",
-        a: "Verification ensures credits are real, additional, permanent, and independently audited under trusted global standards.",
+        q: "How is CSRD different from voluntary ESG reporting?",
+        a: "CSRD (Corporate Sustainability Reporting Directive) mandates legally enforceable sustainability disclosures for large companies operating in the EU. Unlike voluntary ESG, CSRD requires third-party assurance, audit-grade data, and standardized reporting formats.",
       },
       {
-        q: "How are Trust Scores calculated?",
-        a: "Trust Scores combine methodology quality, project vintage, monitoring data, and risk signals to assess credit integrity.",
+        q: "What makes emissions data \"audit-ready\"?",
+        a: "Audit-ready emissions data has full data lineage (traceable to source), calculation transparency (method and boundary documented), immutable records (protected against retroactive edits), and structured formats that map to specific regulatory requirements.",
       },
       {
-        q: "Which registries are supported?",
-        a: "We analyze credits issued under registries such as Verra, Gold Standard, ACR, and other leading standards.",
+        q: "How does OffsetX handle multi-regulation compliance?",
+        a: "OffsetX maps a single emissions dataset to multiple regulations simultaneously — generating CBAM declarations, EU ETS submissions, and CSRD disclosures from the same validated data layer, reducing duplication and audit risk.",
       },
       {
-        q: "What happens during credit retirement?",
-        a: "Credits are permanently retired on public registries, creating an immutable audit trail for reporting and compliance.",
+        q: "Which industries does OffsetX serve?",
+        a: "OffsetX is built for industrial sectors with high compliance exposure: steel, cement, aluminum, manufacturing, energy production, and industrial exporters facing cross-border carbon obligations.",
       },
       {
-        q: "Why focus on quality over volume?",
-        a: "High-quality credits reduce reputational risk, improve climate impact, and strengthen long-term sustainability claims.",
+        q: "What is India's CCTS and when will it matter?",
+        a: "India's Carbon Credit Trading Scheme (CCTS) is an emerging domestic compliance framework. As India formalizes its carbon market obligations, industrial operators will require the same infrastructure-level compliance capabilities that OffsetX provides for EU regulations today.",
       },
     ],
     []
@@ -42,20 +42,19 @@ export default function EducationCenter() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 mb-14 lg:mb-20">
           <div>
             <p className="text-xs tracking-[0.28em] uppercase text-black/45">
-              EDUCATION CENTER
+              COMPLIANCE INTELLIGENCE
             </p>
 
             <h2 className="mt-7 text-[44px] md:text-[64px] leading-[1.05] font-semibold tracking-tight text-black">
-              Learn carbon markets.
+              Carbon compliance.
               <br />
-              <span className="text-black/35">Fast, clear answers.</span>
+              <span className="text-black/35">Clear, practical answers.</span>
             </h2>
           </div>
 
           <div className="lg:pt-16">
             <p className="text-black/60 text-lg leading-relaxed max-w-xl">
-              Clear explanations of verification, registries, and integrity signals —
-              written for teams making real procurement and compliance decisions.
+              Direct answers to the compliance questions industrial teams, procurement officers, and regulatory leads face today under CBAM, EU ETS, CSRD, and CCTS.
             </p>
           </div>
         </div>

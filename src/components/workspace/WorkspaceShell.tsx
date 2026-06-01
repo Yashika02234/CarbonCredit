@@ -6,16 +6,18 @@ interface WorkspaceShellProps {
   onNavigate: (view: ViewState) => void;
   dashboard: ReactNode;
   marketplace: ReactNode;
+  analyze: ReactNode;
   portfolio: ReactNode;
 }
 
-const views: ViewState[] = ["dashboard", "marketplace", "portfolio"];
+const views: ViewState[] = ["dashboard", "marketplace", "analyze", "portfolio"];
 
 export default function WorkspaceShell({
   currentView,
   onNavigate,
   dashboard,
   marketplace,
+  analyze,
   portfolio,
 }: WorkspaceShellProps) {
   const getPanelClass = (view: ViewState) => {
@@ -50,6 +52,14 @@ export default function WorkspaceShell({
           )}`}
         >
           {marketplace}
+        </section>
+
+        <section
+          className={`w-full transition-all duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] ${getPanelClass(
+            "analyze"
+          )}`}
+        >
+          {analyze}
         </section>
 
         <section

@@ -14,6 +14,7 @@ import VerifiedProjectsShowcase from "./VerifiedProjectsShowcase";
 import VerificationFlow from "./VerificationFlow";
 import ImpactMetricsStip from "./ImpactMetricsStrip";
 import WhatWeDoSection from "./WhatWeDoSection";
+import ComplianceProblemPlatform from "./ComplianceProblemPlatform";
 import EducationCenter from "./EducationCenter";
 import TestimonialsStackScroll from "./TestimonialsScroll";
 
@@ -37,6 +38,9 @@ export default function LandingPage({ onOpenAuth }: LandingPageProps) {
       <ImpactMetricsStip />
       <WhatWeDoSection />
 
+      {/* ================= CORE PROBLEM + PLATFORM ================= */}
+      <ComplianceProblemPlatform />
+
       {/* ================= VERIFICATION PROCESS FLOW ================= */}
       <VerificationFlow />
 
@@ -50,7 +54,7 @@ export default function LandingPage({ onOpenAuth }: LandingPageProps) {
             {/* Left big headline */}
             <div className="lg:col-span-7">
               <h2 className="text-slate-900 text-[44px] md:text-[64px] lg:text-[78px] leading-[1.03] tracking-tight font-semibold">
-                Building transparent infrastructure for carbon markets
+                Build the future of carbon compliance
               </h2>
             </div>
 
@@ -130,54 +134,43 @@ function FooterAnimated() {
       {/* CONTENT: reserve bottom band so big OFFSET never overlaps */}
       <div className="relative z-10 max-w-[2400px] mx-auto px-6 md:px-16 pt-20 pb-[320px]">
         {/* ================= TOP LINKS ================= */}
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-16 text-sm">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-16 text-sm">
           <div>
             <p className="font-medium text-white mb-6">Platform</p>
             <ul className="space-y-3 text-white/80">
               <li>Overview</li>
-              <li>Playbooks</li>
-              <li>Integrations</li>
-            </ul>
-          </div>
-
-          <div>
-            <p className="font-medium text-white mb-6">Channels</p>
-            <ul className="space-y-3 text-white/80">
-              <li>Messaging</li>
-              <li>Voice</li>
-              <li>Email</li>
+              <li>Compliance Modules</li>
+              <li>Audit Trail</li>
             </ul>
           </div>
 
           <div>
             <p className="font-medium text-white mb-6">Industries</p>
             <ul className="space-y-3 text-white/80">
-              <li>Financial Services</li>
-              <li>Insurance</li>
-              <li>Technology</li>
+              <li>Steel & Metals</li>
+              <li>Cement</li>
+              <li>Aluminum</li>
               <li>Energy</li>
-              <li>Travel</li>
+              <li>Manufacturing</li>
             </ul>
           </div>
 
           <div>
-            <p className="font-medium text-white mb-6">Resources</p>
+            <p className="font-medium text-white mb-6">Regulations</p>
             <ul className="space-y-3 text-white/80">
-              <li>Blog</li>
-              <li>Documentation</li>
-              <li>Pricing</li>
-              <li>Resource Library</li>
-              <li>ROI Calculator</li>
+              <li>CBAM</li>
+              <li>EU ETS</li>
+              <li>CSRD</li>
+              <li>CCTS (India)</li>
             </ul>
           </div>
 
           <div>
             <p className="font-medium text-white mb-6">Company</p>
             <ul className="space-y-3 text-white/80">
-              <li>Who we are</li>
-              <li>Careers</li>
-              <li>Partners</li>
-              <li>Trust Center</li>
+              <li>About</li>
+              <li>Contact</li>
+              <li>LinkedIn</li>
             </ul>
           </div>
         </div>
@@ -189,31 +182,26 @@ function FooterAnimated() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-16 items-start">
           <div>
             <p className="text-white/80 max-w-sm leading-relaxed">
-              Offset is building transparent, data-backed infrastructure
-              for high-integrity global carbon markets.
+              OffsetX is building compliance infrastructure for the global carbon markets era — audit-grade, regulation-native, enterprise-ready.
             </p>
           </div>
 
           <div>
-            <p className="font-medium text-white mb-4">Who we are</p>
+            <p className="font-medium text-white mb-4">About OffsetX</p>
             <p className="text-white/80 leading-relaxed">
-              We help institutions understand, evaluate, and trust
-              carbon credits through verifiable data and scoring.
+              We help industrial companies and enterprises meet mandatory carbon compliance obligations through audit-ready emissions intelligence.
             </p>
 
-            <p className="font-medium text-white mt-10 mb-4">Follow us</p>
+            <p className="font-medium text-white mt-10 mb-4">Connect</p>
             <div className="flex gap-6 text-white/80">
               <span>LinkedIn</span>
-              <span>Twitter</span>
-              <span>YouTube</span>
             </div>
           </div>
 
           <div>
-            <p className="font-medium text-white mb-4">Request an AI summary</p>
+            <p className="font-medium text-white mb-4">Request early access</p>
             <p className="text-white/80 mb-6 leading-relaxed">
-              Learn how Offset helps enterprises
-              navigate carbon markets with confidence.
+              Join the pilot program and help shape the compliance infrastructure for industrial carbon markets.
             </p>
 
             <button
@@ -225,15 +213,13 @@ function FooterAnimated() {
                 transition
               "
             >
-              Request summary →
+              Request Early Access →
             </button>
 
             <div className="flex flex-wrap gap-6 text-xs text-white/40 mt-10">
-              <span>Terms</span>
               <span>Privacy</span>
-              <span>Security</span>
-              <span>Accessibility</span>
-              <span>Status</span>
+              <span>Terms</span>
+              <span>Contact</span>
             </div>
           </div>
         </div>

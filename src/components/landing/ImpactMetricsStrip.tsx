@@ -55,28 +55,28 @@ export default function ImpactMetricsStrip() {
 
   const metrics = [
     {
-      value: 2400000,
-      display: (v: number) => `${(v / 1000000).toFixed(1)}M+`,
-      label: "Credits Evaluated",
-      sub: "Across verified registries",
+      value: 5,
+      display: (v: number) => `${v}+`,
+      label: "Regulations Tracked",
+      sub: "CBAM, EU ETS, CCTS, CSRD & more",
     },
     {
-      value: 38,
+      value: 6,
       display: (v: number) => `${v}`,
-      label: "Active Projects",
-      sub: "Multi-region coverage",
-    },
-    {
-      value: 12,
-      display: (v: number) => `${v}`,
-      label: "Standards Supported",
-      sub: "Global methodologies",
+      label: "Target Industries",
+      sub: "Steel, Cement, Aluminum & more",
     },
     {
       value: 99,
-      display: (v: number) => `${v}.2%`,
-      label: "Data Traceability",
-      sub: "Audit-ready records",
+      display: (v: number) => `${v}.9%`,
+      label: "Audit Trail Uptime",
+      sub: "Enterprise-grade reliability",
+    },
+    {
+      value: 100,
+      display: (v: number) => `${v}%`,
+      label: "Compliance-Native",
+      sub: "Built for mandatory reporting",
     },
   ];
 

@@ -15,33 +15,28 @@ export default function VerificationFlow() {
     () => [
       {
         step: "001",
-        title: "Project Intake",
-        desc: "Registry records, project documentation, and methodology details are collected and normalized for evaluation.",
+        title: "Data Ingestion",
+        desc: "Emissions data from industrial operations, energy consumption, logistics, suppliers, and facility records is collected, standardized, and organized into a unified compliance dataset.",
       },
       {
         step: "002",
-        title: "Methodology Validation",
-        desc: "Project methodologies, baselines, and vintages are checked against approved standards and protocols.",
+        title: "Validation & Verification",
+        desc: "Data is automatically checked against calculation methodologies, reporting boundaries, and regulatory requirements. Missing values, inconsistencies, and anomalies are flagged for review.",
       },
       {
         step: "003",
-        title: "Registry & Issuance Check",
-        desc: "Credits are verified against official registries to confirm issuance, ownership, and serial integrity.",
+        title: "Compliance Intelligence",
+        desc: "OffsetX calculates emissions exposure, estimates compliance obligations, identifies required carbon credits, and evaluates potential regulatory costs across CBAM, EU ETS, CCTS, and CSRD.",
       },
       {
         step: "004",
-        title: "Risk & Integrity Scan",
-        desc: "Automated and rule-based checks flag risks such as double counting, leakage, and quality concerns.",
+        title: "Audit-Ready Reporting",
+        desc: "Generate structured reports with complete traceability, validation records, emissions calculations, and compliance documentation ready for regulators, auditors, and stakeholders.",
       },
       {
         step: "005",
-        title: "Trust Score Generation",
-        desc: "A composite trust score is calculated using methodology strength, data quality, and risk signals.",
-      },
-      {
-        step: "006",
-        title: "Audit-Ready Output",
-        desc: "Transparent records, references, and scoring logic are made available for compliance and reporting.",
+        title: "Decision Support",
+        desc: "Review compliance costs, required carbon credits, reporting outputs, and recommended carbon projects to support operational and financial planning.",
       },
     ],
     []
@@ -119,7 +114,7 @@ export default function VerificationFlow() {
               isLightBg ? "text-slate-600" : "text-white/55"
             }`}
           >
-            Verification flow
+            HOW OFFSETX WORKS
           </p>
 
           <h2
@@ -127,10 +122,10 @@ export default function VerificationFlow() {
               isLightBg ? "text-slate-950" : "text-white"
             }`}
           >
-            How carbon credits
+            From raw data to
             <br />
             <span className={isLightBg ? "text-slate-400" : "text-white/35"}>
-              earn their integrity.
+              audit-ready compliance.
             </span>
           </h2>
 
@@ -157,13 +152,13 @@ export default function VerificationFlow() {
                   style={{ borderRadius: 0 }}
                 >
                   <p className="text-xs tracking-[0.28em] uppercase text-emerald-900/70">
-                    Process overview
+                    PROCESS OVERVIEW
                   </p>
                   <h3 className="mt-4 text-2xl md:text-3xl font-medium text-slate-950 tracking-tight">
-                    Verification, end to end.
+                    Compliance, end to end.
                   </h3>
                   <p className="mt-4 md:mt-5 text-slate-700 leading-relaxed">
-                    Har 1 scroll screen (100vh) par 1 card next hoga — hero jaisa.
+                    Five stages convert fragmented emissions data into validated, audit-ready compliance outputs for carbon regulations and reporting requirements.
                   </p>
                   <div className="mt-8 md:mt-10 h-px w-full bg-gradient-to-r from-emerald-900/25 to-transparent" />
                 </div>
@@ -211,7 +206,7 @@ export default function VerificationFlow() {
                         isLightBg ? "text-emerald-900/70" : "text-emerald-200/80"
                       }`}
                     >
-                      Scroll → next step
+                      {s.step === "005" ? "Process complete" : "Scroll → next step"}
                     </p>
                   </article>
                 ))}
@@ -228,7 +223,7 @@ export default function VerificationFlow() {
           {/* ✅ keep caption but ensure it doesn’t get cut */}
           <div className="mt-6 md:mt-8 max-w-[820px]">
             <h4 className={`${isLightBg ? "text-slate-950" : "text-white"} text-xl md:text-2xl font-medium`}>
-              Integrity you can audit. Decisions you can defend.
+              A structured workflow for industrial carbon compliance. Built for auditability, automation, and regulatory readiness.
             </h4>
           </div>
         </div>

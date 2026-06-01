@@ -61,7 +61,8 @@ export type ViewState =
   | "portfolio"
   | "about"
   | "contact"
-  | "dashboard";
+  | "dashboard"
+  | "analyze";
 
   // ================= API TYPES =================
 

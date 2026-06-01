@@ -12,35 +12,35 @@ type Testimonial = {
 const testimonials: Testimonial[] = [
   {
     quote:
-      "Offset’s verification engine has fundamentally improved how we evaluate carbon credits. Registry cross-checks, methodology validation, and risk signals provide institutional-grade confidence before every transaction.",
-    author: "Head of Sustainability",
-    role: "Global Energy Corporation",
+      "OffsetX is exactly what industrial exporters needed. CBAM is forcing steel and cement manufacturers to completely rethink their emissions data workflows — and OffsetX gives them the infrastructure to do it without building it themselves.",
+    author: "Carbon Markets Expert",
+    role: "EU Policy & Regulatory Advisory",
     rating: 5,
-    accent: "Registry Verification",
+    accent: "Regulatory Validation",
   },
   {
     quote:
-      "The trust scoring framework lets us assess additionality, leakage risk, and vintage quality in a transparent view. It’s now central to our internal climate governance.",
-    author: "Director of ESG Strategy",
-    role: "Multinational Financial Institution",
+      "The transition from voluntary ESG reporting to mandatory CSRD compliance is not incremental — it's a complete systems change. OffsetX provides the audit-grade architecture that compliance officers actually need.",
+    author: "Chief Sustainability Officer",
+    role: "Industrial Manufacturing Group",
     rating: 5,
-    accent: "Methodology Integrity",
+    accent: "Enterprise Compliance",
   },
   {
     quote:
-      "Offset brings audit-ready traceability to voluntary carbon markets. Every retirement now carries documented proof, strengthening compliance and stakeholder reporting.",
-    author: "Climate Finance Lead",
-    role: "Sovereign Investment Office",
+      "We piloted OffsetX across our emissions reporting for three facilities. The data integrity layer and automated validation cut our audit preparation time significantly. This is compliance infrastructure, not another dashboard.",
+    author: "Head of Carbon Compliance",
+    role: "Global Energy & Resources Firm",
     rating: 5,
-    accent: "Audit-Ready Transparency",
+    accent: "Pilot Readiness",
   },
   {
     quote:
-      "By combining geospatial intelligence with structured registry validation, Offset reduces risk exposure and enables more defensible climate investment decisions.",
-    author: "Chief Risk Officer",
-    role: "Impact Investment Fund",
+      "OffsetX is being developed with deep understanding of how global compliance frameworks actually operate. Their architecture reflects the kind of thinking that comes from incubator-level engagement with regulatory realities.",
+    author: "Program Director",
+    role: "Climate Tech Incubator",
     rating: 5,
-    accent: "Risk & Trust Scoring",
+    accent: "Incubator Backed",
   },
 ];
 

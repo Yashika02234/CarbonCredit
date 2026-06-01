@@ -25,51 +25,51 @@ const slides: Slide[] = [
     id: 1,
     src: mangroveVideo,
     type: "video",
-    kicker: "MANGROVE RESTORATION",
-    title: "Coastal blue carbon",
-    date: "OCTOBER 29, 2025",
-    desc: "Verified restoration sites with transparent baselines, monitoring, and third-party evidence.",
-    cta: "Explore the project",
+    kicker: "STEEL & METALS",
+    title: "Industrial steel compliance",
+    date: "CBAM SECTOR",
+    desc: "Scope 1 & 2 emissions tracking, CBAM declaration generation, and audit-ready data lineage for steel producers exporting to the EU.",
+    cta: "See compliance module",
   },
   {
     id: 2,
     src: solarVideo,
     type: "video",
-    kicker: "RENEWABLES",
-    title: "Utility solar deployment",
-    date: "OCTOBER 29, 2025",
-    desc: "Registry-matched issuance and vintage checks with methodology validation for credit integrity.",
-    cta: "See methodology",
+    kicker: "CEMENT",
+    title: "Cement & clinker reporting",
+    date: "CBAM SECTOR",
+    desc: "Process emissions quantification, embedded carbon calculations, and EU ETS surrender compliance for cement manufacturers.",
+    cta: "View methodology",
   },
   {
     id: 3,
     src: methaneVideo,
     type: "video",
-    kicker: "METHANE ABATEMENT",
-    title: "Landfill capture program",
-    date: "OCTOBER 29, 2025",
-    desc: "Leakage + double counting scans, ownership validation, and audit-ready evidence trails.",
-    cta: "View verification",
+    kicker: "ALUMINUM",
+    title: "Aluminum production traceability",
+    date: "CBAM SECTOR",
+    desc: "Electrolysis and smelting emissions data structured for CBAM reporting with full audit trails and regulator-ready output.",
+    cta: "Explore traceability",
   },
   {
     id: 4,
     src: forestVideo,
     type: "video",
-    kicker: "FORESTRY",
-    title: "Improved forest management",
-    date: "OCTOBER 29, 2025",
-    desc: "Geospatial overlays, buffer pool checks, and defensible impact claims for procurement teams.",
-    cta: "Watch summary",
+    kicker: "ENERGY & POWER",
+    title: "Energy sector compliance",
+    date: "EU ETS SECTOR",
+    desc: "Generation, transmission, and fuel combustion emissions mapped to EU ETS obligations with automated allowance reconciliation.",
+    cta: "View energy module",
   },
   {
     id: 5,
     src: solarVideo,
     type: "video",
-    kicker: "REGISTRY INTEGRITY",
-    title: "Serial-level traceability",
-    date: "OCTOBER 29, 2025",
-    desc: "End-to-end traceability from issuance to retirement with exportable reporting outputs.",
-    cta: "See traceability",
+    kicker: "MANUFACTURING",
+    title: "Industrial manufacturing reporting",
+    date: "CSRD SECTOR",
+    desc: "End-to-end Scope 1, 2 & 3 reporting for manufacturing operations, structured for CSRD disclosures and third-party assurance.",
+    cta: "Explore reporting",
   },
 ];
 
@@ -112,19 +112,18 @@ export default function ExpandableHoverRail() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-start">
           <div className="lg:col-span-7">
             <h2 className="text-slate-900 text-[44px] md:text-[64px] lg:text-[78px] leading-[1.03] tracking-tight font-semibold">
-              Verified project activity across the marketplace
+              Industries we serve
             </h2>
           </div>
 
           <div className="lg:col-span-5 lg:pt-4">
             <p className="text-slate-800 text-lg leading-relaxed max-w-[44ch]">
-              Explore a rotating set of verified project types — each panel includes
-              a concise evidence summary designed for faster due diligence.
+              OffsetX is built for industrial sectors facing mandatory carbon compliance — from CBAM-exposed exporters to EU ETS participants and CSRD-obligated enterprises.
             </p>
 
             <button className="mt-10 inline-flex items-center gap-3 text-slate-900 text-base hover:opacity-70 transition">
               <span className="text-xl leading-none">›</span>
-              Learn more
+              Explore sectors
             </button>
           </div>
         </div>
@@ -218,7 +217,7 @@ export default function ExpandableHoverRail() {
 
         {/* small helper */}
         <div className="mt-6 text-xs text-slate-500">
-          Hover a panel to expand • Auto-rotates when not hovering
+          Hover a sector panel to expand • Auto-rotates
         </div>
       </div>
     </section>

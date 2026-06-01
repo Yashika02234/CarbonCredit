@@ -71,13 +71,13 @@ export default function StickyHome({
             
             <h1 className=" text-5xl md:text-7xl lg:text-[6.5rem] font-serif text-white leading-[1.1] tracking-tighter">
               <span className={`transition-all duration-1000 block ${step >= 0 ? "opacity-100" : "opacity-0 translate-y-4"}`}>
-                A Global Marketplace
+                Compliance Infrastructure
               </span>
               <span className={`transition-all duration-1000 delay-150 block text-emerald-400 ${step >= 1 ? "opacity-100" : "opacity-20"}`}>
-                for Data-Backed
+                for Carbon
               </span>
               <span className={`transition-all duration-1000 delay-300 block ${step >= 1 ? "opacity-100" : "opacity-0 translate-y-4"}`}>
-                Carbon Credits
+                Markets
               </span>
             </h1>
 
@@ -86,8 +86,7 @@ export default function StickyHome({
               }`}>
               <div className="backdrop-blur-md bg-white/5 border border-white/10 p-8 rounded-2xl max-w-xl">
                 <p className="text-xl md:text-2xl text-white/80 font-light leading-relaxed">
-                  Offset blends <span className="text-white font-medium">geospatial intelligence</span> with 
-                  a live trading API to replace opaque offsets.
+                  OffsetX delivers <span className="text-white font-medium">audit-ready emissions intelligence</span> built for CBAM, EU ETS, and global carbon compliance mandates.
                 </p>
               </div>
             </div>
@@ -96,20 +95,20 @@ export default function StickyHome({
                 step >= 3 ? "opacity-100 scale-100" : "opacity-0 scale-95"
               }`}>
               <button 
-               onClick={() => onOpenAuth("login")}
+               onClick={() => onOpenAuth("signup")}
                 className="bg-emerald-500 hover:bg-emerald-400 text-[#0a1210] px-10 py-4 rounded-full text-lg font-bold transition-all shadow-lg shadow-emerald-500/20">
-              
-                Explore Marketplace
+             
+                Request Early Access
               </button>
 
               <div className="flex gap-8 text-white/40 font-mono text-xs uppercase tracking-widest">
                 <div className="border-l border-white/20 pl-4">
-                  <p className="text-emerald-400 text-lg">99.9%</p>
-                  <p>Traceability</p>
+                  <p className="text-emerald-400 text-lg">Audit-grade</p>
+                  <p>Workflows</p>
                 </div>
                 <div className="border-l border-white/20 pl-4">
-                  <p className="text-emerald-400 text-lg">Real-time</p>
-                  <p>Audits</p>
+                  <p className="text-emerald-400 text-lg">Global</p>
+                  <p>Readiness</p>
                 </div>
               </div>
             </div>
